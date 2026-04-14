@@ -6,7 +6,9 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing.Base
 {
-    //Контекст MongoDB
+    /// <summary>
+    ///Контекст MongoDB
+    /// </summary>
     public static class MongoContext
     {
         private static readonly MongoClient _client = new MongoClient("mongodb://localhost:27017");
@@ -19,7 +21,9 @@ namespace Testing.Base
         }
     }
 
-    // Коллекции
+    /// <summary>
+    ///Коллекции
+    /// </summary>
     public static class Repos
     {
         public static MongoRepo<Company> Company = new("Company");
@@ -37,7 +41,9 @@ namespace Testing.Base
         public static MongoRepo<Result> Result = new("Result");
     }
 
-    // Репозиторий
+    /// <summary>
+    ///Репозиторий
+    /// </summary>
     public class MongoRepo<T> where T : class
     {
         private readonly IMongoCollection<T> _collection;
