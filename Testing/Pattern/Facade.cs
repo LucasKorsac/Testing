@@ -1,41 +1,63 @@
 ﻿using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Testing.Base;
 using static Testing.Base.BaseMongo;
-using static Testing.Interf;
 
 namespace Testing.Pattern
 {
-    /// <summary>
-    /// Паттерн фасад. Сокрытие работы с репозиториями
-    /// </summary>
+    //Паттерн фасад
     public class Facade
     {
-        private readonly IMongoRepo<AbTest> _repo;
+        // Репозиторий A/B тестов
+        private readonly IMongoRepo<ABTests> _abTests;
 
-        public Facade(IMongoRepo<AbTest> repo)
+        // Репозиторий вариантов тестов
+        private readonly IMongoRepo<Variants> _variants;
+
+        public Facade(IMongoRepo<ABTests> abTests, IMongoRepo<Variants> variants)
         {
-            _repo = repo;
+            _abTests = abTests;
+            _variants = variants;
         }
 
         /// <summary>
-        /// Получение всех тестов
+        /// Получение всех A/B тестов
         /// </summary>
-        public async Task<List<AbTest>> GetAll()
-        {
-            return await _repo.Get(x => true);
-        }
+        public async Task<List<ABTests>> GetAllTests() => await _abTests.GetAll();
 
+        /// <summary>
+        /// Получение вариантов для конкретного теста
+        /// </summary>
+        public async Task<List<Variants>> GetVariants(ObjectId testId) => await _variants.Where(x => x.AbTestId == testId);
+
+        /*
         /// <summary>
         /// Получение тестов по приложению
         /// </summary>
-        public async Task<List<AbTest>> GetByApplication(ObjectId appId)
+        public async Task<List<ABTests>> GetByApplication(ObjectId appId)
+            => await _abTests.Where(x => x.ApplicationId == appId);
+        */
+
+        /*
+        /// <summary>
+        /// Система событий (Наблюдатель)
+        /// используется для логирования или аналитики
+        /// </summary>
+        private readonly Subject<AbTestEvent> _events = new();
+        */
+
+        /*
+        /// <summary>
+        /// Обработка события выбора варианта
+        /// </summary>
+        public void OnVariantSelected(string testName, string variantName)
         {
-            return await _repo.Get(x => x.ApplicationId == appId);
+            _events.Notify(new AbTestEvent
+            {
+                Action = "VariantSelected",
+                TestName = testName,
+                Variant = variantName
+            });
         }
+        */
     }
 }

@@ -1,189 +1,153 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
 
 namespace Testing.Base
 {
     public class BaseMongo
     {
         // Компания
-        public class Company
-        {
-            [BsonId]
-            public ObjectId Id { get; set; }
-            public string Name { get; set; }
-
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
-        }
-
-        //Роль пользователя
-        public class Role
+        public class Companies
         {
             [BsonId]
             public ObjectId Id { get; set; }
 
-            public string Name { get; set; }
-
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public string Name { get; set; } = "";
         }
 
-        //Разработчик
+        // Роль
+        public class Roles
+        {
+            [BsonId]
+            public ObjectId Id { get; set; }
 
-        public class Developer
+            public string Name { get; set; } = "";
+        }
+
+        // Разработчик
+        public class Developers
         {
             [BsonId]
             public ObjectId Id { get; set; }
 
             public ObjectId CompanyId { get; set; } // FK → Company
-            public ObjectId RoleId { get; set; } // FK → Role
-            public string Login { get; set; }
-            public string Name { get; set; }
-            public string Password { get; set; }
+            public ObjectId RoleId { get; set; }    // FK → Role
 
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public string Login { get; set; } = "";         
+            public string Password { get; set; } = "";   
+            public string PasswordHash { get; set; } = ""; // Хэш пароля
         }
-
 
         // Приложение
-
-        public class Application
+        public class Applications
         {
             [BsonId]
             public ObjectId Id { get; set; }
 
             public ObjectId CompanyId { get; set; } // FK → Company
 
-            public string Description { get; set; }
-            public string Name { get; set; }
-
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public string Name { get; set; } = "";
+            public string Description { get; set; } = "";
         }
 
-        //Тип метрики
-        public class MetricType
+        // Тип метрики
+        public class MetricTypes
         {
             [BsonId]
             public ObjectId Id { get; set; }
 
-            public string Name { get; set; }
-
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public string Name { get; set; } = "";
         }
 
         // Метрика
-
-        public class Metric
+        public class Metrics
         {
             [BsonId]
             public ObjectId Id { get; set; }
-            public ObjectId TypeId { get; set; } // FK → MetricType
 
-            public string Name { get; set; }
+            public ObjectId MetricTypeId { get; set; } // FK → MetricType
 
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public string Name { get; set; } = "";
         }
 
-        //Экземпляр
-        public class Instance
+        // Экземпляр приложения
+        public class Instances
         {
             [BsonId]
             public ObjectId Id { get; set; }
-            public ObjectId MetricId { get; set; }      // FK → Metric
+
             public ObjectId ApplicationId { get; set; } // FK → Application
-            public string Name { get; set; }          
-            public int Value { get; set; }            
+            public ObjectId MetricId { get; set; }      // FK → Metric
 
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public int Version { get; set; }            // Версия
+            public string Name { get; set; } = "";
         }
 
-        //Атрибут
-        public class MAttribute
+        // Атрибут
+        public class Attributes
         {
             [BsonId]
             public ObjectId Id { get; set; }
 
-            public string Name { get; set; }
-
-            // Рекомендации
-            public string Recommendation { get; set; }
-
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public string Environment { get; set; } = "";   // Окружение
+            public string Recommendation { get; set; } = "";
         }
 
-        // Значение атрибута
-        public class Value
+        // Значение
+        public class Values
         {
             [BsonId]
             public ObjectId Id { get; set; }
 
-            public ObjectId InstanceId { get; set; } // FK → Instance
+            public ObjectId InstanceId { get; set; }  // FK → Instance
             public ObjectId AttributeId { get; set; } // FK → Attribute
 
-            public string Description { get; set; }
-
-            public string ValueText { get; set; }
-
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public DateTime Date { get; set; }        // Дата записи
+            public double MetricValue { get; set; }   // Значение
         }
 
-        //Описание теста
-
-        public class ABDescription
+        // Описание A/B теста
+        public class ABDescriptions
         {
             [BsonId]
             public ObjectId Id { get; set; }
 
-            public string Target { get; set; } // цель теста
-            public string Descript { get; set; } // описание
-
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public string Target { get; set; } = "";     // Цель
+            public string Description { get; set; } = "";   //Описание
         }
 
         // A/B тест
-        public class AbTest
+        public class ABTests
         {
             [BsonId]
-            public ObjectId ApplicationId { get; set; } // FK → Application
-            public ObjectId DescriptionID { get; set; } // FK → ABDescription
             public ObjectId Id { get; set; }
-            public string Name { get; set; }
 
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            //public ObjectId ApplicationId { get; set; } // FK → Application
+            public ObjectId DescriptionId { get; set; } // FK → ABDescription
+
+            public string Name { get; set; } = "";
         }
 
-        //Вариант теста
-        public class Variant
+        // Вариант
+        public class Variants
         {
             [BsonId]
+            public ObjectId Id { get; set; }
+
             public ObjectId AbTestId { get; set; } // FK → AbTest
-            public ObjectId Id { get; set; }
-            public string Description { get; set; }
-            public string Name { get; set; }
 
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
+            public string Name { get; set; } = "";
+            public string Description { get; set; } = "";
         }
 
-        // Результат теста
-        public class Result
+        // Результат
+        public class Results
         {
             [BsonId]
+            public ObjectId Id { get; set; }
+
             public ObjectId InstanceId { get; set; } // FK → Instance
             public ObjectId VariantId { get; set; }  // FK → Variant
-            public ObjectId Id { get; set; }
-
-            [BsonExtraElements]
-            public BsonDocument Extra { get; set; }
         }
     }
 }

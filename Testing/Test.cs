@@ -1,5 +1,4 @@
-﻿// File: Test.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Testing.Pattern;
 
@@ -12,10 +11,10 @@ namespace Testing
         public List<int> Values { get; set; } = new();
         public bool IsActive { get; set; }
 
-        // Используем стратегию вместо хардкода
-        public int GetValue(Strategy strategy)
+        // Использование интерфейса стратегии
+        public int GetValue(IStrategy<int> strategy)
         {
-            return strategy.GetVariant(Values, Default);
+            return strategy.Choose(Values, Default);
         }
     }
 }

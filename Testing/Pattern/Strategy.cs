@@ -1,35 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MongoDB.Bson;
+using static Testing.Base.BaseMongo;
 
 namespace Testing.Pattern
 {
     /// <summary>
     /// Паттерн стратегия. Выбор варианта A/B теста
     /// </summary>
-    public interface IStrategy
+    public interface IStrategy<T>
     {
-        /// <summary>
-        /// Выбор варианта из списка
-        /// </summary>
-        int GetVariant(List<int> variants, int defaultValue);
+        T Choose(List<T> items, T defaultValue);
     }
 
     /// <summary>
     /// Случайный выбор варианта
     /// </summary>
-    public class RandomStrategy : IStrategy
+    public class RandomStrategy<T> : IStrategy<T>
     {
         private static readonly Random _rnd = new();
 
-        public int GetVariant(List<int> variants, int defaultValue)
+        /// <summary>
+        /// Выбор случайного элемента из списка, если список пустой или null — возвращает значение по умолчанию
+        /// </summary>
+        public T Choose(List<T> items, T defaultValue)
         {
-            if (variants == null || variants.Count == 0) return defaultValue;
+            if (items == null || items.Count == 0)
+                return defaultValue;
 
-            return variants[_rnd.Next(variants.Count)];
+            return items[_rnd.Next(items.Count)];
         }
     }
-
 }
