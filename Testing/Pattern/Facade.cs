@@ -7,10 +7,7 @@ namespace Testing.Pattern
     //Паттерн фасад
     public class Facade
     {
-        // Репозиторий A/B тестов
         private readonly IMongoRepo<ABTests> _abTests;
-
-        // Репозиторий вариантов тестов
         private readonly IMongoRepo<Variants> _variants;
 
         public Facade(IMongoRepo<ABTests> abTests, IMongoRepo<Variants> variants)
@@ -27,37 +24,25 @@ namespace Testing.Pattern
         /// <summary>
         /// Получение вариантов для конкретного теста
         /// </summary>
-        public async Task<List<Variants>> GetVariants(ObjectId testId) => await _variants.Where(x => x.AbTestId == testId);
+        public async Task<List<Variants>> GetVariants(ObjectId testId)
+            => await _variants.Where(x => x.AbTestId == testId);
 
-        /*
         /// <summary>
-        /// Получение тестов по приложению
+        /// Получение теста и варианты сразу
         /// </summary>
-        public async Task<List<ABTests>> GetByApplication(ObjectId appId)
-            => await _abTests.Where(x => x.ApplicationId == appId);
-        */
-
-        /*
-        /// <summary>
-        /// Система событий (Наблюдатель)
-        /// используется для логирования или аналитики
-        /// </summary>
-        private readonly Subject<AbTestEvent> _events = new();
-        */
-
-        /*
-        /// <summary>
-        /// Обработка события выбора варианта
-        /// </summary>
-        public void OnVariantSelected(string testName, string variantName)
+        public async Task<Dictionary<ABTests, List<Variants>>> GetTestsWithVariants()
         {
-            _events.Notify(new AbTestEvent
+            var result = new Dictionary<ABTests, List<Variants>>();
+
+            var tests = await _abTests.GetAll();
+
+            foreach (var test in tests)
             {
-                Action = "VariantSelected",
-                TestName = testName,
-                Variant = variantName
-            });
+                var variants = await _variants.Where(x => x.AbTestId == test.Id);
+                result[test] = variants;
+            }
+
+            return result;
         }
-        */
     }
 }

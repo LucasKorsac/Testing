@@ -8,12 +8,12 @@ namespace Testing.Pattern
     /// <summary>
     /// Декоратор репозитория, добавляющий логирование операций, не меняет поведение основного репозитория, только оборачивает вызовы
     /// </summary>
-    public class LoggingMongoRepo<T> : IMongoRepo<T> where T : class
+    public class LogMongoRepo<T> : IMongoRepo<T> where T : class
     {
         // Внутренний репозиторий, к которому проксируются все вызовы
         private readonly IMongoRepo<T> _inner;
 
-        public LoggingMongoRepo(IMongoRepo<T> inner)
+        public LogMongoRepo(IMongoRepo<T> inner)
         {
             _inner = inner;
         }
@@ -34,7 +34,6 @@ namespace Testing.Pattern
             Console.WriteLine($"[LOG] GetById(string): {id}");
             return await _inner.GetById(id, ct);
         }
-
 
         /// <summary>
         /// Получение всех записей

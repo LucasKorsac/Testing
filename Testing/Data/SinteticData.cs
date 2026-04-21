@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Testing.Base;
+using Testing.Pattern;
 using static Testing.Base.BaseMongo;
 
-namespace Testing
+namespace Testing.Data
 {
     public static class SinteticData
     {
@@ -16,27 +17,40 @@ namespace Testing
         {
             Console.WriteLine("Seeding database...");
 
-            // Защита от повторного заполнения
-            if (await Repos.Company.Count() > 0)
+            var factory = new MongoFactory();
+
+            var companyRepo = factory.Create<Companies>("Company");
+            var roleRepo = factory.Create<Roles>("Role");
+            var developerRepo = factory.Create<Developers>("Developer");
+            var appRepo = factory.Create<Applications>("Application");
+            var metricTypeRepo = factory.Create<MetricTypes>("MetricType");
+            var metricRepo = factory.Create<Metrics>("Metric");
+            var instanceRepo = factory.Create<Instances>("Instance");
+            var attributeRepo = factory.Create<Attributes>("Attribute");
+            var valueRepo = factory.Create<Values>("Value");
+            var descRepo = factory.Create<ABDescriptions>("Description");
+            var abTestRepo = factory.Create<ABTests>("AbTest");
+            var variantRepo = factory.Create<Variants>("Variant");
+            var resultRepo = factory.Create<Results>("Result");
+
+            // защита
+            if (await companyRepo.Count() > 0)
             {
                 Console.WriteLine("Database already seeded");
                 return;
             }
 
-            // Компании
             var company = new Companies { Name = "Tech Corp" };
-            await Repos.Company.Create(company);
+            await companyRepo.Create(company);
 
-            // Роли
             var roles = new List<Roles>
-            {
-                new() { Name = "Backend" },
-                new() { Name = "Frontend" },
-                new() { Name = "QA" }
-            };
-            await Repos.Role.CreateMany(roles);
+        {
+            new() { Name = "Backend" },
+            new() { Name = "Frontend" },
+            new() { Name = "QA" }
+        };
+            await roleRepo.CreateMany(roles);
 
-            // Разработчики
             var developers = Enumerable.Range(1, 5).Select(i => new Developers
             {
                 CompanyId = company.Id,
@@ -46,34 +60,31 @@ namespace Testing
                 PasswordHash = Guid.NewGuid().ToString()
             }).ToList();
 
-            await Repos.Developer.CreateMany(developers);
+            await developerRepo.CreateMany(developers);
 
-            // Приложение
             var app = new Applications
             {
                 CompanyId = company.Id,
                 Name = "Test App",
                 Description = "Demo application"
             };
-            await Repos.Application.Create(app);
 
-            // Типы метрик
+            await appRepo.Create(app);
+
             var metricTypes = new List<MetricTypes>
-            {
-                new() { Name = "Performance" },
-                new() { Name = "UX" }
-            };
-            await Repos.MetricType.CreateMany(metricTypes);
+        {
+            new() { Name = "Performance" },
+            new() { Name = "UX" }
+        };
+            await metricTypeRepo.CreateMany(metricTypes);
 
-            // Метрики
             var metrics = new List<Metrics>
-            {
-                new() { Name = "Load Time", MetricTypeId = metricTypes[0].Id },
-                new() { Name = "Click Rate", MetricTypeId = metricTypes[1].Id }
-            };
-            await Repos.Metric.CreateMany(metrics);
+        {
+            new() { Name = "Load Time", MetricTypeId = metricTypes[0].Id },
+            new() { Name = "Click Rate", MetricTypeId = metricTypes[1].Id }
+        };
+            await metricRepo.CreateMany(metrics);
 
-            // Инстансы
             var instances = metrics.Select((m, i) => new Instances
             {
                 ApplicationId = app.Id,
@@ -82,18 +93,16 @@ namespace Testing
                 Name = $"Instance v{i + 1}"
             }).ToList();
 
-            await Repos.Instance.CreateMany(instances);
+            await instanceRepo.CreateMany(instances);
 
-            // Атрибуты
             var attributes = new List<Attributes>
-            {
-                new() { Environment = "Prod", Recommendation = "Stable" },
-                new() { Environment = "Test", Recommendation = "Check performance" }
-            };
+        {
+            new() { Environment = "Prod", Recommendation = "Stable" },
+            new() { Environment = "Test", Recommendation = "Check performance" }
+        };
 
-            await Repos.Attribute.CreateMany(attributes);
+            await attributeRepo.CreateMany(attributes);
 
-            // Значения метрик
             var values = new List<Values>();
 
             foreach (var inst in instances)
@@ -110,38 +119,33 @@ namespace Testing
                 }
             }
 
-            await Repos.Value.CreateMany(values);
+            await valueRepo.CreateMany(values);
 
-            // A/B описание
             var desc = new ABDescriptions
             {
                 Target = "Increase CTR",
                 Description = "Button test"
             };
 
-            await Repos.Description.Create(desc);
+            await descRepo.Create(desc);
 
-            // A/B тест
             var abTest = new ABTests
             {
-                //ApplicationId = app.Id,
                 DescriptionId = desc.Id,
                 Name = "Button Color Test"
             };
 
-            await Repos.AbTest.Create(abTest);
+            await abTestRepo.Create(abTest);
 
-            // Варианты
             var variants = new List<Variants>
-            {
-                new() { AbTestId = abTest.Id, Name = "Red", Description = "Red button" },
-                new() { AbTestId = abTest.Id, Name = "Blue", Description = "Blue button" },
-                new() { AbTestId = abTest.Id, Name = "Green", Description = "Green button" }
-            };
+        {
+            new() { AbTestId = abTest.Id, Name = "Red", Description = "Red button" },
+            new() { AbTestId = abTest.Id, Name = "Blue", Description = "Blue button" },
+            new() { AbTestId = abTest.Id, Name = "Green", Description = "Green button" }
+        };
 
-            await Repos.Variant.CreateMany(variants);
+            await variantRepo.CreateMany(variants);
 
-            // Результаты
             var results = new List<Results>();
 
             foreach (var inst in instances)
@@ -153,7 +157,7 @@ namespace Testing
                 });
             }
 
-            await Repos.Result.CreateMany(results);
+            await resultRepo.CreateMany(results);
 
             Console.WriteLine("Seeding completed");
         }

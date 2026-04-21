@@ -2,6 +2,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using System.Linq.Expressions;
+using Testing.Pattern;
 using static Testing.Base.BaseMongo;
 
 namespace Testing.Base
@@ -13,7 +14,7 @@ namespace Testing.Base
     {
         private static readonly MongoClient _client = new MongoClient("mongodb://localhost:27017");
 
-        private static readonly IMongoDatabase _database = _client.GetDatabase("Testing");
+        private static readonly IMongoDatabase _database = _client.GetDatabase("ABTesting");
 
         public static IMongoCollection<T> GetCollection<T>(string name)
         {
@@ -24,21 +25,38 @@ namespace Testing.Base
     /// <summary>
     ///Коллекции
     /// </summary>
-    public static class Repos
+    public class Repos
     {
-        public static MongoRepo<Companies> Company = new("Company");
-        public static MongoRepo<Roles> Role = new("Role");
-        public static MongoRepo<Developers> Developer = new("Developer");
-        public static MongoRepo<Applications> Application = new("Application");
-        public static MongoRepo<MetricTypes> MetricType = new("MetricType");
-        public static MongoRepo<Metrics> Metric = new("Metric");
-        public static MongoRepo<Instances> Instance = new("Instance");
-        public static MongoRepo<Attributes> Attribute = new("Attribute");
-        public static MongoRepo<Values> Value = new("Value");
-        public static MongoRepo<ABDescriptions> Description = new("Description");
-        public static MongoRepo<ABTests> AbTest = new("AbTest");
-        public static MongoRepo<Variants> Variant = new("Variant");
-        public static MongoRepo<Results> Result = new("Result");
+        public IMongoRepo<Companies> Company { get; }
+        public IMongoRepo<Roles> Role { get; }
+        public IMongoRepo<Developers> Developer { get; }
+        public IMongoRepo<Applications> Application { get; }
+        public IMongoRepo<MetricTypes> MetricType { get; }
+        public IMongoRepo<Metrics> Metric { get; }
+        public IMongoRepo<Instances> Instance { get; }
+        public IMongoRepo<Attributes> Attribute { get; }
+        public IMongoRepo<Values> Value { get; }
+        public IMongoRepo<ABDescriptions> Description { get; }
+        public IMongoRepo<ABTests> AbTest { get; }
+        public IMongoRepo<Variants> Variant { get; }
+        public IMongoRepo<Results> Result { get; }
+
+        public Repos()
+        {
+            Company = new LogMongoRepo<Companies>(new MongoRepo<Companies>("Company"));
+            Role = new LogMongoRepo<Roles>(new MongoRepo<Roles>("Role"));
+            Developer = new LogMongoRepo<Developers>(new MongoRepo<Developers>("Developer"));
+            Application = new LogMongoRepo<Applications>(new MongoRepo<Applications>("Application"));
+            MetricType = new LogMongoRepo<MetricTypes>(new MongoRepo<MetricTypes>("MetricType"));
+            Metric = new LogMongoRepo<Metrics>(new MongoRepo<Metrics>("Metric"));
+            Instance = new LogMongoRepo<Instances>(new MongoRepo<Instances>("Instance"));
+            Attribute = new LogMongoRepo<Attributes>(new MongoRepo<Attributes>("Attribute"));
+            Value = new LogMongoRepo<Values>(new MongoRepo<Values>("Value"));
+            Description = new LogMongoRepo<ABDescriptions>(new MongoRepo<ABDescriptions>("Description"));
+            AbTest = new LogMongoRepo<ABTests>(new MongoRepo<ABTests>("AbTest"));
+            Variant = new LogMongoRepo<Variants>(new MongoRepo<Variants>("Variant"));
+            Result = new LogMongoRepo<Results>(new MongoRepo<Results>("Result"));
+        }
     }
 
     /// <summary>

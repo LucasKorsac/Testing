@@ -34,28 +34,21 @@ namespace Testing
         /// </summary>
         public async Task Init()
         {
-            var tests = await _facade.GetAllTests();
+            var data = await _facade.GetTestsWithVariants();
 
-            if (tests == null || tests.Count == 0)
-                return;
-
-            foreach (var test in tests)
+            foreach (var pair in data)
             {
-                // Варианты из Mongo
-                var variants = await _variantRepo.Where(
-                    x => x.AbTestId == test.Id
-                );
+                var test = pair.Key;
+                var variants = pair.Value;
 
                 if (variants == null || variants.Count == 0)
                     continue;
 
-                // Выбор варианта через стратегию
                 var selected = _strategy.Choose(variants, variants[0]);
 
                 if (selected == null)
                     continue;
 
-                // Запись результата
                 var key = $"{test.Name}:{selected.Name}";
 
                 if (!AB.ContainsKey(key))
