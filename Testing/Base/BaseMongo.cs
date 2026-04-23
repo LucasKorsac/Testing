@@ -122,7 +122,6 @@ namespace Testing.Base
             [BsonId]
             public ObjectId Id { get; set; }
 
-            //public ObjectId ApplicationId { get; set; } // FK → Application
             public ObjectId DescriptionId { get; set; } // FK → ABDescription
 
             public string Name { get; set; } = "";

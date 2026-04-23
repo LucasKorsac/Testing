@@ -41,15 +41,15 @@ window.addEventListener("DOMContentLoaded", () => {
 function initModels() {
     const select = document.getElementById("modelSelect");
 
-    // schemas — это объект с описанием всех моделей
+    // schemas - объект с описанием всех моделей
     Object.keys(schemas).forEach(m => {
 
-        // создание option для select
+        // Создание option для select
         const opt = document.createElement("option");
         opt.value = m;
         opt.textContent = m;
 
-        // добавление в список
+        // Добавление в список
         select.appendChild(opt);
     });
 }
@@ -69,7 +69,7 @@ function renderForm() {
 
     const container = document.getElementById("createForm");
 
-    // Очистка форму
+    // Очистка формы
     container.innerHTML = "";
 
     // Создание ввода под каждое поле модели
@@ -78,7 +78,6 @@ function renderForm() {
         const input = document.createElement("input");
         input.id = "create_" + field;
         input.placeholder = field;
-
         container.appendChild(input);
     });
 }
@@ -94,9 +93,7 @@ async function loadList() {
         const filter = document.getElementById("filterInput").value || "";
 
         // Запрос к API с пагинацией и фильтром
-        const data = await apiRequest(
-            `${getUrl(model)}?page=${page}&pageSize=${pageSize}&filter=${filter}`
-        );
+        const data = await apiRequest(`${getUrl(model)}?page=${page}&pageSize=${pageSize}&filter=${filter}`);
 
         // Отображение таблицы
         renderTable(data);
@@ -104,8 +101,7 @@ async function loadList() {
         // Обновление страницы в UI
         document.getElementById("pageLabel").textContent = page;
 
-    } catch (e) {
-        console.error(e);
+    } catch (e) {console.error(e);
         alert("Ошибка загрузки");
     }
 }

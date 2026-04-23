@@ -6,7 +6,6 @@ namespace Testing
     // Контроллер для хранения текущих A/B тестов
     internal class Controller
     {
-        // singleton-экземпляр (глобальная точка доступа)
         public static readonly Controller I = new();
 
         // Словарь текущих тестов: ключ — имя теста, значение

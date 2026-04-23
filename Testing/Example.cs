@@ -14,7 +14,7 @@ namespace Testing
     internal class Example
     {
         /// <summary>
-        /// Результаты: VariantName → Count
+        /// Результаты: Test:Variant → Count
         /// </summary>
         public Dictionary<string, int> AB { get; private set; } = new();
 
@@ -44,7 +44,11 @@ namespace Testing
                 if (variants == null || variants.Count == 0)
                     continue;
 
-                var selected = _strategy.Choose(variants, variants[0]);
+                // Вызов стратегии
+                var selected = _strategy.Choose(
+                    variants,
+                    variants[0]
+                );
 
                 if (selected == null)
                     continue;

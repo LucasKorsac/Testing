@@ -26,13 +26,7 @@ namespace Testing.Pattern
 
                 return new AbTestDto
                 {
-                    Id = model.Id.ToString(),
-                    Name = model.Name,
-
-                    // Преобразование ObjectId в string
-                    // ApplicationId = model.ApplicationId.ToString(),
-
-                    DescriptionId = model.DescriptionId.ToString()
+                    Id = model.Id.ToString(), Name = model.Name, DescriptionId = model.DescriptionId.ToString()
                 };
             }
 
@@ -43,13 +37,7 @@ namespace Testing.Pattern
 
                 return new ABTests
                 {
-                    Id = ObjectId.Parse(dto.Id),
-                    Name = dto.Name,
-
-                    // Обратное преобразование строки в ObjectId
-                    // ApplicationId = ObjectId.Parse(dto.ApplicationId),
-
-                    DescriptionId = ObjectId.Parse(dto.DescriptionId)
+                    Id = ObjectId.Parse(dto.Id), Name = dto.Name, DescriptionId = ObjectId.Parse(dto.DescriptionId)
                 };
             }
         }

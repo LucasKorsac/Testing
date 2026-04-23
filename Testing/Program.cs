@@ -7,8 +7,7 @@ namespace Testing
     {
         static async Task Main()
         {
-            Console.WriteLine("Запуск приложения");
-
+            // Поменять для соединения
             var app = new App();
             await app.Init();
 

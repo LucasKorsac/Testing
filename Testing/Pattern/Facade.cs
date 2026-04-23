@@ -24,8 +24,7 @@ namespace Testing.Pattern
         /// <summary>
         /// Получение вариантов для конкретного теста
         /// </summary>
-        public async Task<List<Variants>> GetVariants(ObjectId testId)
-            => await _variants.Where(x => x.AbTestId == testId);
+        public async Task<List<Variants>> GetVariants(ObjectId testId) => await _variants.Where(x => x.AbTestId == testId);
 
         /// <summary>
         /// Получение теста и варианты сразу
