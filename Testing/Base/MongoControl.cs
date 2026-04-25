@@ -22,9 +22,9 @@ namespace Testing.Base
         }
     }
 
-    /// <summary>
-    ///Коллекции
-    /// </summary>
+    ///// <summary>
+    /////Коллекции
+    ///// </summary>
     public class Repos
     {
         public IMongoRepo<Companies> Company { get; }
@@ -39,23 +39,28 @@ namespace Testing.Base
         public IMongoRepo<ABDescriptions> Description { get; }
         public IMongoRepo<ABTests> AbTest { get; }
         public IMongoRepo<Variants> Variant { get; }
-        public IMongoRepo<Results> Result { get; }
+        public IMongoRepo<AbResults> Result { get; }
+        public IMongoRepo<AbEvent> Event { get; }
 
-        public Repos()
+        public Repos(IMongoRepo<Companies> company, IMongoRepo<Roles> role, IMongoRepo<Developers> developer, IMongoRepo<Applications> application,
+            IMongoRepo<MetricTypes> metricType, IMongoRepo<Metrics> metric, IMongoRepo<Instances> instance, IMongoRepo<Attributes> attribute,
+            IMongoRepo<Values> value, IMongoRepo<ABDescriptions> description, IMongoRepo<ABTests> abTest, IMongoRepo<Variants> variant,
+            IMongoRepo<AbResults> result, IMongoRepo<AbEvent> ev)
         {
-            Company = new LogMongoRepo<Companies>(new MongoRepo<Companies>("Company"));
-            Role = new LogMongoRepo<Roles>(new MongoRepo<Roles>("Role"));
-            Developer = new LogMongoRepo<Developers>(new MongoRepo<Developers>("Developer"));
-            Application = new LogMongoRepo<Applications>(new MongoRepo<Applications>("Application"));
-            MetricType = new LogMongoRepo<MetricTypes>(new MongoRepo<MetricTypes>("MetricType"));
-            Metric = new LogMongoRepo<Metrics>(new MongoRepo<Metrics>("Metric"));
-            Instance = new LogMongoRepo<Instances>(new MongoRepo<Instances>("Instance"));
-            Attribute = new LogMongoRepo<Attributes>(new MongoRepo<Attributes>("Attribute"));
-            Value = new LogMongoRepo<Values>(new MongoRepo<Values>("Value"));
-            Description = new LogMongoRepo<ABDescriptions>(new MongoRepo<ABDescriptions>("Description"));
-            AbTest = new LogMongoRepo<ABTests>(new MongoRepo<ABTests>("AbTest"));
-            Variant = new LogMongoRepo<Variants>(new MongoRepo<Variants>("Variant"));
-            Result = new LogMongoRepo<Results>(new MongoRepo<Results>("Result"));
+            Company = company;
+            Role = role;
+            Developer = developer;
+            Application = application;
+            MetricType = metricType;
+            Metric = metric;
+            Instance = instance;
+            Attribute = attribute;
+            Value = value;
+            Description = description;
+            AbTest = abTest;
+            Variant = variant;
+            Result = result;
+            Event = ev;
         }
     }
 
@@ -72,10 +77,16 @@ namespace Testing.Base
         /// <summary>
         /// Инициализация репозитория по имени коллекции
         /// </summary>
-        public MongoRepo(string collectionName)
+
+        public MongoRepo(IMongoDatabase db)
         {
-            _collection = MongoContext.GetCollection<T>(collectionName);
+            _collection = db.GetCollection<T>(typeof(T).Name);
         }
+
+        //public MongoRepo(string collectionName)
+        //{
+        //    _collection = MongoContext.GetCollection<T>(collectionName);
+        //}
 
         /// <summary>
         /// LINQ-доступ к коллекци
@@ -247,6 +258,8 @@ namespace Testing.Base
 
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
+
+
 
         /// <summary>
         /// Удаление с возвратом результата

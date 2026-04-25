@@ -1,10 +1,11 @@
+using MongoDB.Driver;
 using Testing;
+using Testing.Base;
 using Testing.Pattern;
-using WebAppTest;
+using WebAppTest.Control;
 using static Testing.Base.BaseMongo;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Конфигурация сервисов
 
@@ -17,12 +18,16 @@ builder.Services.AddControllers();
 // Мониторинг, телеметрия
 builder.Services.AddApplicationInsightsTelemetry();
 
+//Регистрация базы 
+builder.Services.AddSingleton<IMongoClient>(_ => { return new MongoClient("mongodb://localhost:27017"); });
+
+builder.Services.AddSingleton<IMongoDatabase>(sp => { var client = sp.GetRequiredService<IMongoClient>(); return client.GetDatabase("ABTesting"); });
 
 // Бизнес-слой
 
 
 // Сервис управления A/B тестами
-builder.Services.AddScoped<ServiceControl>();
+builder.Services.AddScoped(typeof(IMongoRepo<>), typeof(MongoRepo<>));
 
 // Фасад над MongoDB репозиториями
 builder.Services.AddScoped<Facade>();
@@ -40,8 +45,6 @@ builder.Services.AddScoped<Adaptation>();
 
 
 var app = builder.Build();
-
-
 
 // HTTP обработка запросов
 

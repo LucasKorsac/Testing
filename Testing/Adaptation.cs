@@ -15,10 +15,11 @@ namespace Testing
     public class Adaptation
     {
         private readonly IMongoRepo<Variants> _variantRepo;
-        private readonly IMongoRepo<Results> _resultRepo;
+        private readonly IMongoRepo<AbResults> _resultRepo;
         private readonly IMongoRepo<Values> _valueRepo;
+        private readonly IMongoRepo<AbEvent> _events;
 
-        public Adaptation(IMongoRepo<Variants> variantRepo, IMongoRepo<Results> resultRepo, IMongoRepo<Values> valueRepo)
+        public Adaptation(IMongoRepo<Variants> variantRepo, IMongoRepo<AbResults> resultRepo, IMongoRepo<Values> valueRepo)
         {
             _variantRepo = variantRepo;
             _resultRepo = resultRepo;

@@ -140,13 +140,24 @@ namespace Testing.Base
         }
 
         // Результат
-        public class Results
+        public class AbResults
         {
             [BsonId]
             public ObjectId Id { get; set; }
 
             public ObjectId InstanceId { get; set; } // FK → Instance
             public ObjectId VariantId { get; set; }  // FK → Variant
+        }
+
+        //Ивент 25.04
+        public class AbEvent
+        {
+            public ObjectId Id { get; set; }
+            public string TestName { get; set; }
+            public string VariantName { get; set; }
+            public string EventType { get; set; }
+            public DateTime Time { get; set; }
+            public string UserId { get; set; }
         }
     }
 }

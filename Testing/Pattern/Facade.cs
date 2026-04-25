@@ -27,7 +27,7 @@ namespace Testing.Pattern
         public async Task<List<Variants>> GetVariants(ObjectId testId) => await _variants.Where(x => x.AbTestId == testId);
 
         /// <summary>
-        /// Получение теста и варианты сразу
+        /// Получение теста и вариантов сразу
         /// </summary>
         public async Task<Dictionary<ABTests, List<Variants>>> GetTestsWithVariants()
         {
@@ -43,5 +43,7 @@ namespace Testing.Pattern
 
             return result;
         }
+
+
     }
 }

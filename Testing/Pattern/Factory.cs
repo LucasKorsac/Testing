@@ -1,34 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MongoDB.Driver;
 using Testing.Base;
 
 namespace Testing.Pattern
 {
     /// <summary>
-    /// Фабрика репозиториев MongoDB. Создаёт репозитории и скрывает логику их инициализации
+    /// Фабрика репозиториев базы
     /// </summary>
-    interface Factory
-    {
-        IMongoRepo<T> Create<T>(string collectionName) where T : class;
-    }
-    /// <summary>
-    /// Реализация фабрики репозиториев
-    /// </summary>
-    public class MongoFactory : Factory
+    public interface IMongoFactory
     {
         /// <summary>
-        /// Создание репозитория с автоматическим подключением декоратора логирования
+        /// Создаёт репозиторий для указанной сущности
         /// </summary>
-        public IMongoRepo<T> Create<T>(string collectionName) where T : class
-        {
-            // Базовый репозиторий
-            var repo = new MongoRepo<T>(collectionName);
+        IMongoRepo<T> Create<T>() where T : class;
+    }
 
-            // Обертка в декоратор
-            return new LogMongoRepo<T>(repo);
+    /// <summary>
+    /// Реализация фабрики MongoDB репозиториев. Слой абстракции над созданием репозиториев
+    /// </summary>
+    public class MongoFactory : IMongoFactory
+    {
+        /// <summary>
+        /// Подключение к базе MongoDB
+        /// </summary>
+        private readonly IMongoDatabase _database;
+
+        /// <summary>
+        /// Конструктор фабрики
+        /// </summary>
+        public MongoFactory(IMongoDatabase database)
+        {
+            _database = database;
+        }
+
+        /// <summary>
+        /// Создание репозитория с подключением декоратора логирования
+        /// </summary>
+        public IMongoRepo<T> Create<T>() where T : class
+        {
+            // Создание базового репозитория
+            var repo = new MongoRepo<T>(_database);
+
+            // Оборот в декоратор
+            var loggedRepo = new LogMongoRepo<T>(repo);
+
+            // Возврат репозитория
+            return loggedRepo;
         }
     }
 }
