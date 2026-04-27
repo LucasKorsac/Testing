@@ -14,6 +14,10 @@ namespace Testing
         /// </summary>
         public class DataFileService
         {
+            //JSON написать 
+            //стратегию напсать для работы с файлами
+
+
             // TXT
 
             /// <summary>

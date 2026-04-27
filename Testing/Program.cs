@@ -3,13 +3,14 @@ using System;
 using System.Threading.Tasks;
 using Testing.Pattern;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson.IO;
 
 namespace Testing
 {
     internal class Program
     {
         static async Task Main()
-        {
+        {File.WriteAllText()
             // DI контейнер
             var services = new ServiceCollection();
             // Mongo
