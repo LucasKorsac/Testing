@@ -1,0 +1,79 @@
+﻿@page
+@model WebAppTest.Pages.TestControlModel
+@{
+    ViewData["Title"] = "Управление";
+}
+@using Testing
+
+<header>
+    <nav>
+        <ul>
+            <!--Ссылки на страницы-->
+            <li><a href="/Prof">Профиль</a></li>
+            <li><a href="/Index">Главная страница</a></li>
+            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/Manage">Справка</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+
+    <h1>Страница управления</h1>
+
+    <!-- вывод данных из модели -->
+    @* <div>
+        @Model.Test?.ToString()
+    </div> *@
+
+    <!-- Панель действий -->
+    <section>
+        <button>Создать тест</button>
+
+        <label for="sort">Сортировка:</label>
+        <select id="sort" name="sort">
+            <option>По дате</option>
+            <option>По названию</option>
+            <option>По длительности</option>
+        </select>
+    </section>
+
+    <hr>
+
+    <!-- Список тестов -->
+    <section>
+
+        <div>
+            <h3>Название теста 1</h3>
+            <p>Продолжительность: m1 дн.</p>
+
+            <button>Внести изменения</button>
+            <button>Остановить</button>
+            <button>Удалить</button>
+        </div>
+
+        <hr>
+
+        <div>
+            <h3>Название теста 2</h3>
+            <p>Продолжительность: m2 дн.</p>
+
+            <button>Внести изменения</button>
+            <button>Остановить</button>
+            <button>Удалить</button>
+        </div>
+
+        <hr>
+
+        <div>
+            <h3>Название теста n</h3>
+            <p>Продолжительность: mN дн.</p>
+
+            <button>Внести изменения</button>
+            <button>Остановить</button>
+            <button>Удалить</button>
+        </div>
+
+    </section>
+
+</main>

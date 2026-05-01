@@ -1,0 +1,67 @@
+﻿@page
+@model WebAppTest.Pages.ProfModel
+@{
+    ViewData["Title"] = "Профиль";
+}
+@using Testing
+
+<header>
+    <nav>
+        <ul>
+            <!--Ссылки на страницы-->
+            <li><a href="/Prof">Профиль</a></li>
+            <li><a href="/Index">Главная страница</a></li>
+            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/Manage">Справка</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+
+    <h1>Профиль</h1>
+
+    <!-- вывод тестовых данных -->
+    @* <div>
+        @Model.Test?.ToString()
+    </div> *@
+
+    <section>
+
+        <div>
+            <img src="#" alt="Аватар пользователя">
+        </div>
+
+        <div>
+            <button>Редактировать профиль</button>
+        </div>
+
+        <div>
+            <label for="firstName">Имя:</label>
+            <input type="text" id="firstName" name="firstName" value="Имя_пользователя">
+        </div>
+
+        <div>
+            <label for="lastName">Фамилия:</label>
+            <input type="text" id="lastName" name="lastName" value="Фамилия_пользователя">
+        </div>
+
+        <div>
+            <p>ссылка_на_профиль</p>
+        </div>
+
+    </section>
+
+    <section>
+        <h2>Информация о пользователе</h2>
+        <textarea rows="6" cols="50">
+Текст написанный пользователем
+        </textarea>
+    </section>
+
+    <aside>
+        <p><strong>Лукас</strong> (1 day ago)</p>
+        <p>При изменении элементы в которых возможны корректировки активны</p>
+    </aside>
+
+</main>

@@ -65,11 +65,11 @@ namespace Testing.Pattern
     /// <summary>
     /// Интерфейс стратегии выбора
     /// </summary>
-    public interface IStrategy<T>
-    {
-        /// <summary>
-        /// Выбор элемента из списка
-        /// </summary>
-        T Choose(List<T> items, T defaultValue);
-    }
+    //public interface IStrategy<T>
+    //{
+    //    /// <summary>
+    //    /// Выбор элемента из списка
+    //    /// </summary>
+    //    T Choose(List<T> items, T defaultValue);
+    //}
 }

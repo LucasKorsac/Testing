@@ -10,7 +10,9 @@ namespace Testing
     internal class Program
     {
         static async Task Main()
-        {File.WriteAllText()
+        {
+            //File.WriteAllText()
+
             // DI контейнер
             var services = new ServiceCollection();
             // Mongo

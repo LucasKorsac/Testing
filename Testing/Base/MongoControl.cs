@@ -40,12 +40,11 @@ namespace Testing.Base
         public IMongoRepo<ABTests> AbTest { get; }
         public IMongoRepo<Variants> Variant { get; }
         public IMongoRepo<AbResults> Result { get; }
-        public IMongoRepo<AbEvent> Event { get; }
 
         public Repos(IMongoRepo<Companies> company, IMongoRepo<Roles> role, IMongoRepo<Developers> developer, IMongoRepo<Applications> application,
             IMongoRepo<MetricTypes> metricType, IMongoRepo<Metrics> metric, IMongoRepo<Instances> instance, IMongoRepo<Attributes> attribute,
             IMongoRepo<Values> value, IMongoRepo<ABDescriptions> description, IMongoRepo<ABTests> abTest, IMongoRepo<Variants> variant,
-            IMongoRepo<AbResults> result, IMongoRepo<AbEvent> ev)
+            IMongoRepo<AbResults> result)
         {
             Company = company;
             Role = role;
@@ -60,7 +59,6 @@ namespace Testing.Base
             AbTest = abTest;
             Variant = variant;
             Result = result;
-            Event = ev;
         }
     }
 

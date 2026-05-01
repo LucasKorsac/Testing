@@ -1,12 +1,61 @@
 ﻿@page
-@using Testing
-@model IndexModel
+@model WebAppTest.Pages.IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Главная";
 }
+@using Testing
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    @Model.Test?.ToString()
-</div>
+
+<!-- Верхняя панель -->
+<header>
+    <nav>
+        <ul>
+            <!--Ссылки на страницы-->
+            <li><a href="/Prof">Профиль</a></li>
+            <li><a href="/Index">Главная страница</a></li>
+            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/Manage">Справка</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- Основной контент -->
+<main>
+    <h1>Главная страница</h1>
+
+    <section>
+        <h2>Информация о тестах</h2>
+
+        <!-- вывод из модели -->
+        @* <div>
+        @Model.Test?.ToString()
+        </div> *@
+
+        <!--Общая информация о проведении тестирования-->
+        <ul>
+            <li>Кол-во тестов в год/месяц/неделю</li>
+            <li>Кол-во пользователей за период</li>
+            <li>...</li>
+            <li>N пункт списка</li>
+        </ul>
+
+        <p>Рекомендации по проведению тестирования</p>
+
+        <!--Окно для отображения графиков-->
+        <div>
+            <p>[Здесь будет график или изображение]</p>
+        </div>
+    </section>
+
+    <aside>
+        <!--Список с документами/таблицами-->
+        <h2>Список документов</h2>
+        
+        <select>
+            <option>Документ 1</option>
+            <option>Документ 2</option>
+            <option>Документ 3</option>
+        </select>
+    </aside>
+
+</main>
