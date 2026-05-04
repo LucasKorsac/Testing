@@ -7,9 +7,7 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing.Base
 {
-    /// <summary>
-    ///Контекст MongoDB
-    /// </summary>
+    /// <summary> Контекст MongoDB </summary>
     public static class MongoContext
     {
         private static readonly MongoClient _client = new MongoClient("mongodb://localhost:27017");
@@ -22,9 +20,7 @@ namespace Testing.Base
         }
     }
 
-    ///// <summary>
-    /////Коллекции
-    ///// </summary>
+    /// <summary> Коллекции </summary>
     public class Repos
     {
         public IMongoRepo<Companies> Company { get; }
@@ -62,49 +58,32 @@ namespace Testing.Base
         }
     }
 
-    /// <summary>
-    /// MongoDB репозиторий
-    /// </summary>
+    /// <summary> MongoDB репозиторий </summary>
     public class MongoRepo<T> : IMongoRepo<T> where T : class
     {
-        /// <summary>
-        /// Коллекция
-        /// </summary>
+        /// <summary> Коллекция </summary>
         private readonly IMongoCollection<T> _collection;
 
-        /// <summary>
-        /// Инициализация репозитория по имени коллекции
-        /// </summary>
+        /// <summary> Инициализация репозитория по имени коллекции </summary>
 
         public MongoRepo(IMongoDatabase db)
         {
             _collection = db.GetCollection<T>(typeof(T).Name);
         }
 
-        //public MongoRepo(string collectionName)
-        //{
-        //    _collection = MongoContext.GetCollection<T>(collectionName);
-        //}
-
-        /// <summary>
-        /// LINQ-доступ к коллекци
-        /// </summary>
+        /// <summary> LINQ-доступ к коллекци </summary>
         public IQueryable<T> Query => _collection.AsQueryable();
 
         //Запросы
 
-        /// <summary>
-        /// Получение документа по ObjectId
-        /// </summary>
+        /// <summary> Получение документа по ObjectId </summary>
         public async Task<T?> GetById(ObjectId id, CancellationToken ct = default)
         {
             var filter = Builders<T>.Filter.Eq("_id", id);
             return await _collection.Find(filter).FirstOrDefaultAsync(ct);
         }
 
-        /// <summary>
-        /// Получение документа по Id
-        /// </summary>
+        /// <summary> Получение документа по Id </summary>
         public async Task<T?> GetById(string id, CancellationToken ct = default)
         {
             if (!ObjectId.TryParse(id, out var objectId)) return null;
@@ -112,25 +91,19 @@ namespace Testing.Base
             return await GetById(objectId, ct);
         }
 
-        /// <summary>
-        /// Получение первого документа по условию
-        /// </summary>
+        /// <summary> Получение первого документа по условию </summary>
         public async Task<T?> FirstOrDefault(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
             return await _collection.Find(filter).FirstOrDefaultAsync(ct);
         }
 
-        /// <summary>
-        /// Получение списка по условию
-        /// </summary>
+        /// <summary> Получение списка по условию </summary>
         public async Task<List<T>> Where(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
             return await _collection.Find(filter).ToListAsync(ct);
         }
 
-        /// <summary>
-        /// Получение всех документов коллекции
-        /// </summary>
+        /// <summary> Получение всех документов коллекции </summary>
         public async Task<List<T>> GetAll(CancellationToken ct = default)
         {
             return await _collection.Find(Builders<T>.Filter.Empty).ToListAsync(ct);
@@ -138,17 +111,13 @@ namespace Testing.Base
 
         // Создание
 
-        /// <summary>
-        /// Создание одного документа
-        /// </summary>
+        /// <summary> Создание одного документа </summary>
         public async Task Create(T entity, CancellationToken ct = default)
         {
             await _collection.InsertOneAsync(entity, cancellationToken: ct);
         }
 
-        /// <summary>
-        /// Массовое создание документов
-        /// </summary>
+        /// <summary> Массовое создание документов </summary>
         public async Task CreateMany(IEnumerable<T> entities, CancellationToken ct = default)
         {
             await _collection.InsertManyAsync(entities, cancellationToken: ct);
@@ -156,18 +125,14 @@ namespace Testing.Base
 
         // Обновления
 
-        /// <summary>
-        /// Полная замена документа по ObjectId, перезапись
-        /// </summary>
+        /// <summary> Полная замена документа по ObjectId, перезапись </summary>
         public async Task Update(ObjectId id, T entity, CancellationToken ct = default)
         {
             var filter = Builders<T>.Filter.Eq("_id", id);
             await _collection.ReplaceOneAsync(filter, entity, cancellationToken: ct);
         }
 
-        /// <summary>
-        /// Перегрузка Update для string id
-        /// </summary>
+        /// <summary> Перегрузка Update для string id </summary>
         public async Task Update(string id, T entity, CancellationToken ct = default)
         {
             if (!ObjectId.TryParse(id, out var objectId))
@@ -176,9 +141,7 @@ namespace Testing.Base
             await Update(objectId, entity, ct);
         }
 
-        /// <summary>
-        /// Частичное обновление
-        /// </summary>
+        /// <summary> Частичное обновление </summary>
         public async Task<bool> Update(ObjectId id, UpdateDefinition<T> update, CancellationToken ct = default)
         {
             var filter = Builders<T>.Filter.Eq("_id", id);
@@ -190,34 +153,26 @@ namespace Testing.Base
 
         // Удаление
 
-        /// <summary>
-        /// Удаление по ObjectId
-        /// </summary>
+        /// <summary> Удаление по ObjectId </summary>
         public async Task Delete(ObjectId id, CancellationToken ct = default)
         {
             await _collection.DeleteOneAsync(Builders<T>.Filter.Eq("_id", id), ct);
         }
 
-        /// <summary>
-        /// Удаление нескольких документов по условию
-        /// </summary>
+        /// <summary> Удаление нескольких документов по условию </summary>
         public async Task<long> DeleteMany(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
             var result = await _collection.DeleteManyAsync(filter, ct);
             return result.DeletedCount;
         }
 
-        /// <summary>
-        /// Полная очистка коллекции
-        /// </summary>
+        /// <summary> Полная очистка коллекции </summary>
         public async Task DeleteAll(CancellationToken ct = default)
         {
             await _collection.DeleteManyAsync(Builders<T>.Filter.Empty, ct);
         }
 
-        /// <summary>
-        /// Удаление по string
-        /// </summary>
+        /// <summary> Удаление по string </summary>
         public async Task Delete(string id, CancellationToken ct = default)
         {
             if (!ObjectId.TryParse(id, out var objectId))
@@ -226,17 +181,13 @@ namespace Testing.Base
             await Delete(objectId, ct);
         }
 
-        /// <summary>
-        /// Проверка существования документа по условию
-        /// </summary>
+        /// <summary> Проверка существования документа по условию </summary>
         public async Task<bool> Exists(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
             return await _collection.Find(filter).AnyAsync(ct);
         }
 
-        /// <summary>
-        /// Подсчет документов
-        /// </summary>
+        /// <summary> Подсчет документов </summary>
         public async Task<long> Count(Expression<Func<T, bool>>? filter = null, CancellationToken ct = default)
         {
             filter ??= _ => true;
@@ -244,9 +195,7 @@ namespace Testing.Base
             return await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
         }
 
-        /// <summary>
-        /// Полная замена документа
-        /// </summary>
+        /// <summary> Полная замена документа </summary>
         public async Task<bool> Replace(ObjectId id, T entity, CancellationToken ct = default)
         {
             var result = await _collection.ReplaceOneAsync(
@@ -256,20 +205,5 @@ namespace Testing.Base
 
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
-
-
-
-        /// <summary>
-        /// Удаление с возвратом результата
-        /// </summary>
-        //public async Task<bool> Delete(ObjectId id, CancellationToken ct = default)
-        //{
-        //    var result = await _collection.DeleteOneAsync(
-        //        Builders<T>.Filter.Eq("_id", id),
-        //        ct);
-
-        //    return result.IsAcknowledged && result.DeletedCount > 0;
-        //}
-
     }
 }

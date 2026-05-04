@@ -8,20 +8,22 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing
 {
-    /// <summary>
-    /// Пример использования A/B системы (refactored)
-    /// </summary>
+    /// <summary> Выполнение выбора вариантов тестов с помощью стратегии и сбор статистики распределения </summary>
     internal class Example
     {
-        /// <summary>
-        /// Результаты: Test:Variant → Count
-        /// </summary>
+        /// <summary> Результаты выполнения A/B тестов </summary>
         public Dictionary<string, int> AB { get; private set; } = new();
 
+        /// <summary> Фасад для получения тестов и их вариантов </summary>
         private readonly Facade _facade;
+
+        /// <summary> Стратегия выбора варианта (Random / Adaptive) </summary>
         private readonly IStrategy<Variants> _strategy;
+
+        /// <summary> Репозиторий вариантов </summary>
         private readonly IMongoRepo<Variants> _variantRepo;
 
+        /// <summary> Конструктор с внедрением зависимостей </summary>
         public Example(Facade facade, IStrategy<Variants> strategy, IMongoRepo<Variants> variantRepo)
         {
             _facade = facade;
@@ -29,35 +31,36 @@ namespace Testing
             _variantRepo = variantRepo;
         }
 
-        /// <summary>
-        /// Инициализация A/B теста
-        /// </summary>
+        /// <summary> Инициализация A/B тестирования </summary>
         public async Task Init()
         {
-            var data = await _facade.GetTestsWithVariants();
+            // Получаем все тесты вместе с вариантами
+            var data = await _facade.GetTests();
 
-            foreach (var pair in data)
+            foreach (var item in data)
             {
-                var test = pair.Key;
-                var variants = pair.Value;
+                var test = item.Test;               // A/B тест
+                var variants = item.Variants;      // варианты теста
 
+                // Пропуск теста без вариантов
                 if (variants == null || variants.Count == 0)
                     continue;
 
-                // Вызов стратегии
-                var selected = _strategy.Choose(
-                    variants,
-                    variants[0]
-                );
+                // Выбор варианта через стратегию
+                var selected = _strategy.Choose(variants, variants[0]);
 
+                // Если стратегия не вернула результат — пропуск
                 if (selected == null)
                     continue;
 
+                // Формирование ключа статистики
                 var key = $"{test.Name}:{selected.Name}";
 
+                // Инициализация счётчика при первом появлении
                 if (!AB.ContainsKey(key))
                     AB[key] = 0;
 
+                // Увеличение счётчика выбранного варианта
                 AB[key]++;
             }
         }

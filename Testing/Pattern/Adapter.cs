@@ -30,7 +30,7 @@ namespace Testing.Pattern
                 };
             }
 
-            // Преобразование из DTO обратно в доменную модель
+            // Преобразование из DTO в доменную модель
             public static ABTests ToModel(AbTestDto dto)
             {
                 if (dto == null) return null;

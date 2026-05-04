@@ -23,6 +23,10 @@ builder.Services.AddSingleton<IMongoClient>(_ => { return new MongoClient("mongo
 
 builder.Services.AddSingleton<IMongoDatabase>(sp => { var client = sp.GetRequiredService<IMongoClient>(); return client.GetDatabase("ABTesting"); });
 
+builder.Services.AddHttpClient<ApiClient>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5001/");
+});
 // Бизнес-слой
 
 

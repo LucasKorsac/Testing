@@ -9,15 +9,12 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing
 {
-    /// <summary>
-    /// Адаптивный алгоритм перераспределения вероятностей (MAB-подобный)
-    /// </summary>
+    /// <summary> Адаптивный алгоритм перераспределения вероятностей (MAB-подобный) </summary>
     public class Adaptation
     {
         private readonly IMongoRepo<Variants> _variantRepo;
         private readonly IMongoRepo<AbResults> _resultRepo;
         private readonly IMongoRepo<Values> _valueRepo;
-        private readonly IMongoRepo<AbEvent> _events;
 
         public Adaptation(IMongoRepo<Variants> variantRepo, IMongoRepo<AbResults> resultRepo, IMongoRepo<Values> valueRepo)
         {
@@ -68,7 +65,7 @@ namespace Testing
             {
                 int index = i + 1; // чтобы не было 0
                 var s = stats[i];
-                double weight = (Math.Pow(index, 2) * Math.Sqrt(s.Count)) / (k * n);
+                double weight = Math.Pow(index, 2) * Math.Sqrt(s.Count) / (k * n);
 
                 // минимум 1, чтобы вариант не исчез
                 s.Weight = Math.Max(1, (int)Math.Round(weight));

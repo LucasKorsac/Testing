@@ -3,32 +3,22 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing.Pattern
 {
-    /// <summary>
-    /// Адаптивная стратегия выбора варианта.
-    /// </summary>
+    /// <summary> Адаптивная стратегия выбора варианта </summary>
     public class AdaptiveStrategy : IStrategy<Variants>
     {
-        /// <summary>
-        /// Адаптация
-        /// </summary>
+        /// <summary> Адаптация </summary>
         private readonly Adaptation _adaptation;
 
-        /// <summary>
-        /// Случайные числа для выбора варианта
-        /// </summary>
+        /// <summary> Случайные числа для выбора варианта </summary>
         private static readonly Random _rnd = new();
 
-        /// <summary>
-        /// Конструктор с внедрением зависимости Adaptation
-        /// </summary>
+        /// <summary> Конструктор с внедрением зависимости Adaptation </summary>
         public AdaptiveStrategy(Adaptation adaptation)
         {
             _adaptation = adaptation;
         }
 
-        /// <summary>
-        /// Выбор варианта
-        /// <returns>Выбранный вариант</returns>
+        /// <summary> Выбор варианта </summary>
         public Variants Choose(List<Variants> items, Variants defaultValue)
         {
             // null и пустое значение
@@ -61,15 +51,4 @@ namespace Testing.Pattern
             }
         }
     }
-
-    /// <summary>
-    /// Интерфейс стратегии выбора
-    /// </summary>
-    //public interface IStrategy<T>
-    //{
-    //    /// <summary>
-    //    /// Выбор элемента из списка
-    //    /// </summary>
-    //    T Choose(List<T> items, T defaultValue);
-    //}
 }

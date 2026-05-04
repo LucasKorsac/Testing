@@ -6,14 +6,10 @@ using System.Threading.Tasks;
 
 namespace Testing
 {
-    /// <summary>
-    /// Централизованная обработка исключений
-    /// </summary>
+    /// <summary> Централизованная обработка исключений </summary>
     public static class ErrorCheck
     {
-        /// <summary>
-        /// Обработка исключения
-        /// </summary>
+        /// <summary> Обработка исключения </summary>
         public static void Handle(Exception ex, string context = "")
         {
             var message = $"[ERROR] {DateTime.Now:HH:mm:ss}";
@@ -31,9 +27,7 @@ namespace Testing
             LogToFile(message);
         }
 
-        /// <summary>
-        /// Безопасное выполнение async метода
-        /// </summary>
+        /// <summary> Безопасное выполнение async метода </summary>
         public static async Task SafeExecuteAsync(Func<Task> action, string context = "")
         {
             try
@@ -46,9 +40,7 @@ namespace Testing
             }
         }
 
-        /// <summary>
-        /// Безопасное выполнение с результатом
-        /// </summary>
+        /// <summary> Безопасное выполнение с результатом </summary>
         public static async Task<T?> SafeExecuteAsync<T>(Func<Task<T>> action, string context = "")
         {
             try
@@ -62,9 +54,7 @@ namespace Testing
             }
         }
 
-        /// <summary>
-        /// Логирование в файл
-        /// </summary>
+        /// <summary> Логирование в файл </summary>
         private static void LogToFile(string message)
         {
             try
@@ -73,7 +63,7 @@ namespace Testing
             }
             catch
             {
-                // если файл не записался — игнорируем
+                // если файл не записался — игнор
             }
         }
     

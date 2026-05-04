@@ -1,121 +1,128 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using System.Xml.Linq;
 
 namespace Testing
 {
     internal class FilesWork
     {
-        /// <summary>
-        /// Работа с файлами: TXT и XML экспорт/импорт
-        /// </summary>
+        /// <summary> Сервис для работы с файлами TXT и JSON </summary>
         public class DataFileService
         {
-            //JSON написать 
-            //стратегию напсать для работы с файлами
+            /// <summary> Создаёт папку, если она не существует </summary>
+            private void EnsureDirectory(string path)
+            {
+                var dir = Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(dir))
+                    Directory.CreateDirectory(dir);
+            }
 
+            // TXT 
 
-            // TXT
-
-            /// <summary>
-            /// Запись строк в TXT файл
-            /// </summary>
+            /// <summary> Запись списка строк в TXT файл </summary>
             public void WriteTxt(string path, IEnumerable<string> lines)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-
+                EnsureDirectory(path);
                 File.WriteAllLines(path, lines, Encoding.UTF8);
             }
 
-            /// <summary>
-            /// Добавление строки в TXT файл
-            /// </summary>
+            /// <summary> Добавление одной строки в конец TXT файла </summary>
             public void AppendTxt(string path, string line)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-
+                EnsureDirectory(path);
                 File.AppendAllText(path, line + Environment.NewLine, Encoding.UTF8);
             }
 
-            /// <summary>
-            /// Чтение TXT файла
-            /// </summary>
+            /// <summary> Чтение всех строк из TXT файла </summary>
             public List<string> ReadTxt(string path)
             {
+                return File.Exists(path)
+                    ? new List<string>(File.ReadAllLines(path, Encoding.UTF8))
+                    : new List<string>();
+            }
+
+            // JSON
+
+            /// <summary> Сериализация объекта в JSON файл </summary>
+            public void WriteJson<T>(string path, T data)
+            {
+                EnsureDirectory(path);
+
+                var json = JsonSerializer.Serialize(data, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+
+                File.WriteAllText(path, json, Encoding.UTF8);
+            }
+
+            /// <summary> Десериализация объекта из JSON файла </summary>
+            public T? ReadJson<T>(string path)
+            {
                 if (!File.Exists(path))
-                    return new List<string>();
+                    return default;
 
-                return new List<string>(File.ReadAllLines(path, Encoding.UTF8));
+                var json = File.ReadAllText(path, Encoding.UTF8);
+                return JsonSerializer.Deserialize<T>(json);
             }
 
-            // XML
+            ////  XML
 
-            /// <summary>
-            /// Запись простых ключ-значение данных в XML
-            /// </summary>
-            public void WriteXml(string path, Dictionary<string, string> data, string rootName = "Root")
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            ///// <summary>
+            ///// Запись словаря (ключ-значение) в XML файл
+            ///// </summary>
+            //public void WriteXml(string path, Dictionary<string, string> data, string rootName = "Root")
+            //{
+            //    EnsureDirectory(path);
 
-                var root = new XElement(rootName);
+            //    var root = new XElement(rootName,
+            //        data.Select(d => new XElement(d.Key, d.Value)));
 
-                foreach (var item in data)
-                {
-                    root.Add(new XElement(item.Key, item.Value));
-                }
+            //    new XDocument(root).Save(path);
+            //}
 
-                var doc = new XDocument(root);
-                doc.Save(path);
-            }
+            ///// <summary>
+            ///// Запись списка объектов в XML (через рефлексию)
+            ///// </summary>
+            //public void WriteXmlList<T>(string path, IEnumerable<T> items, string rootName = "Items", string itemName = "Item")
+            //{
+            //    EnsureDirectory(path);
 
-            /// <summary>
-            /// Запись списка объектов в XML
-            /// </summary>
-            public void WriteXmlList<T>(string path, IEnumerable<T> items, string rootName = "Items", string itemName = "Item")
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            //    var root = new XElement(rootName);
 
-                var root = new XElement(rootName);
+            //    foreach (var item in items)
+            //    {
+            //        var element = new XElement(itemName);
 
-                foreach (var item in items)
-                {
-                    var element = new XElement(itemName);
+            //        foreach (var prop in typeof(T).GetProperties())
+            //        {
+            //            var value = prop.GetValue(item)?.ToString() ?? "";
+            //            element.Add(new XElement(prop.Name, value));
+            //        }
 
-                    foreach (var prop in typeof(T).GetProperties())
-                    {
-                        var value = prop.GetValue(item)?.ToString() ?? "";
-                        element.Add(new XElement(prop.Name, value));
-                    }
+            //        root.Add(element);
+            //    }
 
-                    root.Add(element);
-                }
+            //    new XDocument(root).Save(path);
+            //}
 
-                var doc = new XDocument(root);
-                doc.Save(path);
-            }
+            ///// <summary>
+            ///// Чтение XML файла в словарь
+            ///// </summary>
+            //public Dictionary<string, string> ReadXml(string path)
+            //{
+            //    if (!File.Exists(path))
+            //        return new Dictionary<string, string>();
 
-            /// <summary>
-            /// Чтение XML
-            /// </summary>
-            public Dictionary<string, string> ReadXml(string path)
-            {
-                var result = new Dictionary<string, string>();
+            //    var doc = XDocument.Load(path);
 
-                if (!File.Exists(path))
-                    return result;
-
-                var doc = XDocument.Load(path);
-
-                foreach (var element in doc.Root!.Elements())
-                {
-                    result[element.Name.LocalName] = element.Value;
-                }
-
-                return result;
-            }
+            //    return doc.Root!
+            //        .Elements()
+            //        .ToDictionary(e => e.Name.LocalName, e => e.Value);
+            //}
         }
     }
 }

@@ -21,7 +21,7 @@ namespace WebAppTest.Control
         /// </summary>
         private readonly IStrategy<Variants> _strategy;
 
-        private readonly IMongoRepo<AbEvent> _events;
+        //private readonly IMongoRepo<AbEvent> _events;
 
         /// <summary>
         /// Репозиторий вариантов
@@ -31,11 +31,10 @@ namespace WebAppTest.Control
         /// <summary>
         /// Конструктор с внедрением зависимостей
         /// </summary>
-        public ServiceControl(Facade facade, IStrategy<Variants> strategy, IMongoRepo<Variants> variantRepo, IMongoRepo<AbEvent> events)
+        public ServiceControl(Facade facade, IStrategy<Variants> strategy, IMongoRepo<Variants> variantRepo)
         {
             _facade = facade;
             _strategy = strategy;
-            _events = events;
         }
 
         /// <summary>
@@ -47,43 +46,25 @@ namespace WebAppTest.Control
             var result = new Dictionary<string, string>();
 
             // Получение тестов и их вариантов
-            var data = await _facade.GetTestsWithVariants();
+            var tests = await _facade.GetTests();
 
-            // Проход по каждому тесту
-            foreach (var pair in data)
+            foreach (var item in tests)
             {
-                var test = pair.Key;           // A/B тест
-                var variants = pair.Value;     // список вариантов
+                var test = item.Test;
 
-                // Если вариантов нет, то пропуск теста
+                var variants = item.Variants;
+
                 if (variants == null || variants.Count == 0)
                     continue;
 
-                // Выбор варианта через стратегию
-                //var selected = _strategy.Choose(variants, variants[0]);
-
-                var fallback = variants.FirstOrDefault();
-                if (fallback == null) continue;
-
+                var fallback = variants.First();
                 var selected = _strategy.Choose(variants, fallback);
 
-                // Сохраняем результат
                 result[test.Name] = selected.Name;
             }
 
             // Возвращает результата для API
             return result;
-        }
-
-        //
-        public async Task Convert(string test, string variant, string userId)
-        {
-            await _events.Create(new AbEvent { TestName = test, VariantName = variant, EventType = "conversion", Time = DateTime.UtcNow, UserId = userId });
-        }
-
-        public async Task<List<AbEvent>> GetEvents(string testName)
-        {
-            return await _events.Where(x => x.TestName == testName);
         }
     }
 }

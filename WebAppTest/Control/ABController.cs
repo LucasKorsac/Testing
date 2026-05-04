@@ -71,40 +71,39 @@ namespace WebAppTest.Control
         /// <summary>
         /// Фиксация события конверсии пользователя в тесте
         /// </summary>
-        [HttpPost("convert")]
-        public async Task<IActionResult> Convert([FromBody] ConvertRequest req)
-        {
-            await _service.Convert(req.TestName, req.VariantName, req.UserId);
-            return Ok();
-        }
+        //[HttpPost("convert")]
+        //public async Task<IActionResult> Convert([FromBody] ConvertRequest req)
+        //{
+        //    await _service.Convert(req.TestName, req.VariantName, req.UserId);
+        //    return Ok();
+        //}
 
         /// <summary>
         /// Получение статистики по тесту
         /// </summary>
-        [HttpGet("stats")]
-        public async Task<IActionResult> Stats(string testName)
-        {
-            var events = await _service.GetEvents(testName);
+        //[HttpGet("stats")]
+        //public async Task<IActionResult> Stats(string testName)
+        //{
+        //    var events = await _service.GetEvents(testName);
 
-            var result = events
-                .GroupBy(e => e.VariantName)
-                .Select(g =>
-                {
-                    // Количество показов варианта
-                    var shows = g.Count(x => x.EventType == "show");
+        //    var result = events
+        //        .GroupBy(e => e.VariantName)
+        //        .Select(g =>
+        //        {
+        //            // Количество показов варианта
+        //            var shows = g.Count(x => x.EventType == "show");
 
-                    // Количество конверсий варианта
-                    var conversions = g.Count(x => x.EventType == "conversion");
+        //            // Количество конверсий варианта
+        //            var conversions = g.Count(x => x.EventType == "conversion");
 
-                    // Конверсия
-                    return new
-                    {variant = g.Key, shows, conversions, conversionRate = shows == 0
-                            ? 0
-                            : conversions / (double)shows
-                    };
-                });
-
-            return Ok(result);
-        }
+        //            // Конверсия
+        //            return new
+        //            {variant = g.Key, shows, conversions, conversionRate = shows == 0
+        //                    ? 0
+        //                    : conversions / (double)shows
+        //            };
+        //        });
+        //return Ok(result);
+        //}
     }
 }

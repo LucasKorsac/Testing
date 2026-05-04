@@ -10,9 +10,7 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing
 {
-    /// <summary>
-    /// Сервис для работы с A/B тестами
-    /// </summary>
+    /// <summary> Сервис для работы с A/B тестами </summary>
     internal class TestService
     {
         private readonly Facade _facade;
@@ -26,9 +24,7 @@ namespace Testing
             _variantRepo = variantRepo;
         }
 
-        /// <summary>
-        /// Получение значений A/B теста для приложения
-        /// </summary>
+        /// <summary> Получение значений A/B теста для приложения </summary>
         public async Task<Dictionary<string, string>> GetAB(ObjectId applicationId)
         {
             var result = new Dictionary<string, string>();

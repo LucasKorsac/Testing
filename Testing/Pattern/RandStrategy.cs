@@ -8,9 +8,7 @@ namespace Testing.Pattern
 {
     internal class RandStrategy
     {
-        /// <summary>
-        /// Случайная стратегия выбора
-        /// </summary>
+        /// <summary> Случайная стратегия выбора </summary>
         public class RandomStrategy<T> : IStrategy<T>
         {
             private static readonly Random _rnd = new();
