@@ -3,12 +3,10 @@
 @{
     ViewData["Title"] = "Управление";
 }
-@using Testing
 
 <header>
     <nav>
         <ul>
-            <!--Ссылки на страницы-->
             <li><a href="/Prof">Профиль</a></li>
             <li><a href="/Index">Главная страница</a></li>
             <li><a href="/TestControl">Управление</a></li>
@@ -19,60 +17,90 @@
 
 <main>
 
-    <h1>Страница управления</h1>
+    <h1>Управление A/B тестами</h1>
 
-    <!-- вывод данных из модели -->
-    @* <div>
-        @Model.Test?.ToString()
-    </div> *@
-
-    <!-- Панель действий -->
     <section>
-        <button>Создать тест</button>
 
-        <label for="sort">Сортировка:</label>
-        <select id="sort" name="sort">
-            <option>По дате</option>
-            <option>По названию</option>
-            <option>По длительности</option>
-        </select>
+        <div class="actions">
+
+            <button class="btn btn-primary">
+                + Создать тест
+            </button>
+
+        </div>
+
     </section>
 
-    <hr>
-
-    <!-- Список тестов -->
     <section>
 
-        <div>
-            <h3>Название теста 1</h3>
-            <p>Продолжительность: m1 дн.</p>
+        <h2>Список тестов</h2>
 
-            <button>Внести изменения</button>
-            <button>Остановить</button>
-            <button>Удалить</button>
-        </div>
+        @if (Model.Tests.Any())
+        {
+            @foreach (var test in Model.Tests)
+            {
+                <section class="test-card">
 
-        <hr>
+                    <!-- LEFT -->
+                    <div class="test-info">
 
-        <div>
-            <h3>Название теста 2</h3>
-            <p>Продолжительность: m2 дн.</p>
+                        <h3>
+                            <a href="/Tests/@test.Id?mode=view">
+                                @test.Name
+                            </a>
+                        </h3>
 
-            <button>Внести изменения</button>
-            <button>Остановить</button>
-            <button>Удалить</button>
-        </div>
+                        <p class="test-description">
+                            @test.Description
+                        </p>
 
-        <hr>
+                        <span class="test-status @(test.Enabled ? "status-active" : "status-stopped")">
+                            @(test.Enabled ? "Активен" : "Остановлен")
+                        </span>
 
-        <div>
-            <h3>Название теста n</h3>
-            <p>Продолжительность: mN дн.</p>
+                    </div>
 
-            <button>Внести изменения</button>
-            <button>Остановить</button>
-            <button>Удалить</button>
-        </div>
+                    <!-- RIGHT -->
+                    <div class="actions">
+
+                        <a class="btn btn-secondary"
+                           href="/Tests/@test.Id?mode=view">
+                            Открыть
+                        </a>
+
+                        <a class="btn btn-primary"
+                           href="/Tests/@test.Id?mode=edit">
+                            Редактировать
+                        </a>
+
+                        <a class="btn btn-warning"
+                           href="/Tests/@test.Id?mode=stop">
+                            Остановить
+                        </a>
+
+                        <form method="post"
+                              asp-page-handler="Delete"
+                              asp-route-id="@test.Id">
+
+                            <button class="btn btn-danger"
+                                    type="submit"
+                                    onclick="return confirm('Удалить тест?')">
+
+                                Удалить
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </section>
+            }
+        }
+        else
+        {
+            <p>Нет тестов</p>
+        }
 
     </section>
 

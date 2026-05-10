@@ -7,78 +7,74 @@ using static Testing.Base.BaseMongo;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Конфигурация сервисов
-
-// Подключение Razor Pages
 builder.Services.AddRazorPages();
-
-// Подключение API контроллеров
 builder.Services.AddControllers();
-
-// Мониторинг, телеметрия
 builder.Services.AddApplicationInsightsTelemetry();
 
-//Регистрация базы 
-builder.Services.AddSingleton<IMongoClient>(_ => { return new MongoClient("mongodb://localhost:27017"); });
+/// =====================
+/// MongoDB
+/// =====================
+builder.Services.AddSingleton<IMongoClient>(_ =>
+    new MongoClient("mongodb://localhost:27017"));
 
-builder.Services.AddSingleton<IMongoDatabase>(sp => { var client = sp.GetRequiredService<IMongoClient>(); return client.GetDatabase("ABTesting"); });
+builder.Services.AddSingleton<IMongoDatabase>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    return client.GetDatabase("ABTesting");
+});
 
+/// =====================
+/// HTTP CLIENT
+/// =====================
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:5001/");
 });
-// Бизнес-слой
 
-
-// Сервис управления A/B тестами
+/// =====================
+/// REPOSITORY LAYER
+/// =====================
 builder.Services.AddScoped(typeof(IMongoRepo<>), typeof(MongoRepo<>));
 
-// Фасад над MongoDB репозиториями
-builder.Services.AddScoped<Facade>();
+/// =====================
+/// FACADE (FIXED - IMPORTANT)
+/// =====================
+builder.Services.AddScoped<Facade>(sp =>
+{
+    return new Facade(
+        sp.GetRequiredService<IMongoRepo<ABTests>>(),
+        sp.GetRequiredService<IMongoRepo<Variants>>(),
+        sp.GetRequiredService<IMongoRepo<AbResults>>(),
+        sp.GetRequiredService<IMongoRepo<Instances>>()
+    );
+});
 
-// Стратегия выбора вариантов
-
-
-// Основная стратегия: адаптивный выбор
-builder.Services.AddScoped<IStrategy<Variants>, AdaptiveStrategy>();
-
-// Слой адаптации
-
-// Класс, который строит пул вариантов на основе результатов
+/// =====================
+/// BUSINESS LAYER
+/// =====================
+builder.Services.AddScoped<ServiceControl>();
 builder.Services.AddScoped<Adaptation>();
 
+builder.Services.AddScoped<IStrategy<Variants>, AdaptiveStrategy>();
+builder.Services.AddScoped<IStatsBuilder, StatsBuilder>();
+builder.Services.AddScoped<IWeightStrategy, WeightStrategy>();
+
+builder.Services.AddScoped<IUiService, UiService>();
 
 var app = builder.Build();
 
-// HTTP обработка запросов
-
-// Обработка ошибок
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-
-    // HTTP Strict Transport Security (HSTS)
     app.UseHsts();
 }
 
-// Перенаправление HTTP к HTTPS
 app.UseHttpsRedirection();
-
-// Раздача статических файлов (wwwroot: HTML, JS, CSS)
 app.UseStaticFiles();
-
 app.UseRouting();
-
-// Авторизация
 app.UseAuthorization();
 
-// Маршрутизация
-
-// Razor Pages endpoints
 app.MapRazorPages();
-
-// API контроллеры
 app.MapControllers();
 
-// Запуск 
 app.Run();

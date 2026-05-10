@@ -4,55 +4,76 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing.Pattern
 {
-    /// <summary> DTO: тест и его варианты </summary>
-    public class TestWithVariants
-    {
-        public ABTests Test { get; set; }
-        public List<Variants> Variants { get; set; } = new();
-    }
-
-    /// <summary> Фасад для работы с A/B тестами </summary>
+    /// <summary> Фасад A/B тестов </summary>
     public class Facade
     {
         private readonly IMongoRepo<ABTests> _abTests;
         private readonly IMongoRepo<Variants> _variants;
+        private readonly IMongoRepo<AbResults> _results;
+        private readonly IMongoRepo<Instances> _instances;
 
-        public Facade(IMongoRepo<ABTests> abTests, IMongoRepo<Variants> variants)
+        public Facade(IMongoRepo<ABTests> abTests, IMongoRepo<Variants> variants, IMongoRepo<AbResults> results, IMongoRepo<Instances> instances)
         {
             _abTests = abTests;
             _variants = variants;
+            _results = results;
+            _instances = instances;
         }
 
-        /// <summary> Получение всех тестов </summary>
+        /// <summary> Все тесты </summary>
         public Task<List<ABTests>> GetAllTests()
         {
             return _abTests.GetAll();
         }
 
-        /// <summary> Получить тесты вместе с вариантами </summary>
+        /// <summary> Тесты + варианты </summary>
         public async Task<List<TestWithVariants>> GetTests()
         {
             var tests = await _abTests.GetAll();
             var variants = await _variants.GetAll();
 
-            var variantsByTestId = variants
+            var grouped = variants
                 .GroupBy(v => v.AbTestId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            var result = new List<TestWithVariants>(tests.Count);
+            var result = new List<TestWithVariants>();
 
-            foreach (var test in tests)
+            foreach (var t in tests)
             {
-                variantsByTestId.TryGetValue(test.Id, out var testVariants);
+                grouped.TryGetValue(t.Id, out var list);
 
                 result.Add(new TestWithVariants
                 {
-                    Test = test,
-                    Variants = testVariants ?? new List<Variants>()
+                    Test = t,
+                    Variants = list ?? new List<Variants>()
                 });
             }
 
             return result;
+        }
+
+        /// <summary> Результаты по тесту </summary>
+        public async Task<List<AbResults>> GetResults(ObjectId testId)
+        {
+            var variants = await _variants.Where(v => v.AbTestId == testId);
+            var ids = variants.Select(v => v.Id).ToList();
+
+            return await _results.Where(r => ids.Contains(r.VariantId));
+        }
+
+        public async Task<ABTests?> GetById(ObjectId id)
+        {
+            var tests = await _abTests.GetAll();
+            return tests.FirstOrDefault(t => t.Id == id);
+        }
+        public async Task UpdateTest(ABTests test)
+        {
+            await _abTests.Update(test.Id, test);
+        }
+
+        public async Task DeleteTest(ObjectId id)
+        {
+            await _abTests.Delete(id);
         }
     }
 }

@@ -3,14 +3,10 @@
 @{
     ViewData["Title"] = "Главная";
 }
-@using Testing
 
-
-<!-- Верхняя панель -->
 <header>
     <nav>
         <ul>
-            <!--Ссылки на страницы-->
             <li><a href="/Prof">Профиль</a></li>
             <li><a href="/Index">Главная страница</a></li>
             <li><a href="/TestControl">Управление</a></li>
@@ -19,43 +15,99 @@
     </nav>
 </header>
 
-<!-- Основной контент -->
 <main>
+
     <h1>Главная страница</h1>
 
+    <!-- Аналитика -->
+
     <section>
-        <h2>Информация о тестах</h2>
 
-        <!-- вывод из модели -->
-        @* <div>
-        @Model.Test?.ToString()
-        </div> *@
+        <h2>Аналитика</h2>
 
-        <!--Общая информация о проведении тестирования-->
-        <ul>
-            <li>Кол-во тестов в год/месяц/неделю</li>
-            <li>Кол-во пользователей за период</li>
-            <li>...</li>
-            <li>N пункт списка</li>
-        </ul>
+        <div class="stats-grid">
 
-        <p>Рекомендации по проведению тестирования</p>
+            <div class="stat-card">
+                <span>Активные тесты</span>
+                <strong>@Model.ActiveCount</strong>
+            </div>
 
-        <!--Окно для отображения графиков-->
-        <div>
-            <p>[Здесь будет график или изображение]</p>
+            <div class="stat-card">
+                <span>Всего тестов</span>
+                <strong>@Model.TotalTests</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Всего вариантов</span>
+                <strong>@Model.TotalVariants</strong>
+            </div>
+
         </div>
+
     </section>
 
-    <aside>
-        <!--Список с документами/таблицами-->
-        <h2>Список документов</h2>
-        
-        <select>
-            <option>Документ 1</option>
-            <option>Документ 2</option>
-            <option>Документ 3</option>
-        </select>
-    </aside>
+    <!-- График -->
+
+    <section>
+
+        <h2>Активность тестов</h2>
+
+        <div class="chart-container">
+
+            <canvas id="testsChart"></canvas>
+
+        </div>
+
+    </section>
+
+    <!-- Активные тесты -->
+
+    <section>
+
+        <h2>Активные тесты</h2>
+
+        @if (Model.ActiveTests.Any())
+        {
+            <div class="tests-list">
+
+                @foreach (var t in Model.ActiveTests)
+                {
+                    <a class="test-item"
+                       href="/Tests/@t.Key">
+
+                        <div>
+
+                            <strong>@t.Key</strong>
+
+                            <p>
+                                Выбранный вариант:
+                                @t.Value
+                            </p>
+
+                        </div>
+
+                    </a>
+                }
+
+            </div>
+        }
+        else
+        {
+            <p>Нет активных тестов</p>
+        }
+
+    </section>
 
 </main>
+
+<!-- index.js -->
+
+<script src="https://cdn.jsdelivr.net/npm/index.js"></script>
+
+<script>
+
+    window.testsChartData = {labels: @Html.Raw(Json.Serialize(Model.ChartLabels)), values: @Html.Raw(Json.Serialize(Model.ChartValues))};
+
+</script>
+
+<script src="~/js/index-chart.js"></script>

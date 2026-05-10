@@ -9,17 +9,13 @@ namespace WebAppTest.Control
         private readonly HttpClient _http;
 
         public ApiClient(HttpClient http)
-        {
-            _http = http;
-        }
+        { _http = http; }
 
         /// <summary> Получение вариантов тестов (run) </summary>
         public async Task<Dictionary<string, string>?> RunAsync(string appId)
         {
             var response = await _http.PostAsJsonAsync("api/ab/run", new
-            {
-                AppId = appId
-            });
+            { AppId = appId });
 
             return await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
         }
@@ -28,11 +24,7 @@ namespace WebAppTest.Control
         public async Task ConvertAsync(string test, string variant, string userId)
         {
             await _http.PostAsJsonAsync("api/ab/convert", new
-            {
-                TestName = test,
-                VariantName = variant,
-                UserId = userId
-            });
+            { TestName = test, VariantName = variant, UserId = userId });
         }
 
         /// <summary> Получение статистики </summary>

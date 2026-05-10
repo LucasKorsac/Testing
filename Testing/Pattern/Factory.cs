@@ -6,32 +6,33 @@ namespace Testing.Pattern
     /// <summary> Фабрика репозиториев базы </summary>
     public interface IMongoFactory
     {
-        /// <summary> Создание репозитория для указанной сущности </summary>
         IMongoRepo<T> Create<T>() where T : class;
     }
 
-    /// <summary> Реализация фабрики MongoDB репозиториев. Слой абстракции над созданием репозиториев </summary>
+    /// <summary> Реализация фабрики MongoDB репозиториев </summary>
     public class MongoFactory : IMongoFactory
     {
-        /// <summary> Подключение к базе MongoDB </summary>
+        /// <summary> подключение к MongoDB </summary>
         private readonly IMongoDatabase _database;
 
-        /// <summary> Конструктор фабрики </summary>
-        public MongoFactory(IMongoDatabase database)
+        /// <summary> логгер для декоратора </summary>
+        private readonly RepositoryLogger _logger;
+
+        public MongoFactory(IMongoDatabase database, RepositoryLogger logger)
         {
             _database = database;
+            _logger = logger;
         }
 
         /// <summary> Создание репозитория с подключением декоратора логирования </summary>
         public IMongoRepo<T> Create<T>() where T : class
         {
-            // Создание базового репозитория
+            // базовый репозиторий
             var repo = new MongoRepo<T>(_database);
 
-            // Оборот в декоратор
-            var loggedRepo = new LogMongoRepo<T>(repo);
+            // декоратор логирования (ВАЖНО: у тебя он называется Decorator)
+            var loggedRepo = new Decorator<T>(repo, _logger);
 
-            // Возврат репозитория
             return loggedRepo;
         }
     }

@@ -1,5 +1,4 @@
 ﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using System.Linq.Expressions;
 using Testing.Pattern;
@@ -7,86 +6,105 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing.Base
 {
-    /// <summary> Контекст MongoDB </summary>
+    /// <summary> Контекст подключения к MongoDB </summary>
     public static class MongoContext
     {
+        /// <summary> Mongo клиент </summary>
         private static readonly MongoClient _client = new MongoClient("mongodb://localhost:27017");
 
+        /// <summary> База данных </summary>
         private static readonly IMongoDatabase _database = _client.GetDatabase("ABTesting");
 
+        /// <summary> Получение объекта базы данных </summary>
+        public static IMongoDatabase Database => _database;
+
+        /// <summary> Получение коллекции </summary>
         public static IMongoCollection<T> GetCollection<T>(string name)
         {
             return _database.GetCollection<T>(name);
         }
     }
 
-    /// <summary> Коллекции </summary>
+    // Репозитории
+
+    /// <summary> Хранилище репозиториев </summary>
     public class Repos
     {
-        public IMongoRepo<Companies> Company { get; }
         public IMongoRepo<Roles> Role { get; }
         public IMongoRepo<Developers> Developer { get; }
         public IMongoRepo<Applications> Application { get; }
         public IMongoRepo<MetricTypes> MetricType { get; }
         public IMongoRepo<Metrics> Metric { get; }
         public IMongoRepo<Instances> Instance { get; }
-        public IMongoRepo<Attributes> Attribute { get; }
+        public IMongoRepo<EquipParam> EquipParam { get; }
         public IMongoRepo<Values> Value { get; }
-        public IMongoRepo<ABDescriptions> Description { get; }
         public IMongoRepo<ABTests> AbTest { get; }
         public IMongoRepo<Variants> Variant { get; }
         public IMongoRepo<AbResults> Result { get; }
+        public IMongoRepo<DevelopRoleApplic> DevRolApp { get; }
 
-        public Repos(IMongoRepo<Companies> company, IMongoRepo<Roles> role, IMongoRepo<Developers> developer, IMongoRepo<Applications> application,
-            IMongoRepo<MetricTypes> metricType, IMongoRepo<Metrics> metric, IMongoRepo<Instances> instance, IMongoRepo<Attributes> attribute,
-            IMongoRepo<Values> value, IMongoRepo<ABDescriptions> description, IMongoRepo<ABTests> abTest, IMongoRepo<Variants> variant,
-            IMongoRepo<AbResults> result)
+        /// <summary> Конструктор репозиториев </summary>
+        public Repos(IMongoDatabase db)
         {
-            Company = company;
-            Role = role;
-            Developer = developer;
-            Application = application;
-            MetricType = metricType;
-            Metric = metric;
-            Instance = instance;
-            Attribute = attribute;
-            Value = value;
-            Description = description;
-            AbTest = abTest;
-            Variant = variant;
-            Result = result;
+            Role = new MongoRepo<Roles>(db);
+
+            Developer = new MongoRepo<Developers>(db);
+
+            Application = new MongoRepo<Applications>(db);
+
+            MetricType = new MongoRepo<MetricTypes>(db);
+
+            Metric = new MongoRepo<Metrics>(db);
+
+            Instance = new MongoRepo<Instances>(db);
+
+            EquipParam = new MongoRepo<EquipParam>(db);
+
+            Value = new MongoRepo<Values>(db);
+
+            AbTest = new MongoRepo<ABTests>(db);
+
+            Variant = new MongoRepo<Variants>(db);
+
+            Result = new MongoRepo<AbResults>(db);
+
+            DevRolApp = new MongoRepo<DevelopRoleApplic>(db);
         }
     }
 
     /// <summary> MongoDB репозиторий </summary>
-    public class MongoRepo<T> : IMongoRepo<T> where T : class
+    public class MongoRepo<T> : IMongoRepo<T>
+        where T : class
     {
-        /// <summary> Коллекция </summary>
+        /// <summary> Mongo коллекция </summary>
         private readonly IMongoCollection<T> _collection;
 
-        /// <summary> Инициализация репозитория по имени коллекции </summary>
-
+        /// <summary> Конструктор </summary>
         public MongoRepo(IMongoDatabase db)
         {
             _collection = db.GetCollection<T>(typeof(T).Name);
         }
 
-        /// <summary> LINQ-доступ к коллекци </summary>
-        public IQueryable<T> Query => _collection.AsQueryable();
+        /// <summary> LINQ запросы </summary>
+        public IQueryable<T> Query =>_collection.AsQueryable();
 
-        //Запросы
+        // GET
 
         /// <summary> Получение документа по ObjectId </summary>
         public async Task<T?> GetById(ObjectId id, CancellationToken ct = default)
         {
             var filter = Builders<T>.Filter.Eq("_id", id);
-            return await _collection.Find(filter).FirstOrDefaultAsync(ct);
+
+            return await _collection
+                .Find(filter)
+                .FirstOrDefaultAsync(ct);
         }
 
-        /// <summary> Получение документа по Id </summary>
+        /// <summary> Получение документа по string id </summary>
         public async Task<T?> GetById(string id, CancellationToken ct = default)
         {
-            if (!ObjectId.TryParse(id, out var objectId)) return null;
+            if (!ObjectId.TryParse(id, out var objectId))
+                return null;
 
             return await GetById(objectId, ct);
         }
@@ -94,45 +112,61 @@ namespace Testing.Base
         /// <summary> Получение первого документа по условию </summary>
         public async Task<T?> FirstOrDefault(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
-            return await _collection.Find(filter).FirstOrDefaultAsync(ct);
+            return await _collection
+                .Find(filter)
+                .FirstOrDefaultAsync(ct);
         }
 
-        /// <summary> Получение списка по условию </summary>
+        /// <summary> Получение списка документов </summary>
         public async Task<List<T>> Where(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
-            return await _collection.Find(filter).ToListAsync(ct);
+            return await _collection
+                .Find(filter)
+                .ToListAsync(ct);
         }
 
-        /// <summary> Получение всех документов коллекции </summary>
+        /// <summary> Получение всех документов </summary>
         public async Task<List<T>> GetAll(CancellationToken ct = default)
         {
-            return await _collection.Find(Builders<T>.Filter.Empty).ToListAsync(ct);
+            return await _collection
+                .Find(Builders<T>.Filter.Empty)
+                .ToListAsync(ct);
         }
 
-        // Создание
+        // CREATE
 
-        /// <summary> Создание одного документа </summary>
+        /// <summary> Добавление документа </summary>
         public async Task Create(T entity, CancellationToken ct = default)
         {
             await _collection.InsertOneAsync(entity, cancellationToken: ct);
         }
 
-        /// <summary> Массовое создание документов </summary>
+        /// <summary> Массовое добавление </summary>
         public async Task CreateMany(IEnumerable<T> entities, CancellationToken ct = default)
         {
             await _collection.InsertManyAsync(entities, cancellationToken: ct);
         }
 
-        // Обновления
+        // UPDATE
 
-        /// <summary> Полная замена документа по ObjectId, перезапись </summary>
-        public async Task Update(ObjectId id, T entity, CancellationToken ct = default)
+        /// <summary> Полная замена документа </summary>
+        public async Task<bool> Replace(ObjectId id, T entity, CancellationToken ct = default)
         {
             var filter = Builders<T>.Filter.Eq("_id", id);
-            await _collection.ReplaceOneAsync(filter, entity, cancellationToken: ct);
+
+            var result = await _collection.ReplaceOneAsync(filter, entity, cancellationToken: ct);
+
+            return result.IsAcknowledged &&
+                   result.ModifiedCount > 0;
         }
 
-        /// <summary> Перегрузка Update для string id </summary>
+        /// <summary> Полное обновление документа </summary>
+        public async Task Update(ObjectId id, T entity, CancellationToken ct = default)
+        {
+            await Replace(id, entity, ct);
+        }
+
+        /// <summary> Полное обновление по string id </summary>
         public async Task Update(string id, T entity, CancellationToken ct = default)
         {
             if (!ObjectId.TryParse(id, out var objectId))
@@ -141,28 +175,41 @@ namespace Testing.Base
             await Update(objectId, entity, ct);
         }
 
-        /// <summary> Частичное обновление </summary>
+        /// <summary> Частичное обновление документа </summary>
         public async Task<bool> Update(ObjectId id, UpdateDefinition<T> update, CancellationToken ct = default)
         {
             var filter = Builders<T>.Filter.Eq("_id", id);
 
             var result = await _collection.UpdateOneAsync(filter, update, cancellationToken: ct);
 
-            return result.IsAcknowledged && result.ModifiedCount > 0;
+            return result.IsAcknowledged &&
+                   result.ModifiedCount > 0;
         }
 
-        // Удаление
+        // DELETE
 
-        /// <summary> Удаление по ObjectId </summary>
+        /// <summary> Удаление документа </summary>
         public async Task Delete(ObjectId id, CancellationToken ct = default)
         {
-            await _collection.DeleteOneAsync(Builders<T>.Filter.Eq("_id", id), ct);
+            var filter = Builders<T>.Filter.Eq("_id", id);
+
+            await _collection.DeleteOneAsync(filter, ct);
         }
 
-        /// <summary> Удаление нескольких документов по условию </summary>
+        /// <summary> Удаление документа по string id </summary>
+        public async Task Delete(string id, CancellationToken ct = default)
+        {
+            if (!ObjectId.TryParse(id, out var objectId))
+                return;
+
+            await Delete(objectId, ct);
+        }
+
+        /// <summary> Удаление по условию </summary>
         public async Task<long> DeleteMany(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
             var result = await _collection.DeleteManyAsync(filter, ct);
+
             return result.DeletedCount;
         }
 
@@ -172,22 +219,17 @@ namespace Testing.Base
             await _collection.DeleteManyAsync(Builders<T>.Filter.Empty, ct);
         }
 
-        /// <summary> Удаление по string </summary>
-        public async Task Delete(string id, CancellationToken ct = default)
-        {
-            if (!ObjectId.TryParse(id, out var objectId))
-                return;
+        // HELPERS
 
-            await Delete(objectId, ct);
-        }
-
-        /// <summary> Проверка существования документа по условию </summary>
+        /// <summary> Проверка существования </summary>
         public async Task<bool> Exists(Expression<Func<T, bool>> filter, CancellationToken ct = default)
         {
-            return await _collection.Find(filter).AnyAsync(ct);
+            return await _collection
+                .Find(filter)
+                .AnyAsync(ct);
         }
 
-        /// <summary> Подсчет документов </summary>
+        /// <summary> Подсчёт документов </summary>
         public async Task<long> Count(Expression<Func<T, bool>>? filter = null, CancellationToken ct = default)
         {
             filter ??= _ => true;
@@ -195,15 +237,62 @@ namespace Testing.Base
             return await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
         }
 
-        /// <summary> Полная замена документа </summary>
-        public async Task<bool> Replace(ObjectId id, T entity, CancellationToken ct = default)
-        {
-            var result = await _collection.ReplaceOneAsync(
-                Builders<T>.Filter.Eq("_id", id),
-                entity,
-                cancellationToken: ct);
 
-            return result.IsAcknowledged && result.ModifiedCount > 0;
+        // Доп
+
+
+        /// <summary> Получение отсортированного списка </summary>
+        public async Task<List<T>> GetSorted(SortDefinition<T> sort, CancellationToken ct = default)
+        {
+            return await _collection
+                .Find(Builders<T>.Filter.Empty)
+                .Sort(sort)
+                .ToListAsync(ct);
+        }
+
+        /// <summary> Получение части документов </summary>
+        public async Task<List<T>> GetPaged(int page, int pageSize, CancellationToken ct = default)
+        {
+            if (page < 1)
+                page = 1;
+
+            return await _collection
+                .Find(Builders<T>.Filter.Empty)
+                .Skip((page - 1) * pageSize)
+                .Limit(pageSize)
+                .ToListAsync(ct);
+        }
+
+        /// <summary> Получение первого или создание нового </summary>
+        public async Task<T?> FirstOrCreate(Expression<Func<T, bool>> filter, T entity, CancellationToken ct = default)
+        {
+            var existing = await FirstOrDefault(filter, ct);
+
+            if (existing != null)
+                return existing;
+
+            await Create(entity, ct);
+
+            return entity;
+        }
+
+        /// <summary> Получение случайного документа </summary>
+        public async Task<T?> Random(CancellationToken ct = default)
+        {
+            var count = await Count(ct: ct);
+
+            if (count == 0)
+                return null;
+
+            var rnd = new Random();
+
+            var index = rnd.Next(0, (int)count);
+
+            return await _collection
+                .Find(Builders<T>.Filter.Empty)
+                .Skip(index)
+                .Limit(1)
+                .FirstOrDefaultAsync(ct);
         }
     }
 }

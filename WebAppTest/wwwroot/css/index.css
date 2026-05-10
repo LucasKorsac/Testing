@@ -1,0 +1,37 @@
+body {
+    font-family: Arial;
+    background: #f5f7fb;
+    margin: 0;
+    color: #111827;
+}
+
+.nav ul {
+    display: flex;
+    gap: 15px;
+    list-style: none;
+    padding: 15px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.nav a {
+    color: #374151;
+    text-decoration: none;
+}
+
+    .nav a:hover {
+        color: #2563eb;
+    }
+
+.container {
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}

@@ -1,95 +1,53 @@
 ﻿using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Testing.Base;
+using Testing.Pattern;
 using static Testing.Base.BaseMongo;
 
 namespace Testing
 {
-    /// <summary> Адаптивный алгоритм перераспределения вероятностей (MAB-подобный) </summary>
+    /// <summary> Адаптивный сервис построения пула вариантов </summary>
     public class Adaptation
     {
-        private readonly IMongoRepo<Variants> _variantRepo;
-        private readonly IMongoRepo<AbResults> _resultRepo;
-        private readonly IMongoRepo<Values> _valueRepo;
+        private readonly IStatsBuilder _statsBuilder;
+        private readonly IWeightStrategy _weightStrategy;
 
-        public Adaptation(IMongoRepo<Variants> variantRepo, IMongoRepo<AbResults> resultRepo, IMongoRepo<Values> valueRepo)
+        public Adaptation(IStatsBuilder statsBuilder, IWeightStrategy weightStrategy)
         {
-            _variantRepo = variantRepo;
-            _resultRepo = resultRepo;
-            _valueRepo = valueRepo;
+            _statsBuilder = statsBuilder;
+            _weightStrategy = weightStrategy;
         }
 
-        /// <summary>
-        /// Возврат пула вариантов с учетом весов
-        /// </summary>
-        public async Task<List<Variants>> BuildPool(ObjectId testId, int minCount = 5, double k = 1.0)
-        {   // Получение вариантов теста
-            var variants = await _variantRepo.Where(v => v.AbTestId == testId);
-            if (variants.Count == 0) return new List<Variants>();
+        /// <summary> Построение вероятностного пула вариантов </summary>
+        public async Task<List<Variants>> BuildPool(ObjectId testId, int minCount = 5)
+        {
+            var stats = await _statsBuilder.Build(testId);
 
-            var stats = new List<VariantStat>();
+            if (stats.Count == 0)
+                return new List<Variants>();
 
-            // Сбор данных
-            foreach (var variant in variants)
-            {   var results = await _resultRepo.Where(r => r.VariantId == variant.Id);
-                var instanceIds = results.Select(r => r.InstanceId).ToList();
-                var values = await _valueRepo.Where(v => instanceIds.Contains(v.InstanceId));
-
-                if (values.Count == 0) continue;
-
-                var avg = values.Average(v => v.MetricValue);
-
-                stats.Add(new VariantStat{Variant = variant, Count = values.Count, Average = avg});
-            }
-
-            // Фильтрация 
+            // фильтр по минимальной выборке
             stats = stats
                 .Where(s => s.Count >= minCount)
+                .OrderByDescending(s => s.Average)
                 .ToList();
 
-            if (stats.Count == 0) return new List<Variants>();
+            if (stats.Count == 0)
+                return new List<Variants>();
 
-            // Ранжирование по возрастанию
-            stats = stats
-                .OrderBy(s => s.Average)
-                .ToList();
+            int total = stats.Count;
 
-            int n = stats.Count;
-
-            // Расчет весов
-            for (int i = 0; i < stats.Count; i++)
-            {
-                int index = i + 1; // чтобы не было 0
-                var s = stats[i];
-                double weight = Math.Pow(index, 2) * Math.Sqrt(s.Count) / (k * n);
-
-                // минимум 1, чтобы вариант не исчез
-                s.Weight = Math.Max(1, (int)Math.Round(weight));
-            }
-
-            // Формирование пула
             var pool = new List<Variants>();
 
-            foreach (var s in stats)
-            {for (int i = 0; i < s.Weight; i++)
-                { pool.Add(s.Variant); }}
-            return pool;
-        }
+            for (int i = 0; i < stats.Count; i++)
+            {
+                var s = stats[i];
 
-        /// <summary>
-        /// Внутренняя модель статистики
-        /// </summary>
-        private class VariantStat
-        {
-            public Variants Variant { get; set; }
-            public int Count { get; set; }
-            public double Average { get; set; }
-            public int Weight { get; set; }
+                int weight = _weightStrategy.CalculateWeight(index: i + 1, count: s.Count, total: total, average: s.Average);
+
+                for (int j = 0; j < weight; j++)
+                    pool.Add(s.Variant);
+            }
+
+            return pool;
         }
     }
 }
-

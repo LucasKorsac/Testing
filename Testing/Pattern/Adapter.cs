@@ -3,41 +3,47 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing.Pattern
 {
-    // Адаптер для преобразования модели A/B теста в DTO и обратно
+    /// <summary> Адаптер для преобразования модели A/B теста в DTO </summary>
     public class Adapter
     {
-        // DTO используется для передачи данных наружу (например, в API или UI)
+        /// <summary> DTO для передачи данных </summary>
         public class AbTestDto
         {
-            public string Id { get; set; }
-            public string Name { get; set; }
+            public string Id { get; set; } = "";
 
-            public string ApplicationId { get; set; }
+            public string Name { get; set; } = "";
 
-            public string DescriptionId { get; set; }
+            public string Description { get; set; } = "";
+
+            public bool Enabled { get; set; }
         }
 
+        /// <summary> Mapper между моделью и DTO </summary>
         public static class AbTestMapper
         {
-            // Преобразование из доменной модели в DTO
-            public static AbTestDto ToDto(ABTests model)
+            /// <summary> Преобразование модели в DTO </summary>
+            public static AbTestDto? ToDto(ABTests model)
             {
-                if (model == null) return null;
+                if (model == null)
+                    return null;
 
                 return new AbTestDto
-                {
-                    Id = model.Id.ToString(), Name = model.Name, DescriptionId = model.DescriptionId.ToString()
-                };
+                {Id = model.Id.ToString(), Name = model.Name, Description = model.Description, Enabled = model.Enabled};
             }
 
-            // Преобразование из DTO в доменную модель
-            public static ABTests ToModel(AbTestDto dto)
+            /// <summary> Преобразование DTO в модель </summary>
+            public static ABTests? ToModel(AbTestDto dto)
             {
-                if (dto == null) return null;
+                if (dto == null)
+                    return null;
 
                 return new ABTests
                 {
-                    Id = ObjectId.Parse(dto.Id), Name = dto.Name, DescriptionId = ObjectId.Parse(dto.DescriptionId)
+                    Id = string.IsNullOrWhiteSpace(dto.Id)
+                        ? ObjectId.GenerateNewId()
+                        : ObjectId.Parse(dto.Id),
+
+                    Name = dto.Name, Description = dto.Description, Enabled = dto.Enabled
                 };
             }
         }

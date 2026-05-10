@@ -1,4 +1,91 @@
-﻿@page
+﻿@page "{id}"
 @model WebAppTest.Pages.TestsModel
 @{
+    ViewData["Title"] = "Тест";
 }
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="/Prof">Профиль</a></li>
+            <li><a href="/Index">Главная</a></li>
+            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/Manage">Справка</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="page-container">
+
+    <section class="hero-card">
+
+        <div class="hero-top">
+            <div>
+                <h1>@Model.TestName</h1>
+                <p class="muted-text">@Model.Description</p>
+            </div>
+
+            <span class="status-badge @(Model.IsActive ? "status-active" : "status-stopped")">
+                @(Model.IsActive ? "Активен" : "Остановлен")
+            </span>
+        </div>
+
+        <div class="hero-actions">
+
+            <button class="btn btn-primary"
+                    onclick="editTest()">
+                Редактировать
+            </button>
+
+            @if (Model.IsActive)
+            {
+                <button class="btn btn-warning"
+                        onclick="stopTest()">
+                    Остановить
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-success"
+                        onclick="resumeTest()">
+                    Возобновить
+                </button>
+            }
+
+            <button class="btn btn-danger"
+                    onclick="deleteTest()">
+                Удалить
+            </button>
+
+        </div>
+
+    </section>
+
+    <section class="content-card">
+
+        <h2>Метрики</h2>
+
+        <table class="modern-table">
+            @foreach (var m in Model.TableData)
+            {
+                <tr>
+                    <td>@m.Key</td>
+                    <td>@m.Value</td>
+                </tr>
+            }
+        </table>
+
+    </section>
+
+    <a class="btn btn-secondary" href="/TestControl">
+        ← Назад
+    </a>
+
+</main>
+
+<form id="actionForm" method="post">
+    <input type="hidden" name="id" value="@RouteData.Values["id"]" />
+    <input type="hidden" id="actionMode" name="mode" />
+</form>
+
+<script src="/js/tests.js"></script>

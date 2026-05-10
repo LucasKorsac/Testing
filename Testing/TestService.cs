@@ -1,46 +1,43 @@
 ﻿using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Testing.Base;
 using Testing.Pattern;
-using static System.Net.Mime.MediaTypeNames;
 using static Testing.Base.BaseMongo;
 
 namespace Testing
 {
-    /// <summary> Сервис для работы с A/B тестами </summary>
-    internal class TestService
+    /// <summary> Сервис выполнения A/B тестов </summary>
+    public class TestService
     {
         private readonly Facade _facade;
         private readonly IStrategy<Variants> _strategy;
-        private readonly IMongoRepo<Variants> _variantRepo;
 
-        public TestService(Facade facade, IStrategy<Variants> strategy, IMongoRepo<Variants> variantRepo)
+        public TestService(Facade facade, IStrategy<Variants> strategy)
         {
             _facade = facade;
             _strategy = strategy;
-            _variantRepo = variantRepo;
         }
 
-        /// <summary> Получение значений A/B теста для приложения </summary>
-        public async Task<Dictionary<string, string>> GetAB(ObjectId applicationId)
+        /// <summary> Получение результатов A/B тестов для экземпляра приложения </summary>
+        public async Task<Dictionary<string, string>> GetAB(string instanceId)
         {
+            if (!ObjectId.TryParse(instanceId, out _))
+                throw new ArgumentException("Invalid instance id");
+
             var result = new Dictionary<string, string>();
 
-            var tests = await _facade.GetAllTests();
+            var tests = await _facade.GetTests();
 
-            foreach (var test in tests)
+            foreach (var item in tests)
             {
-                var variants = await _variantRepo.Where(x => x.AbTestId == test.Id);
+                var variants = item.Variants ?? new List<Variants>();
 
-                if (variants.Count == 0)
+                if (!item.Test.Enabled || variants.Count == 0)
                     continue;
 
-                var selected = _strategy.Choose(variants, variants[0]);
+                var fallback = variants[0];
 
-                result[test.Name] = selected.Name;
+                var selected = _strategy.Choose(variants, fallback);
+
+                result[item.Test.Name] = selected.Name;
             }
 
             return result;

@@ -13,32 +13,29 @@ namespace WebAppTest.Control
             _http = http;
         }
 
-        /// <summary> Получение вариантов тестов (run) </summary>
         public async Task<Dictionary<string, string>?> RunAsync(string appId)
         {
-            var response = await _http.PostAsJsonAsync("api/ab/run", new
-            {
-                AppId = appId
-            });
+            var response = await _http.PostAsJsonAsync(
+                "api/ab/run",
+                new { AppId = appId });
+
+            if (!response.IsSuccessStatusCode)
+                return null;
 
             return await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
         }
 
-        /// <summary> Отправка конверсии </summary>
         public async Task ConvertAsync(string test, string variant, string userId)
         {
-            await _http.PostAsJsonAsync("api/ab/convert", new
-            {
-                TestName = test,
-                VariantName = variant,
-                UserId = userId
-            });
+            await _http.PostAsJsonAsync(
+                "api/ab/convert",
+                new { TestName = test, VariantName = variant, UserId = userId });
         }
 
-        /// <summary> Получение статистики </summary>
         public async Task<List<object>?> GetStats(string testName)
         {
-            return await _http.GetFromJsonAsync<List<object>>($"api/ab/stats?testName={testName}");
+            return await _http.GetFromJsonAsync<List<object>>(
+                $"api/ab/stats?testName={testName}");
         }
     }
 }

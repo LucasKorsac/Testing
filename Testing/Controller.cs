@@ -1,26 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Testing
 {
-    // Контроллер для хранения текущих A/B тестов
     internal class Controller
     {
-        public static readonly Controller I = new();
+        private static readonly Lazy<Controller> _instance = new(() => new Controller());
 
-        // Словарь текущих тестов: ключ — имя теста, значение
-        public Dictionary<string, int> CurrentTests { get; private set; } = new();
+        public static Controller I => _instance.Value;
 
-        // Инициализация контроллера данными A/B тестов
-        public void Init(Dictionary<string, int> ab)
+        private readonly ReaderWriterLockSlim _lock = new();
+
+        private Dictionary<string, int> _currentTests = new();
+
+        public Dictionary<string, int> CurrentTests
         {
-            CurrentTests = ab;
+            get
+            {
+                _lock.EnterReadLock();
+                try
+                {
+                    return new Dictionary<string, int>(_currentTests);
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
+                }
+            }
         }
 
-        // Получение значения теста по имени если тест не найден — возвращается 0
+        public void Init(Dictionary<string, int> ab)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                _currentTests = new Dictionary<string, int>(ab);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
         public int Get(string name)
         {
-            return CurrentTests.TryGetValue(name, out var val) ? val : 0;
+            _lock.EnterReadLock();
+            try
+            {
+                return _currentTests.TryGetValue(name, out var val) ? val : 0;
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
         }
     }
 }

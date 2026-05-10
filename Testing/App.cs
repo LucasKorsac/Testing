@@ -1,12 +1,8 @@
-﻿using MongoDB.Bson;
-using System;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Testing.Base;
 using Testing.Data;
 using Testing.Pattern;
-using static System.Net.Mime.MediaTypeNames;
 using static Testing.Base.BaseMongo;
-using static Testing.Pattern.RandStrategy;
 
 namespace Testing
 {
@@ -14,7 +10,6 @@ namespace Testing
     {
         private readonly IMongoFactory _factory;
 
-        //Прохождение через DI
         public App(IMongoFactory factory)
         {
             _factory = factory;
@@ -24,20 +19,47 @@ namespace Testing
         {
             Console.WriteLine("Starting app...");
 
-            await SinteticData.Init(_factory.Create<Companies>(),_factory.Create<Roles>(),_factory.Create<Developers>(),
-            _factory.Create<Applications>(), _factory.Create<MetricTypes>(), _factory.Create<Metrics>(), _factory.Create<Instances>(),
-            _factory.Create<Attributes>(), _factory.Create<Values>(), _factory.Create<ABDescriptions>(), _factory.Create<ABTests>(),
-            _factory.Create<Variants>(), _factory.Create<AbResults>());
+            // 🔥 Инициализация базы (НЕ ТРОГАЕМ)
+            await SinteticData.Init(
+                _factory.Create<Roles>(),
+                _factory.Create<Developers>(),
+                _factory.Create<DevelopRoleApplic>(),
+                _factory.Create<Applications>(),
+                _factory.Create<MetricTypes>(),
+                _factory.Create<Metrics>(),
+                _factory.Create<Instances>(),
+                _factory.Create<EquipParam>(),
+                _factory.Create<Values>(),
+                _factory.Create<ABTests>(),
+                _factory.Create<Variants>(),
+                _factory.Create<AbResults>()
+            );
 
+            // Репозитории
             var abTestRepo = _factory.Create<ABTests>();
             var variantRepo = _factory.Create<Variants>();
             var resultRepo = _factory.Create<AbResults>();
             var valuesRepo = _factory.Create<Values>();
+            var instanceRepo = _factory.Create<Instances>(); // ← добавили
 
-            var facade = new Facade(abTestRepo, variantRepo);
-            var adaptation = new Adaptation(variantRepo, resultRepo, valuesRepo);
+            // 🔥 Facade (ИСПРАВЛЕНО: теперь 4 параметра)
+            var facade = new Facade(
+                abTestRepo,
+                variantRepo,
+                resultRepo,
+                instanceRepo
+            );
 
-            // Получение теста
+            // Статистика
+            var statsBuilder = new StatsBuilder(
+                variantRepo,
+                resultRepo,
+                valuesRepo
+            );
+
+            var weightStrategy = new WeightStrategy();
+            var adaptation = new Adaptation(statsBuilder, weightStrategy);
+
             var tests = await facade.GetAllTests();
             var test = tests.FirstOrDefault();
 
@@ -47,24 +69,15 @@ namespace Testing
                 return;
             }
 
-            // Выбор стратегии
-            IStrategy<Variants> strategy;
+            var name = test.Name ?? string.Empty;
 
-            if (test.Name.Contains("adaptive"))
-            {
-                strategy = new AdaptiveStrategy(adaptation);
-            }
-            else
-            {
-                strategy = new RandomStrategy<Variants>();
-            }
+            IStrategy<Variants> strategy =
+                name.Contains("adaptive", StringComparison.OrdinalIgnoreCase)
+                    ? new AdaptiveStrategy(adaptation)
+                    : new RandomStrategy<Variants>();
 
-            var example = new Example(facade, strategy, variantRepo);
-
+            var example = new Example(facade, strategy);
             await example.Init();
-
-            foreach (var item in example.AB)
-                Console.WriteLine($"{item.Key} -> {item.Value}");
 
             Console.WriteLine("A/B test finished");
         }

@@ -3,12 +3,10 @@
 @{
     ViewData["Title"] = "Профиль";
 }
-@using Testing
 
 <header>
     <nav>
         <ul>
-            <!--Ссылки на страницы-->
             <li><a href="/Prof">Профиль</a></li>
             <li><a href="/Index">Главная страница</a></li>
             <li><a href="/TestControl">Управление</a></li>
@@ -21,47 +19,61 @@
 
     <h1>Профиль</h1>
 
-    <!-- вывод тестовых данных -->
-    @* <div>
-        @Model.Test?.ToString()
-    </div> *@
+    <!-- Кнопка переключения режима -->
+    <div style="margin-bottom: 10px;">
+        @if (Model.Mode == "view")
+        {
+            <a href="/Prof?mode=edit" class="btn">
+                Редактировать профиль
+            </a>
+        }
+        else
+        {
+            <a href="/Prof?mode=view" class="btn">
+                Отмена
+            </a>
+        }
+    </div>
 
-    <section>
+    <form method="post">
 
-        <div>
-            <img src="#" alt="Аватар пользователя">
-        </div>
+        <section class="profile">
 
-        <div>
-            <button>Редактировать профиль</button>
-        </div>
+            <img src="@Model.AvatarUrl" width="120" />
 
-        <div>
-            <label for="firstName">Имя:</label>
-            <input type="text" id="firstName" name="firstName" value="Имя_пользователя">
-        </div>
+            <div>
 
-        <div>
-            <label for="lastName">Фамилия:</label>
-            <input type="text" id="lastName" name="lastName" value="Фамилия_пользователя">
-        </div>
+                <label>Имя</label>
+                <input asp-for="FirstName"
+                       disabled="@(Model.Mode == "view")" />
 
-        <div>
-            <p>ссылка_на_профиль</p>
-        </div>
+                <label>Фамилия</label>
+                <input asp-for="LastName"
+                       disabled="@(Model.Mode == "view")" />
 
-    </section>
+                <p>@Model.ProfileLink</p>
 
-    <section>
-        <h2>Информация о пользователе</h2>
-        <textarea rows="6" cols="50">
-Текст написанный пользователем
-        </textarea>
-    </section>
+                @if (Model.Mode == "edit")
+                {
+                    <button type="submit" name="mode" value="edit">
+                        Сохранить
+                    </button>
+                }
 
-    <aside>
-        <p><strong>Лукас</strong> (1 day ago)</p>
-        <p>При изменении элементы в которых возможны корректировки активны</p>
-    </aside>
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2>О себе</h2>
+
+            <textarea asp-for="Description"
+                      disabled="@(Model.Mode == "view")">
+            </textarea>
+
+        </section>
+
+    </form>
 
 </main>

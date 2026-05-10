@@ -6,15 +6,6 @@ namespace Testing.Base
 {
     public class BaseMongo
     {
-        // Компания
-        public class Companies
-        {
-            [BsonId]
-            public ObjectId Id { get; set; }
-
-            public string Name { get; set; } = "";
-        }
-
         // Роль
         public class Roles
         {
@@ -30,11 +21,7 @@ namespace Testing.Base
             [BsonId]
             public ObjectId Id { get; set; }
 
-            public ObjectId CompanyId { get; set; } // FK → Company
-            public ObjectId RoleId { get; set; }    // FK → Role
-
             public string Login { get; set; } = "";         
-            public string Password { get; set; } = "";   
             public string PasswordHash { get; set; } = ""; // Хэш пароля
         }
 
@@ -43,9 +30,6 @@ namespace Testing.Base
         {
             [BsonId]
             public ObjectId Id { get; set; }
-
-            public ObjectId CompanyId { get; set; } // FK → Company
-
             public string Name { get; set; } = "";
             public string Description { get; set; } = "";
         }
@@ -66,8 +50,9 @@ namespace Testing.Base
             public ObjectId Id { get; set; }
 
             public ObjectId MetricTypeId { get; set; } // FK → MetricType
+            public ObjectId ApplicationId { get; set; }      // FK → Application
 
-            public string Name { get; set; } = "";
+            public double Meaning { get; set; }     //значение
         }
 
         // Экземпляр приложения
@@ -77,14 +62,14 @@ namespace Testing.Base
             public ObjectId Id { get; set; }
 
             public ObjectId ApplicationId { get; set; } // FK → Application
-            public ObjectId MetricId { get; set; }      // FK → Metric
 
             public int Version { get; set; }            // Версия
             public string Name { get; set; } = "";
+            public DateTime Date {get; set; }     //Дата
         }
 
-        // Атрибут
-        public class Attributes
+        // Параметр оборудоваиня
+        public class EquipParam
         {
             [BsonId]
             public ObjectId Id { get; set; }
@@ -100,20 +85,8 @@ namespace Testing.Base
             public ObjectId Id { get; set; }
 
             public ObjectId InstanceId { get; set; }  // FK → Instance
-            public ObjectId AttributeId { get; set; } // FK → Attribute
-
-            public DateTime Date { get; set; }        // Дата записи
+            public ObjectId ParamId { get; set; } // FK → EquipParam
             public double MetricValue { get; set; }   // Значение
-        }
-
-        // Описание A/B теста
-        public class ABDescriptions
-        {
-            [BsonId]
-            public ObjectId Id { get; set; }
-
-            public string Target { get; set; } = "";     // Цель
-            public string Description { get; set; } = "";   //Описание
         }
 
         // A/B тест
@@ -125,6 +98,8 @@ namespace Testing.Base
             public ObjectId DescriptionId { get; set; } // FK → ABDescription
 
             public string Name { get; set; } = "";
+            public string Description {get; set; }
+            public bool Enabled { get; set; }   //Включен ли тест
         }
 
         // Вариант
@@ -137,6 +112,8 @@ namespace Testing.Base
 
             public string Name { get; set; } = "";
             public string Description { get; set; } = "";
+            public int Mean { get; set; }
+            public int Audience { get; set; }
         }
 
         // Результат
@@ -149,6 +126,15 @@ namespace Testing.Base
             public ObjectId VariantId { get; set; }  // FK → Variant
         }
 
-        //Возможно прийдется поменять связи и добавить таблицы
+        // Слабая сущность Приложение/Разработчик/Роль
+        public class DevelopRoleApplic
+        {
+            [BsonId]
+            public ObjectId Id { get; set; }
+
+            public ObjectId DeveloperId { get;set; } //FK → Developer
+            public ObjectId RoleId { get; set; } //FK → Role
+            public ObjectId Application {  get; set; } //FK → Application
+        }
     }
 }
