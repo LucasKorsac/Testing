@@ -5,7 +5,7 @@ using static Testing.Base.BaseMongo;
 namespace Testing.Data
 {
     /// <summary>
-    /// Генерация синтетических данных
+    /// Генерация синтетических данных (RU версия)
     /// </summary>
     public static class SinteticData
     {
@@ -25,35 +25,40 @@ namespace Testing.Data
             IMongoRepo<Variants> variantRepo,
             IMongoRepo<AbResults> resultRepo)
         {
-            Console.WriteLine("Seeding database...");
+            Console.WriteLine("Заполнение базы тестовыми данными...");
 
-            // защита от повторного заполнения
             if (await appRepo.Count() > 0)
             {
-                Console.WriteLine("Database already seeded");
+                Console.WriteLine("База уже заполнена");
                 return;
             }
 
-            // Роли
+            //  Роли
 
             var roles = new List<Roles>
             {
-                new() { Name = "Backend" },
-                new() { Name = "Frontend" },
-                new() { Name = "QA" },
-                new() { Name = "DevOps" },
-                new() { Name = "Analyst" },
-                new() { Name = "Manager" }
+                new() { Name = "Бэкенд-разработчик" },
+                new() { Name = "Фронтенд-разработчик" },
+                new() { Name = "Тестировщик (QA)" },
+                new() { Name = "DevOps инженер" },
+                new() { Name = "Аналитик данных" },
+                new() { Name = "Менеджер проекта" },
+                new() { Name = "Системный архитектор" },
+                new() { Name = "Mobile разработчик" },
+                new() { Name = "ML инженер" },
+                new() { Name = "UX/UI дизайнер" },
+                new() { Name = "Support инженер" },
+                new() { Name = "Data Engineer" }
             };
 
             await roleRepo.CreateMany(roles);
 
-            // РазработчикиDEVELOPERS
+            //  Разработчики
 
-            var developers = Enumerable.Range(1, 10)
+            var developers = Enumerable.Range(1, 15)
                 .Select(i => new Developers
                 {
-                    Login = $"developer{i}",
+                    Login = $"разработчик{i}",
                     PasswordHash = Guid.NewGuid().ToString()
                 })
                 .ToList();
@@ -64,66 +69,44 @@ namespace Testing.Data
 
             var apps = new List<Applications>
             {
-                new()
-                {
-                    Name = "Shop Platform",
-                    Description = "E-commerce system"
-                },
-
-                new()
-                {
-                    Name = "Analytics Dashboard",
-                    Description = "Monitoring dashboard"
-                },
-
-                new()
-                {
-                    Name = "Streaming Service",
-                    Description = "Video streaming platform"
-                },
-
-                new()
-                {
-                    Name = "Mobile Banking",
-                    Description = "Bank application"
-                },
-
-                new()
-                {
-                    Name = "Learning Platform",
-                    Description = "Education platform"
-                }
+                new() { Name = "Интернет-магазин", Description = "Платформа электронной коммерции" },
+                new() { Name = "Панель аналитики", Description = "BI система" },
+                new() { Name = "Видеосервис", Description = "Стриминг платформа" },
+                new() { Name = "Мобильный банк", Description = "Финансовое приложение" },
+                new() { Name = "Образовательная платформа", Description = "E-learning система" },
+                new() { Name = "CRM система", Description = "Управление клиентами" },
+                new() { Name = "HR платформа", Description = "Подбор персонала" },
+                new() { Name = "Маркетплейс", Description = "Торговая платформа" },
+                new() { Name = "Система логистики", Description = "Доставка и трекинг" },
+                new() { Name = "Социальная сеть", Description = "Коммуникационная платформа" }
             };
 
             await appRepo.CreateMany(apps);
 
-            // Слабая сущность DRA
-
-            var devRoleApps = new List<DevelopRoleApplic>();
-
-            foreach (var dev in developers)
+            // Связи разработчиков
+            var devRoleApps = developers.Select(dev => new DevelopRoleApplic
             {
-                devRoleApps.Add(new DevelopRoleApplic
-                {
-                    DeveloperId = dev.Id,
-                    RoleId = roles[_rnd.Next(roles.Count)].Id,
-                    Application = apps[_rnd.Next(apps.Count)].Id
-                });
-            }
+                DeveloperId = dev.Id,
+                RoleId = roles[_rnd.Next(roles.Count)].Id,
+                Application = apps[_rnd.Next(apps.Count)].Id
+            }).ToList();
 
             await devRoleAppRepo.CreateMany(devRoleApps);
 
-            // Тип метрики
+            // Типы метрик
 
             var metricTypes = new List<MetricTypes>
             {
                 new() { Name = "CTR" },
                 new() { Name = "CR" },
                 new() { Name = "Retention" },
-                new() { Name = "Performance" },
-                new() { Name = "UX" },
-                new() { Name = "CPU Usage" },
-                new() { Name = "Memory" }
+                new() { Name = "Latency" },
+                new() { Name = "Throughput" },
+                new() { Name = "CPU Load" },
+                new() { Name = "Memory Usage" },
+                new() { Name = "Error Rate" },
+                new() { Name = "Session Time" },
+                new() { Name = "UX Score" }
             };
 
             await metricTypeRepo.CreateMany(metricTypes);
@@ -133,7 +116,6 @@ namespace Testing.Data
             var metrics = new List<Metrics>();
 
             foreach (var app in apps)
-            {
                 foreach (var metricType in metricTypes)
                 {
                     metrics.Add(new Metrics
@@ -143,7 +125,6 @@ namespace Testing.Data
                         Meaning = Math.Round(_rnd.NextDouble() * 100, 2)
                     });
                 }
-            }
 
             await metricRepo.CreateMany(metrics);
 
@@ -153,144 +134,128 @@ namespace Testing.Data
 
             foreach (var app in apps)
             {
-                for (int i = 1; i <= 5; i++)
+                for (int i = 1; i <= 10; i++)
                 {
                     instances.Add(new Instances
                     {
                         ApplicationId = app.Id,
                         Version = i,
                         Name = $"{app.Name} v{i}",
-                        Date = DateTime.UtcNow.AddDays(-_rnd.Next(1, 100))
+                        Date = DateTime.UtcNow.AddDays(-_rnd.Next(1, 120))
                     });
                 }
             }
 
             await instanceRepo.CreateMany(instances);
 
-            // Параметры оборудования
+            // Парамерты устройств
 
             var equipParams = new List<EquipParam>
             {
-                new()  {      Environment = "RAM", Recommendation = "Объем оперативной памяти"  },
-                new()  { Environment = "CPU", Recommendation = "Модель процессора" },
-                new()  {   Environment = "Screen Resolution", Recommendation = "Разрешение экрана"  },
-                new()  {  Environment = "Storage",   Recommendation = "Объем хранилища"  },
-                new() {  Environment = "GPU",   Recommendation = "Видеокарта устройства"  },
-                new() { Environment = "OS Version", Recommendation = "Версия операционной системы"}
+                new() { Name = "ОЗУ" },
+                new() { Name = "CPU" },
+                new() { Name = "Screen" },
+                new() { Name = "Storage" },
+                new() { Name = "GPU" },
+                new() { Name = "OS" },
+                new() { Name = "Network" },
+                new() { Name = "Battery" },
+                new() { Name = "Temperature" },
+                new() { Name = "Architecture" }
             };
 
             await equipParamRepo.CreateMany(equipParams);
 
-            // Значения параметров
+            // Значения
+
+            var valueMap = new Dictionary<string, List<double>>
+            {
+                ["ОЗУ"] = new() { 4, 8, 16, 32, 64 },
+                ["CPU"] = new() { 100, 200, 300, 400 },
+                ["Screen"] = new() { 720, 1080, 1440, 2160 },
+                ["Storage"] = new() { 128, 256, 512, 1024 },
+                ["GPU"] = new() { 1, 2, 3, 4 },
+                ["OS"] = new() { 10, 11, 12, 13 },
+                ["Network"] = new() { 100, 200, 500 },
+                ["Battery"] = new() { 3000, 4000, 5000 },
+                ["Temperature"] = new() { 30, 50, 70 },
+                ["Architecture"] = new() { 64, 128 }
+            };
 
             var values = new List<Values>();
 
-            var metricValues = new Dictionary<string, List<double>>
-            {
-                ["RAM"] = new() { 4, 8, 16, 32, 64 },
-                ["CPU"] = new()  {  101,   102, 103, 104, 105 },
-                ["Screen Resolution"] = new() {720, 1080, 1440, 2160},
-                ["Storage"] = new() { 128, 256, 512, 1024},
-                ["GPU"] = new() {   201,  202, 203, 204},
-                ["OS Version"] = new() { 10,11, 12, 13,14}
-            };
-
             foreach (var instance in instances)
-            {
                 foreach (var param in equipParams)
                 {
-                    var possibleValues = metricValues[param.Environment];
+                    var list = valueMap[param.Name];
 
                     values.Add(new Values
                     {
-                        InstanceId = instance.Id, ParamId = param.Id, MetricValue = possibleValues[ _rnd.Next(possibleValues.Count)]
+                        InstanceId = instance.Id,
+                        ParamId = param.Id,
+                        MetricValue = list[_rnd.Next(list.Count)]
                     });
                 }
-            }
 
             await valueRepo.CreateMany(values);
 
-            // AB Тесты
+            // A/B тесты
 
             var tests = new List<ABTests>
             {
-                new()
-                {
-                    Name = "button_color_test", Description = "Button color optimization", Enabled = true
-                },
-
-                new()
-                {
-                    Name = "checkout_ui_test", Description = "Checkout redesign", Enabled = true
-                },
-
-                new()
-                {
-                    Name = "header_layout_test",
-                    Description = "Header navigation experiment",
-                    Enabled = false
-                },
-
-                new()
-                {
-                    Name = "pricing_page_test",
-                    Description = "Pricing page optimization",
-                    Enabled = true
-                },
-
-                new()
-                {
-                    Name = "signup_flow_test",
-                    Description = "Registration flow experiment",
-                    Enabled = false
-                }
+                new() { Name = "цвет_кнопки", Description = "CTA тест", Enabled = true },
+                new() { Name = "чекаут", Description = "Оптимизация оплаты", Enabled = true },
+                new() { Name = "шапка", Description = "Навигация", Enabled = false },
+                new() { Name = "тарифы", Description = "Pricing page", Enabled = true },
+                new() { Name = "регистрация", Description = "Signup flow", Enabled = false }
             };
 
             await abTestRepo.CreateMany(tests);
 
-            // Варианты
+            //  Варианты
 
             var variants = new List<Variants>();
 
             foreach (var test in tests)
             {
-                variants.Add(new Variants
+                variants.AddRange(new[]
                 {
-                    AbTestId = test.Id,
-                    Name = "Variant A",
-                    Description = "Default version",
-                    Mean = _rnd.Next(10, 90),
-                    Audience = 50
-                });
-
-                variants.Add(new Variants
-                {
-                    AbTestId = test.Id,
-                    Name = "Variant B",
-                    Description = "Experimental version",
-                    Mean = _rnd.Next(10, 90),
-                    Audience = 50
-                });
-
-                variants.Add(new Variants
-                {
-                    AbTestId = test.Id,
-                    Name = "Variant C",
-                    Description = "Alternative design",
-                    Mean = _rnd.Next(10, 90),
-                    Audience = 25
+                    new Variants
+                    {
+                        AbTestId = test.Id,
+                        Name = "A",
+                        Description = "Control",
+                        Mean = _rnd.Next(20, 80),
+                        Audience = 40
+                    },
+                    new Variants
+                    {
+                        AbTestId = test.Id,
+                        Name = "B",
+                        Description = "Variant",
+                        Mean = _rnd.Next(20, 80),
+                        Audience = 40
+                    },
+                    new Variants
+                    {
+                        AbTestId = test.Id,
+                        Name = "C",
+                        Description = "Alternative",
+                        Mean = _rnd.Next(20, 80),
+                        Audience = 20
+                    }
                 });
             }
 
             await variantRepo.CreateMany(variants);
 
-            // Результаты
+            //Результаты
 
             var results = new List<AbResults>();
 
             foreach (var instance in instances)
             {
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     results.Add(new AbResults
                     {
@@ -302,7 +267,7 @@ namespace Testing.Data
 
             await resultRepo.CreateMany(results);
 
-            Console.WriteLine("Database seeding completed");
+            Console.WriteLine("Заполнение базы завершено");
         }
     }
 }

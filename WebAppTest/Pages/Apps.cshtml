@@ -1,0 +1,72 @@
+﻿@page
+@model WebAppTest.Pages.Apps
+
+@{
+    ViewData["Title"] = "Приложения";
+}
+
+
+<header>
+    <nav>
+        <ul>
+            <!--  <li><a href="/Prof">Профиль</a></li> -->
+            <li><a href="/Index">Главная страница</a></li>
+            <li><a href="/Apps">Приложения</a></li>
+            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/Manage">Справка</a></li>
+
+        </ul>
+    </nav>
+</header>
+
+<main>
+
+    <h1>Приложения</h1>
+
+    @if (Model.AppsList.Any())
+    {
+        <div class="apps-grid">
+
+            @foreach (var item in Model.AppsList)
+            {
+                <section class="app-card">
+
+                    <!-- название приложения -->
+                    <h2>@item.Application.Name</h2>
+
+                    <p>@item.Application.Description</p>
+
+                    <!-- выпадающий список экземпляров -->
+                    <label>Экземпляры:</label>
+
+                    <select onchange="if(this.value) window.location.href=this.value">
+
+                        <option value="">-- выбрать версию --</option>
+
+                        @foreach (var inst in item.Instances)
+                        {
+                            <option value="/InstanceDetail/@inst.Id">
+                                @inst.Name (v@inst.Version)
+                            </option>
+                        }
+
+                    </select>
+
+                    <br /><br />
+
+                    <a class="btn btn-primary"
+                       asp-page="/AppDetail"
+                       asp-route-id="@item.Application.Id">
+                        Открыть приложение
+                    </a>
+
+                </section>
+            }
+
+        </div>
+    }
+    else
+    {
+        <p>Приложений нет</p>
+    }
+</main>

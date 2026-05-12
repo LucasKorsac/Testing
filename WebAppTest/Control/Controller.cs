@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Testing.Base;
+using Testing.Pattern;
 using WebAppTest.Control;
 
 namespace WebAppTest.Controllers
 {
     [ApiController]
     [Route("api/ab")]
-    public class Controller : ControllerBase
+    public class AbController : ControllerBase
     {
         private readonly IUiService _ui;
 
-        public Controller(IUiService ui)
+        public AbController(IUiService ui)
         {
             _ui = ui;
         }
@@ -36,7 +38,7 @@ namespace WebAppTest.Controllers
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> Update(UpdateRequest request)
+        public async Task<IActionResult> Update([FromBody] UpdateRequest request)
         {
             await _ui.UpdateTestAsync(request.Id, request.Name, request.Description);
             return Ok();

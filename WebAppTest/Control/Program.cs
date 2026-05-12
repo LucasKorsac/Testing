@@ -11,11 +11,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddApplicationInsightsTelemetry();
 
-/// =====================
+
 /// MongoDB
-/// =====================
-builder.Services.AddSingleton<IMongoClient>(_ =>
-    new MongoClient("mongodb://localhost:27017"));
+builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient("mongodb://localhost:27017"));
 
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
@@ -23,35 +21,34 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase("ABTesting");
 });
 
-/// =====================
-/// HTTP CLIENT
-/// =====================
+/// HTTP
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:5001/");
 });
 
-/// =====================
-/// REPOSITORY LAYER
-/// =====================
+/// Репозиторий
+
 builder.Services.AddScoped(typeof(IMongoRepo<>), typeof(MongoRepo<>));
 
-/// =====================
-/// FACADE (FIXED - IMPORTANT)
-/// =====================
+
+/// Facade
+
 builder.Services.AddScoped<Facade>(sp =>
 {
     return new Facade(
         sp.GetRequiredService<IMongoRepo<ABTests>>(),
         sp.GetRequiredService<IMongoRepo<Variants>>(),
         sp.GetRequiredService<IMongoRepo<AbResults>>(),
-        sp.GetRequiredService<IMongoRepo<Instances>>()
+        sp.GetRequiredService<IMongoRepo<Instances>>(),
+        sp.GetRequiredService<IMongoRepo<Applications>>(),
+        sp.GetRequiredService<IMongoRepo<DevelopRoleApplic>>(),
+        sp.GetRequiredService<IMongoRepo<Metrics>>(),
+        sp.GetRequiredService<IMongoRepo<MetricTypes>>()
     );
 });
 
-/// =====================
-/// BUSINESS LAYER
-/// =====================
+/// Бизнес-слой
 builder.Services.AddScoped<ServiceControl>();
 builder.Services.AddScoped<Adaptation>();
 

@@ -1,5 +1,6 @@
 ﻿@page
 @model WebAppTest.Pages.TestControlModel
+
 @{
     ViewData["Title"] = "Управление";
 }
@@ -7,10 +8,12 @@
 <header>
     <nav>
         <ul>
-            <li><a href="/Prof">Профиль</a></li>
+            <!-- <li><a href="/Prof">Профиль</a></li> -->
             <li><a href="/Index">Главная страница</a></li>
+            <li><a href="/Apps">Приложения</a></li>
             <li><a href="/TestControl">Управление</a></li>
             <li><a href="/Manage">Справка</a></li>
+
         </ul>
     </nav>
 </header>
@@ -19,6 +22,7 @@
 
     <h1>Управление A/B тестами</h1>
 
+    <!-- блок действий -->
     <section>
 
         <div class="actions">
@@ -31,6 +35,7 @@
 
     </section>
 
+    <!-- список тестов -->
     <section>
 
         <h2>Список тестов</h2>
@@ -41,11 +46,11 @@
             {
                 <section class="test-card">
 
-                    <!-- LEFT -->
+                    <!-- левая часть -->
                     <div class="test-info">
 
                         <h3>
-                            <a href="/Tests/@test.Id?mode=view">
+                            <a asp-page="/Tests" asp-route-id="@test.Id">
                                 @test.Name
                             </a>
                         </h3>
@@ -55,29 +60,66 @@
                         </p>
 
                         <span class="test-status @(test.Enabled ? "status-active" : "status-stopped")">
+
                             @(test.Enabled ? "Активен" : "Остановлен")
+
                         </span>
 
                     </div>
 
-                    <!-- RIGHT -->
+                    <!-- правая часть -->
                     <div class="actions">
 
+                        <!-- открыть -->
                         <a class="btn btn-secondary"
-                           href="/Tests/@test.Id?mode=view">
+                           href="/Tests/@test.Id">
+
                             Открыть
+
                         </a>
 
+                        <!-- редактирование -->
                         <a class="btn btn-primary"
                            href="/Tests/@test.Id?mode=edit">
+
                             Редактировать
+
                         </a>
 
-                        <a class="btn btn-warning"
-                           href="/Tests/@test.Id?mode=stop">
-                            Остановить
-                        </a>
+                        <!-- остановка -->
+                        @if (test.Enabled)
+                        {
+                            <form method="post"
+                                  asp-page-handler="Stop"
+                                  asp-route-id="@test.Id">
 
+                                <button class="btn btn-warning"
+                                        type="submit">
+
+                                    Остановить
+
+                                </button>
+
+                            </form>
+                        }
+                        else
+                        {
+                            <!-- возобновление -->
+                            <form method="post"
+                                  asp-page-handler="Resume"
+                                  asp-route-id="@test.Id">
+
+                                <button class="btn btn-success"
+                                        type="submit">
+
+                                    Возобновить
+
+                                </button>
+
+                            </form>
+                        }
+
+                        <!-- удаление -->
                         <form method="post"
                               asp-page-handler="Delete"
                               asp-route-id="@test.Id">

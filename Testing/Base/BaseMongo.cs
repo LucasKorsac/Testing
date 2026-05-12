@@ -74,8 +74,8 @@ namespace Testing.Base
             [BsonId]
             public ObjectId Id { get; set; }
 
-            public string Environment { get; set; } = "";   // Окружение
-            public string Recommendation { get; set; } = "";
+            public string Name { get; set; } = "";   // Окружение
+            public string UnitMeasure { get; set; } = "";
         }
 
         // Значение
@@ -95,7 +95,7 @@ namespace Testing.Base
             [BsonId]
             public ObjectId Id { get; set; }
 
-            public ObjectId DescriptionId { get; set; } // FK → ABDescription
+            public ObjectId ApplicationId { get; set; }
 
             public string Name { get; set; } = "";
             public string Description {get; set; }

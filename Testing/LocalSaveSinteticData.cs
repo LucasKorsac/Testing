@@ -5,7 +5,9 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing
 {
-    /// <summary> Локальное заполнение MongoDB синтетическими данными </summary>
+    /// <summary>
+    /// Локальное безопасное заполнение MongoDB синтетическими данными
+    /// </summary>
     public class LocalSaveSinteticData
     {
         private readonly IMongoFactory _factory;
@@ -17,23 +19,128 @@ namespace Testing
 
         public async Task Run()
         {
-            Console.WriteLine("Starting MongoDB seed...");
+            Console.WriteLine("=== START SEED ===");
 
-            var abTestRepo = _factory.Create<ABTests>();
-            var variantRepo = _factory.Create<Variants>();
-            var resultRepo = _factory.Create<AbResults>();
-            var valueRepo = _factory.Create<Values>();
-            var instanceRepo = _factory.Create<Instances>();
-            var metricRepo = _factory.Create<Metrics>();
+            // Защита: только Development
+            if (!IsDevelopment())
+            {
+                Console.WriteLine("Seed запрещён вне Development окружения");
+                return;
+            }
 
-            var roleRepo = _factory.Create<Roles>();
-            var devRepo = _factory.Create<Developers>();
-            var devRoleRepo = _factory.Create<DevelopRoleApplic>();
-            var appRepo = _factory.Create<Applications>();
-            var metricTypeRepo = _factory.Create<MetricTypes>();
-            var equipRepo = _factory.Create<EquipParam>();
+            var (abTestRepo,
+                 variantRepo,
+                 resultRepo,
+                 valueRepo,
+                 instanceRepo,
+                 metricRepo,
+                 roleRepo,
+                 devRepo,
+                 devRoleRepo,
+                 appRepo,
+                 metricTypeRepo,
+                 equipRepo) = CreateRepositories();
 
-            // Очистка ВСЕЙ базы (важно для консистентности)
+            try
+            {
+                Console.WriteLine("Очистка базы данных...");
+
+                await ClearAll(
+                    roleRepo,
+                    devRepo,
+                    devRoleRepo,
+                    appRepo,
+                    metricTypeRepo,
+                    metricRepo,
+                    instanceRepo,
+                    equipRepo,
+                    valueRepo,
+                    abTestRepo,
+                    variantRepo,
+                    resultRepo
+                );
+
+                Console.WriteLine("Заполнение базы...");
+
+                await SinteticData.Init(
+                    roleRepo,
+                    devRepo,
+                    devRoleRepo,
+                    appRepo,
+                    metricTypeRepo,
+                    metricRepo,
+                    instanceRepo,
+                    equipRepo,
+                    valueRepo,
+                    abTestRepo,
+                    variantRepo,
+                    resultRepo
+                );
+
+                Console.WriteLine("=== SEED COMPLETED SUCCESSFULLY ===");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ Ошибка при заполнении базы: " + ex.Message);
+                throw;
+            }
+        }
+
+        // ---------------- HELPERS ----------------
+
+        private bool IsDevelopment()
+        {
+            return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                   == "Development";
+        }
+
+        private (
+            IMongoRepo<ABTests>,
+            IMongoRepo<Variants>,
+            IMongoRepo<AbResults>,
+            IMongoRepo<Values>,
+            IMongoRepo<Instances>,
+            IMongoRepo<Metrics>,
+            IMongoRepo<Roles>,
+            IMongoRepo<Developers>,
+            IMongoRepo<DevelopRoleApplic>,
+            IMongoRepo<Applications>,
+            IMongoRepo<MetricTypes>,
+            IMongoRepo<EquipParam>
+        ) CreateRepositories()
+        {
+            return (
+                _factory.Create<ABTests>(),
+                _factory.Create<Variants>(),
+                _factory.Create<AbResults>(),
+                _factory.Create<Values>(),
+                _factory.Create<Instances>(),
+                _factory.Create<Metrics>(),
+                _factory.Create<Roles>(),
+                _factory.Create<Developers>(),
+                _factory.Create<DevelopRoleApplic>(),
+                _factory.Create<Applications>(),
+                _factory.Create<MetricTypes>(),
+                _factory.Create<EquipParam>()
+            );
+        }
+
+        private async Task ClearAll(
+            IMongoRepo<Roles> roleRepo,
+            IMongoRepo<Developers> devRepo,
+            IMongoRepo<DevelopRoleApplic> devRoleRepo,
+            IMongoRepo<Applications> appRepo,
+            IMongoRepo<MetricTypes> metricTypeRepo,
+            IMongoRepo<Metrics> metricRepo,
+            IMongoRepo<Instances> instanceRepo,
+            IMongoRepo<EquipParam> equipRepo,
+            IMongoRepo<Values> valueRepo,
+            IMongoRepo<ABTests> abTestRepo,
+            IMongoRepo<Variants> variantRepo,
+            IMongoRepo<AbResults> resultRepo)
+        {
+            Console.WriteLine(" Очистка коллекций...");
+
             await roleRepo.DeleteAll();
             await devRepo.DeleteAll();
             await devRoleRepo.DeleteAll();
@@ -47,11 +154,7 @@ namespace Testing
             await variantRepo.DeleteAll();
             await resultRepo.DeleteAll();
 
-            // защита от пустого seed
-            await SinteticData.Init(roleRepo, devRepo, devRoleRepo, appRepo, metricTypeRepo, metricRepo,
-                instanceRepo, equipRepo, valueRepo, abTestRepo, variantRepo, resultRepo);
-
-            Console.WriteLine("MongoDB seed completed");
+            Console.WriteLine(" Очистка завершена");
         }
     }
 }

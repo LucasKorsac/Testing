@@ -1,0 +1,62 @@
+﻿@page "{id}"
+@model WebAppTest.Pages.AppDetail
+
+@{
+    ViewData["Title"] = "Приложение";
+}
+
+<header>
+    <nav>
+        <ul>
+            <!-- <li><a href="/Prof">Профиль</a></li> -->
+            <li><a href="/Index">Главная страница</a></li>
+            <li><a href="/Apps">Приложения</a></li>
+            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/Manage">Справка</a></li>
+
+        </ul>
+    </nav>
+</header>
+
+<main>
+
+    <section class="hero-card">
+
+        <h1>@Model.Application?.Name</h1>
+
+        <p>@Model.Application?.Description</p>
+
+    </section>
+
+    <section class="content-card">
+
+        <h2>Экземпляры приложения</h2>
+
+        @if (Model.Instances.Any())
+        {
+            @foreach (var instance in Model.Instances)
+            {
+                <div class="test-card">
+
+                    <h3>@instance.Name</h3>
+
+                    <p>Версия: @instance.Version</p>
+
+                    <p>Дата: @instance.Date.ToShortDateString()</p>
+
+                    <a class="btn btn-secondary"
+                       href="/InstanceDetail/@instance.Id">
+                        Открыть экземпляр
+                    </a>
+
+                </div>
+            }
+        }
+        else
+        {
+            <p>У приложения нет экземпляров</p>
+        }
+
+    </section>
+
+</main>

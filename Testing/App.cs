@@ -19,7 +19,7 @@ namespace Testing
         {
             Console.WriteLine("Starting app...");
 
-            // 🔥 Инициализация базы (НЕ ТРОГАЕМ)
+            // инициализация базы
             await SinteticData.Init(
                 _factory.Create<Roles>(),
                 _factory.Create<Developers>(),
@@ -35,22 +35,31 @@ namespace Testing
                 _factory.Create<AbResults>()
             );
 
-            // Репозитории
+            // репозитории
             var abTestRepo = _factory.Create<ABTests>();
             var variantRepo = _factory.Create<Variants>();
             var resultRepo = _factory.Create<AbResults>();
-            var valuesRepo = _factory.Create<Values>();
-            var instanceRepo = _factory.Create<Instances>(); // ← добавили
+            var instanceRepo = _factory.Create<Instances>();
+            var applicationRepo = _factory.Create<Applications>();
+            var devRoleAppRepo = _factory.Create<DevelopRoleApplic>();
+            var metricsRepo = _factory.Create<Metrics>();
+            var metricTypesRepo = _factory.Create<MetricTypes>();
 
-            // 🔥 Facade (ИСПРАВЛЕНО: теперь 4 параметра)
+            // Facade
             var facade = new Facade(
                 abTestRepo,
                 variantRepo,
                 resultRepo,
-                instanceRepo
+                instanceRepo,
+                applicationRepo,
+                devRoleAppRepo,
+                metricsRepo,
+                metricTypesRepo
             );
 
-            // Статистика
+            // статистика
+            var valuesRepo = _factory.Create<Values>();
+
             var statsBuilder = new StatsBuilder(
                 variantRepo,
                 resultRepo,
@@ -60,6 +69,7 @@ namespace Testing
             var weightStrategy = new WeightStrategy();
             var adaptation = new Adaptation(statsBuilder, weightStrategy);
 
+            // Тесты
             var tests = await facade.GetAllTests();
             var test = tests.FirstOrDefault();
 
