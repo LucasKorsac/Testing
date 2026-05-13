@@ -8,10 +8,10 @@
 <header>
     <nav>
         <ul>
-            <!--  <li><a href="/Prof">Профиль</a></li> -->
+            <!-- <li><a href="/Prof">Профиль</a></li> -->
             <li><a href="/Index">Главная страница</a></li>
             <li><a href="/Apps">Приложения</a></li>
-            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/TestControl">Управление тестами</a></li>
             <li><a href="/Manage">Справка</a></li>
 
         </ul>
@@ -48,7 +48,7 @@
     <table class="table table-bordered table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>Пользователь</th>
+                @* <th>Пользователь</th> *@
 
                 @foreach (var header in Model.Headers)
                 {
@@ -61,7 +61,7 @@
             @foreach (var row in Model.Table)
             {
                 <tr>
-                    <td>@row.User</td>
+                    @* <td>@row.User</td> *@
 
                     @foreach (var header in Model.Headers)
                     {

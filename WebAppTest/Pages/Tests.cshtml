@@ -1,5 +1,7 @@
 ﻿@page "{id}"
 @model WebAppTest.Pages.TestsModel
+@using System.Text.Json
+
 @{
     ViewData["Title"] = "Тест";
 }
@@ -7,85 +9,140 @@
 <header>
     <nav>
         <ul>
-            <!-- <li><a href="/Prof">Профиль</a></li> -->
             <li><a href="/Index">Главная</a></li>
-            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/Apps">Приложения</a></li>
+            <li><a href="/TestControl">Управление тестами</a></li>
             <li><a href="/Manage">Справка</a></li>
         </ul>
     </nav>
 </header>
 
-<main class="page-container">
+<main>
 
-    <section class="hero-card">
-
-        <div class="hero-top">
-            <div>
-                <h1>@Model.TestName</h1>
-                <p class="muted-text">@Model.Description</p>
-            </div>
-
-            <span class="status-badge @(Model.IsActive ? "status-active" : "status-stopped")">
-                @(Model.IsActive ? "Активен" : "Остановлен")
-            </span>
-        </div>
-
-        <div class="hero-actions">
-
-            <button class="btn btn-primary"
-                    onclick="editTest()">
-                Редактировать
-            </button>
-
-            @if (Model.IsActive)
-            {
-                <button class="btn btn-warning"
-                        onclick="stopTest()">
-                    Остановить
-                </button>
-            }
-            else
-            {
-                <button class="btn btn-success"
-                        onclick="resumeTest()">
-                    Возобновить
-                </button>
-            }
-
-            <button class="btn btn-danger"
-                    onclick="deleteTest()">
-                Удалить
-            </button>
-
-        </div>
-
-    </section>
+    <!-- Информация о тесте -->
 
     <section class="content-card">
 
-        <h2>Метрики</h2>
+        <h1>@Model.TestName</h1>
 
-        <table class="modern-table">
-            @foreach (var m in Model.TableData)
-            {
+        <p>@Model.Description</p>
+
+        <span class="status-badge @(Model.IsActive
+                          ? "status-active"
+                          : "status-stopped")">
+
+            @(Model.IsActive ? "Активен" : "Остановлен")
+
+        </span>
+
+    </section>
+
+    <!-- Таблица -->
+
+    <section class="content-card">
+
+        <h2>Информация о тесте</h2>
+
+        <table class="metrics-table">
+
+            <thead>
                 <tr>
-                    <td>@m.Key</td>
-                    <td>@m.Value</td>
+                    <th>Параметр</th>
+                    <th>Значение</th>
                 </tr>
-            }
+            </thead>
+
+            <tbody>
+
+                @foreach (var row in Model.TableData)
+                {
+                    <tr>
+                        <td>@row.Key</td>
+                        <td>@row.Value</td>
+                    </tr>
+                }
+
+            </tbody>
+
         </table>
 
     </section>
 
-    <a class="btn btn-secondary" href="/TestControl">
-        ← Назад
-    </a>
+
+    <!-- График -->
+
+
+    <section class="content-card">
+
+        <h2>Распределение пользователей</h2>
+
+        <div class="chart-wrapper">
+
+            <canvas id="variantChart"></canvas>
+
+        </div>
+
+    </section>
+
+    <!--  Варианты -->
+
+    <section class="content-card">
+
+        <h2>Варианты теста</h2>
+
+        <table class="metrics-table">
+
+            <thead>
+                <tr>
+                    <th>Вариант</th>
+                    <th>Пользователей</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @for (int i = 0; i < Model.VariantLabels.Count; i++)
+                {
+                    <tr>
+                        <td>@Model.VariantLabels[i]</td>
+                        <td>@Model.VariantValues[i]</td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+    <div style="margin-top:20px;">
+
+        <a class="btn btn-secondary"
+           href="/TestControl">
+
+            ← Назад
+
+        </a>
+
+    </div>
 
 </main>
 
-<form id="actionForm" method="post">
-    <input type="hidden" name="id" value="@RouteData.Values["id"]" />
-    <input type="hidden" id="actionMode" name="mode" />
-</form>
+<!-- js -->
 
-<script src="/js/tests.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    window.variantChartData = {
+
+        labels:
+            @Html.Raw(JsonSerializer.Serialize(Model.VariantLabels)),
+
+        values:
+            @Html.Raw(JsonSerializer.Serialize(Model.VariantValues))
+    };
+
+</script>
+
+<script src="~/js/tests.js"></script>

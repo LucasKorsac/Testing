@@ -4,9 +4,6 @@ using static Testing.Base.BaseMongo;
 
 namespace Testing.Data
 {
-    /// <summary>
-    /// Генерация синтетических данных (RU версия)
-    /// </summary>
     public static class SinteticData
     {
         private static readonly Random _rnd = new();
@@ -33,57 +30,68 @@ namespace Testing.Data
                 return;
             }
 
-            //  Роли
-
+            // Роли
             var roles = new List<Roles>
             {
-                new() { Name = "Бэкенд-разработчик" },
-                new() { Name = "Фронтенд-разработчик" },
-                new() { Name = "Тестировщик (QA)" },
-                new() { Name = "DevOps инженер" },
-                new() { Name = "Аналитик данных" },
-                new() { Name = "Менеджер проекта" },
-                new() { Name = "Системный архитектор" },
-                new() { Name = "Mobile разработчик" },
-                new() { Name = "ML инженер" },
-                new() { Name = "UX/UI дизайнер" },
-                new() { Name = "Support инженер" },
-                new() { Name = "Data Engineer" }
+                new() { Name = "Backend Dev" },
+                new() { Name = "Frontend Dev" },
+                new() { Name = "QA Engineer" },
+                new() { Name = "DevOps" },
+                new() { Name = "Data Analyst" },
+                new() { Name = "Project Manager" },
+                new() { Name = "Architect" },
+                new() { Name = "Mobile Dev" },
+                new() { Name = "ML Engineer" },
+                new() { Name = "UX Designer" }
             };
 
             await roleRepo.CreateMany(roles);
 
-            //  Разработчики
+ 
+            // Разрабы
 
             var developers = Enumerable.Range(1, 15)
                 .Select(i => new Developers
                 {
-                    Login = $"разработчик{i}",
+                    Login = $"dev_{i}",
                     PasswordHash = Guid.NewGuid().ToString()
                 })
                 .ToList();
 
             await developerRepo.CreateMany(developers);
 
-            // Приложения
-
             var apps = new List<Applications>
             {
-                new() { Name = "Интернет-магазин", Description = "Платформа электронной коммерции" },
-                new() { Name = "Панель аналитики", Description = "BI система" },
-                new() { Name = "Видеосервис", Description = "Стриминг платформа" },
-                new() { Name = "Мобильный банк", Description = "Финансовое приложение" },
-                new() { Name = "Образовательная платформа", Description = "E-learning система" },
-                new() { Name = "CRM система", Description = "Управление клиентами" },
-                new() { Name = "HR платформа", Description = "Подбор персонала" },
-                new() { Name = "Маркетплейс", Description = "Торговая платформа" },
-                new() { Name = "Система логистики", Description = "Доставка и трекинг" },
-                new() { Name = "Социальная сеть", Description = "Коммуникационная платформа" }
+    // Приложения
+
+             new() { Name = "МагазинПро", Description = "Платформа для онлайн-торговли" },
+             new() { Name = "АналитикаПлюс", Description = "BI и аналитическая панель" },
+             new() { Name = "ВидеоПоток", Description = "Платформа для стриминга видео" },
+             new() { Name = "НеоБанк", Description = "Цифровой банковский сервис" },
+             new() { Name = "УчисьЛегко", Description = "Онлайн образовательная платформа" },
+             new() { Name = "КлиентПро CRM", Description = "Система управления клиентами" },
+             new() { Name = "HR Центр", Description = "Платформа для найма сотрудников" },
+             new() { Name = "МаркетПлейс", Description = "Мультивендорная торговая площадка" },
+             new() { Name = "Логистика Онлайн", Description = "Система отслеживания доставок" },
+             new() { Name = "СоцСеть+", Description = "Социальная сеть нового поколения" },
+
+    // Игры
+
+        
+             new() { Name = "Арена Битвы", Description = "PvP мультиплеерная арена" },
+             new() { Name = "Неон Дрифт", Description = "Киберпанк гоночная игра" },
+             new() { Name = "Осада Королевства", Description = "Стратегия в реальном времени" },
+             new() { Name = "Космос X", Description = "Исследование космоса" },
+             new() { Name = "Зомби Апокалипсис", Description = "Выживание в мире зомби" },
+             new() { Name = "Ферма Пикселей", Description = "Казуальный симулятор фермы" },
+             new() { Name = "Теневой Протокол", Description = "Стелс-экшен игра" },
+             new() { Name = "Легенды Подземелий", Description = "RPG подземелья и лут" },
+             new() { Name = "Танковые Войны Онлайн", Description = "Мультиплеерные танковые бои" },
+             new() { Name = "Летающие Острова", Description = "Открытый мир приключений" }
             };
 
             await appRepo.CreateMany(apps);
 
-            // Связи разработчиков
             var devRoleApps = developers.Select(dev => new DevelopRoleApplic
             {
                 DeveloperId = dev.Id,
@@ -93,38 +101,38 @@ namespace Testing.Data
 
             await devRoleAppRepo.CreateMany(devRoleApps);
 
-            // Типы метрик
 
+            // Типы метрик
             var metricTypes = new List<MetricTypes>
             {
+                new() { Name = "Удержание" },
+                new() { Name = "Конверсия" },
                 new() { Name = "CTR" },
-                new() { Name = "CR" },
-                new() { Name = "Retention" },
-                new() { Name = "Latency" },
-                new() { Name = "Throughput" },
-                new() { Name = "CPU Load" },
-                new() { Name = "Memory Usage" },
-                new() { Name = "Error Rate" },
-                new() { Name = "Session Time" },
-                new() { Name = "UX Score" }
+                new() { Name = "Среднее время сессии" },
+                new() { Name = "Ошибки" },
+                new() { Name = "Латентность" },
+                new() { Name = "Активные пользователи" }
             };
 
             await metricTypeRepo.CreateMany(metricTypes);
 
             // Метрики
-
             var metrics = new List<Metrics>();
 
             foreach (var app in apps)
-                foreach (var metricType in metricTypes)
+            {
+                var selected = metricTypes.OrderBy(_ => _rnd.Next()).Take(6);
+
+                foreach (var metricType in selected)
                 {
                     metrics.Add(new Metrics
                     {
                         ApplicationId = app.Id,
                         MetricTypeId = metricType.Id,
-                        Meaning = Math.Round(_rnd.NextDouble() * 100, 2)
+                        Meaning = Math.Round(10 + _rnd.NextDouble() * 90, 2)
                     });
                 }
+            }
 
             await metricRepo.CreateMany(metrics);
 
@@ -141,78 +149,58 @@ namespace Testing.Data
                         ApplicationId = app.Id,
                         Version = i,
                         Name = $"{app.Name} v{i}",
-                        Date = DateTime.UtcNow.AddDays(-_rnd.Next(1, 120))
+                        Date = DateTime.UtcNow.AddDays(-_rnd.Next(1, 100))
                     });
                 }
             }
 
             await instanceRepo.CreateMany(instances);
 
-            // Парамерты устройств
+            // Параметры оборудования
 
             var equipParams = new List<EquipParam>
             {
-                new() { Name = "ОЗУ" },
-                new() { Name = "CPU" },
-                new() { Name = "Screen" },
-                new() { Name = "Storage" },
-                new() { Name = "GPU" },
-                new() { Name = "OS" },
-                new() { Name = "Network" },
-                new() { Name = "Battery" },
-                new() { Name = "Temperature" },
-                new() { Name = "Architecture" }
+                new() { Name = "RAM", UnitMeasure = "GB" },
+                new() { Name = "CPU", UnitMeasure = "MHz" },
+                new() { Name = "Screen", UnitMeasure = "px" },
+                new() { Name = "Storage", UnitMeasure = "GB" },
+                new() { Name = "Battery", UnitMeasure = "mAh" },
+                new() { Name = "Temperature", UnitMeasure = "C" },
+                new() { Name = "Network", UnitMeasure = "Mbps" }
             };
 
             await equipParamRepo.CreateMany(equipParams);
 
-            // Значения
-
-            var valueMap = new Dictionary<string, List<double>>
-            {
-                ["ОЗУ"] = new() { 4, 8, 16, 32, 64 },
-                ["CPU"] = new() { 100, 200, 300, 400 },
-                ["Screen"] = new() { 720, 1080, 1440, 2160 },
-                ["Storage"] = new() { 128, 256, 512, 1024 },
-                ["GPU"] = new() { 1, 2, 3, 4 },
-                ["OS"] = new() { 10, 11, 12, 13 },
-                ["Network"] = new() { 100, 200, 500 },
-                ["Battery"] = new() { 3000, 4000, 5000 },
-                ["Temperature"] = new() { 30, 50, 70 },
-                ["Architecture"] = new() { 64, 128 }
-            };
-
-            var values = new List<Values>();
-
-            foreach (var instance in instances)
-                foreach (var param in equipParams)
-                {
-                    var list = valueMap[param.Name];
-
-                    values.Add(new Values
-                    {
-                        InstanceId = instance.Id,
-                        ParamId = param.Id,
-                        MetricValue = list[_rnd.Next(list.Count)]
-                    });
-                }
-
-            await valueRepo.CreateMany(values);
-
-            // A/B тесты
-
+            // AB тесты
             var tests = new List<ABTests>
             {
-                new() { Name = "цвет_кнопки", Description = "CTA тест", Enabled = true },
-                new() { Name = "чекаут", Description = "Оптимизация оплаты", Enabled = true },
-                new() { Name = "шапка", Description = "Навигация", Enabled = false },
-                new() { Name = "тарифы", Description = "Pricing page", Enabled = true },
-                new() { Name = "регистрация", Description = "Signup flow", Enabled = false }
+                new() { Name = "button_color", Description = "CTA test", Enabled = true },
+                new() { Name = "checkout", Description = "Payment flow", Enabled = true },
+                new() { Name = "header", Description = "Navigation", Enabled = true },
+                new() { Name = "pricing", Description = "Pricing page", Enabled = true },
+                new() { Name = "signup", Description = "Registration", Enabled = true },
+                new() { Name = "hero_banner", Description = "Главный баннер / Hero section test", Enabled = true },
+                new() { Name = "search_ui", Description = "Поиск и UX поиска", Enabled = true },
+                new() { Name = "recommendation_block", Description = "Блок рекомендаций", Enabled = true },
+                new() { Name = "cart_flow", Description = "Корзина и путь покупки", Enabled = true },
+                new() { Name = "login_flow", Description = "Авторизация пользователей", Enabled = true },
+
+                new() { Name = "landing_page", Description = "Landing page conversion test (лендинг)", Enabled = true },
+                new() { Name = "dark_mode", Description = "Темная тема интерфейса", Enabled = true },
+                new() { Name = "push_notifications", Description = "Push уведомления", Enabled = true },
+                new() { Name = "onboarding", Description = "Онбординг новых пользователей", Enabled = true },
+                new() { Name = "ads_layout", Description = "Расположение рекламы", Enabled = true },
+
+                new() { Name = "product_card", Description = "Карточка товара UI/UX", Enabled = true },
+                new() { Name = "filter_system", Description = "Фильтры и сортировка", Enabled = true },
+                new() { Name = "video_autoplay", Description = "Автовоспроизведение видео", Enabled = true },
+                new() { Name = "gamification", Description = "Геймификация интерфейса", Enabled = true },
+                new() { Name = "pricing_ru", Description = "Тарифы (русская локализация)", Enabled = true }
             };
 
             await abTestRepo.CreateMany(tests);
 
-            //  Варианты
+            // Варианты
 
             var variants = new List<Variants>();
 
@@ -220,54 +208,37 @@ namespace Testing.Data
             {
                 variants.AddRange(new[]
                 {
-                    new Variants
-                    {
-                        AbTestId = test.Id,
-                        Name = "A",
-                        Description = "Control",
-                        Mean = _rnd.Next(20, 80),
-                        Audience = 40
-                    },
-                    new Variants
-                    {
-                        AbTestId = test.Id,
-                        Name = "B",
-                        Description = "Variant",
-                        Mean = _rnd.Next(20, 80),
-                        Audience = 40
-                    },
-                    new Variants
-                    {
-                        AbTestId = test.Id,
-                        Name = "C",
-                        Description = "Alternative",
-                        Mean = _rnd.Next(20, 80),
-                        Audience = 20
-                    }
+                    new Variants { AbTestId = test.Id, Name = "A", Description = "Control", Audience = 40, Mean = _rnd.Next(10, 80) },
+                    new Variants { AbTestId = test.Id, Name = "B", Description = "Variant", Audience = 40, Mean = _rnd.Next(10, 80) },
+                    new Variants { AbTestId = test.Id, Name = "C", Description = "Alt", Audience = 20, Mean = _rnd.Next(10, 80) }
                 });
             }
 
             await variantRepo.CreateMany(variants);
 
-            //Результаты
-
+            // Результаты
             var results = new List<AbResults>();
 
             foreach (var instance in instances)
             {
-                for (int i = 0; i < 10; i++)
+                foreach (var variant in variants)
                 {
-                    results.Add(new AbResults
+                    int users = _rnd.Next(15, 21); // 15–20 USERS
+
+                    for (int i = 0; i < users; i++)
                     {
-                        InstanceId = instance.Id,
-                        VariantId = variants[_rnd.Next(variants.Count)].Id
-                    });
+                        results.Add(new AbResults
+                        {
+                            InstanceId = instance.Id,
+                            VariantId = variant.Id
+                        });
+                    }
                 }
             }
 
             await resultRepo.CreateMany(results);
 
-            Console.WriteLine("Заполнение базы завершено");
+            Console.WriteLine("Генерация завершена успешно");
         }
     }
 }

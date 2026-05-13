@@ -7,11 +7,10 @@
 <header>
     <nav>
         <ul>
-            <!--  
-            <li><a href="/Prof">Профиль</a></li> -->
+            <!-- <li><a href="/Prof">Профиль</a></li> -->
             <li><a href="/Index">Главная страница</a></li>
             <li><a href="/Apps">Приложения</a></li>
-            <li><a href="/TestControl">Управление</a></li>
+            <li><a href="/TestControl">Управление тестами</a></li>
             <li><a href="/Manage">Справка</a></li>
 
         </ul>
@@ -52,15 +51,11 @@
     <!-- График -->
 
     <section>
-
         <h2>Активность тестов</h2>
 
-        <div class="chart-container">
-
+        <div class="chart-container" style="height:400px;">
             <canvas id="testsChart"></canvas>
-
         </div>
-
     </section>
 
     <!-- Активные тесты -->
@@ -76,15 +71,15 @@
                 @foreach (var t in Model.ActiveTests)
                 {
                     <a class="test-item"
-                       href="/Tests/@t.Key">
+                       href="/Tests/@t.Id">
 
                         <div>
 
-                            <strong>@t.Key</strong>
+                            <strong>@t.Name</strong>
 
                             <p>
-                                Выбранный вариант:
-                                @t.Value
+                                Статус:
+                                @(t.Enabled ? "Активен" : "Остановлен")
                             </p>
 
                         </div>
@@ -105,12 +100,13 @@
 
 <!-- index.js -->
 
-<script src="https://cdn.jsdelivr.net/npm/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-
-    window.testsChartData = {labels: @Html.Raw(Json.Serialize(Model.ChartLabels)), values: @Html.Raw(Json.Serialize(Model.ChartValues))};
-
+    window.testsChartData = {
+        labels: @Html.Raw(Json.Serialize(Model.ChartLabels)),
+        values: @Html.Raw(Json.Serialize(Model.ChartValues))
+    };
 </script>
 
 <script src="~/js/index.js"></script>

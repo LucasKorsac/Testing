@@ -153,6 +153,11 @@ namespace WebAppTest.Control
                 .GetMetricsWithTypes(objectId);
         }
 
+        public async Task<List<ABTests>> GetActiveTestsOnlyAsync()
+        {
+            var tests = await _facade.GetAllTests();
+            return tests.Where(t => t.Enabled).ToList();
+        }
         public Task<List<ApplicationWithInstances>> GetApplicationsWithInstancesAsync() => _facade.GetApplicationsWithInstances();
     }
 }

@@ -5,6 +5,11 @@ body {
     color: #111827;
 }
 
+.chart-container {
+    height: 400px;
+    width: 100%;
+}
+
 .nav ul {
     display: flex;
     gap: 15px;

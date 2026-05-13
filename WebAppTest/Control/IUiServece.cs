@@ -50,9 +50,8 @@ namespace WebAppTest.Control
 
         Task<List<MetricTypes>> GetMetricTypesAsync();
 
-        Task<List<(Metrics Metric, MetricTypes? Type)>>
-            GetMetricsWithTypesAsync(string appId);
-
+        Task<List<(Metrics Metric, MetricTypes? Type)>> GetMetricsWithTypesAsync(string appId);
+        Task<List<ABTests>> GetActiveTestsOnlyAsync();
         // Аналитика
         Task<int> GetTotalVariants();
     }

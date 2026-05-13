@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebAppTest.Control;
+using static Testing.Base.BaseMongo;
 
 namespace WebAppTest.Pages
 {
@@ -12,52 +13,39 @@ namespace WebAppTest.Pages
             _ui = ui;
         }
 
-        // Аналитика
-
-        public Dictionary<string, string> ActiveTests { get; set; } = new();
+        public List<ABTests> ActiveTests { get; set; } = new();
 
         public int TotalTests { get; set; }
-
         public int ActiveCount { get; set; }
-
         public int TotalVariants { get; set; }
 
-        // Данные графика
-
         public List<string> ChartLabels { get; set; } = new();
-
         public List<int> ChartValues { get; set; } = new();
-
-        // GET
 
         public async Task OnGet()
         {
-            // Активные тесты
-            ActiveTests = await _ui.GetActiveTestsAsync("web-app");
+            var testsTask = _ui.GetTestsAsync();
+            var variantsTask = _ui.GetAllVariantsAsync();
+            var activeTask = _ui.GetActiveTestsOnlyAsync();
 
-            // Все тесты
-            var tests = await _ui.GetTestsAsync();
+            await Task.WhenAll(testsTask, variantsTask, activeTask);
 
-            // Варианты
-            var variants = await _ui.GetVariantsAsync();
+            var tests = await testsTask;
+            var variants = await variantsTask;
 
-            // Статистика
+            ActiveTests = await activeTask;
+
             TotalTests = tests.Count;
-
             ActiveCount = tests.Count(t => t.Enabled);
-
             TotalVariants = variants.Count;
-
-            // Данные для графика
 
             foreach (var test in tests)
             {
                 ChartLabels.Add(test.Name);
 
-                var count = variants
-                    .Count(v => v.AbTestId == test.Id);
-
-                ChartValues.Add(count);
+                ChartValues.Add(
+                    variants.Count(v => v.AbTestId == test.Id)
+                );
             }
         }
     }
