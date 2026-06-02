@@ -1,431 +1,587 @@
-﻿using MongoDB.Bson;
+﻿using ABLibrary.Models;
+using MongoDB.Bson;
+using System.Text;
 using Testing.Base;
+using Testing.DTO;
+using System.Security.Cryptography;
+using System.Text;
 using static Testing.Base.BaseMongo;
 
 namespace Testing.Pattern
 {
-    /// <summary>
-    /// Фасад для работы с A/B тестами, приложениями и аналитикой
-    /// </summary>
+    /// <summary> Фасад для работы с A/B тестами, приложениями и аналитикой </summary>
     public class Facade
     {
         private readonly IMongoRepo<ABTests> _abTests;
-
-        private readonly IMongoRepo<Variants> _variants;
-
+        private readonly IMongoRepo<BaseMongo.Variants> _variants;
         private readonly IMongoRepo<AbResults> _results;
-
         private readonly IMongoRepo<Instances> _instances;
-
         private readonly IMongoRepo<Applications> _applications;
-
         private readonly IMongoRepo<DevelopRoleApplic> _devRoles;
-
         private readonly IMongoRepo<Metrics> _metrics;
-
         private readonly IMongoRepo<MetricTypes> _metricTypes;
+        private readonly IMongoRepo<Roles> _roles;
+        private readonly IMongoRepo<Developers> _developers;
+        private readonly IMongoRepo<EquipParam> _equipParam;
+        private readonly IMongoRepo<Values> _values;
 
         public Facade(
             IMongoRepo<ABTests> abTests,
-            IMongoRepo<Variants> variants,
+            IMongoRepo<BaseMongo.Variants> variants,
             IMongoRepo<AbResults> results,
             IMongoRepo<Instances> instances,
             IMongoRepo<Applications> applications,
             IMongoRepo<DevelopRoleApplic> devRoles,
             IMongoRepo<Metrics> metrics,
-            IMongoRepo<MetricTypes> metricTypes)
+            IMongoRepo<MetricTypes> metricTypes,
+            IMongoRepo<Roles> roles,
+            IMongoRepo<Developers> developers,
+            IMongoRepo<EquipParam> equipParam,
+            IMongoRepo<Values> value)
         {
             _abTests = abTests;
-
             _variants = variants;
-
             _results = results;
-
             _instances = instances;
-
             _applications = applications;
-
             _devRoles = devRoles;
-
             _metrics = metrics;
-
             _metricTypes = metricTypes;
+            _roles = roles;
+            _developers = developers;
+            _equipParam = equipParam;
+            _values = value;
         }
 
-       // Тесты
+        private static string ToId(ObjectId id) => id.ToString();
 
-        /// <summary>
-        /// Получение всех тестов
-        /// </summary>
-        public Task<List<ABTests>> GetAllTests()
-        {
-            return _abTests.GetAll();
-        }
+        // Тесты
 
-        /// <summary>
-        /// Получение теста по id
-        /// </summary>
-        public async Task<ABTests?> GetById(ObjectId id)
-        {
-            return await _abTests.GetById(id);
-        }
-
-        /// <summary>
-        /// Тесты вместе с вариантами
-        /// </summary>
-        public async Task<List<TestWithVariants>> GetTests()
+        public async Task<List<TestDto>> GetAllTests()
         {
             var tests = await _abTests.GetAll();
 
+            return tests.Select(t => new TestDto
+            {
+                Id = ToId(t.Id),
+                ApplicationId = ToId(t.ApplicationId),
+                Name = t.Name,
+                Description = t.Description,
+                Enabled = t.Enabled
+            }).ToList();
+        }
+        public async Task<TestDto?> GetById(ObjectId id)
+        {
+            var t = await _abTests.GetById(id);
+            if (t == null) return null;
+
+            return new TestDto
+            {
+                Id = ToId(t.Id),
+                ApplicationId = ToId(t.ApplicationId),
+                Name = t.Name,
+                Description = t.Description,
+                Enabled = t.Enabled
+            };
+        }
+        public async Task<List<TestWithVariantsDto>> GetTests()
+        {
+            var tests = await _abTests.GetAll();
             var variants = await _variants.GetAll();
 
             var grouped = variants
                 .GroupBy(v => v.AbTestId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            var result = new List<TestWithVariants>();
+            var result = new List<TestWithVariantsDto>();
 
             foreach (var test in tests)
             {
                 grouped.TryGetValue(test.Id, out var list);
 
-                result.Add(new TestWithVariants
+                result.Add(new TestWithVariantsDto
                 {
-                    Test = test,
-                    Variants = list ?? new List<Variants>()
+                    Test = new TestDto
+                    {
+                        Id = ToId(test.Id),
+                        ApplicationId = ToId(test.ApplicationId),
+                        Name = test.Name,
+                        Description = test.Description,
+                        Enabled = test.Enabled
+                    },
+                    Variants = (list ?? new List<Variants>())
+                        .Select(v => new VariantDto
+                        {
+                            Id = ToId(v.Id),
+                            AbTestId = ToId(v.AbTestId),
+                            Name = v.Name,
+                            Description = v.Description,
+                            Mean = v.Mean,
+                            Audience = v.Audience
+                        }).ToList()
                 });
             }
 
             return result;
         }
 
-        /// <summary>
-        /// Создание теста
-        /// </summary>
-        public async Task CreateTest(ABTests test)
-        {
-            await _abTests.Create(test);
-        }
-
-        /// <summary>
-        /// Обновление теста
-        /// </summary>
-        public async Task UpdateTest(ABTests test)
-        {
-            await _abTests.Update(test.Id, test);
-        }
-
-        /// <summary>
-        /// Удаление теста
-        /// </summary>
-        public async Task DeleteTest(ObjectId id)
-        {
-            var variants = await _variants.Where(v => v.AbTestId == id);
-
-            var variantIds = variants
-                .Select(v => v.Id)
-                .ToList();
-
-            await _results.DeleteMany(r => variantIds.Contains(r.VariantId));
-
-            await _variants.DeleteMany(v => v.AbTestId == id);
-
-            await _abTests.Delete(id);
-        }
-
-        /// <summary>
-        /// Остановка теста
-        /// </summary>
-        public async Task StopTest(ObjectId id)
-        {
-            var test = await _abTests.GetById(id);
-
-            if (test == null)
-                return;
-
-            test.Enabled = false;
-
-            await _abTests.Update(id, test);
-        }
-
-        /// <summary>
-        /// Возобновление теста
-        /// </summary>
-        public async Task ResumeTest(ObjectId id)
-        {
-            var test = await _abTests.GetById(id);
-
-            if (test == null)
-                return;
-
-            test.Enabled = true;
-
-            await _abTests.Update(id, test);
-        }
-
-        // Варианты
-
-        /// <summary>
-        /// Получение всех вариантов
-        /// </summary>
-        public Task<List<Variants>> GetAllVariants()
-        {
-            return _variants.GetAll();
-        }
-
-        /// <summary>
-        /// Варианты конкретного теста
-        /// </summary>
-        public async Task<List<Variants>> GetVariantsByTest(ObjectId testId)
-        {
-            return await _variants.Where(v => v.AbTestId == testId);
-        }
-
-        /// <summary>
-        /// Создание варианта
-        /// </summary>
-        public async Task CreateVariant(Variants variant)
-        {
-            await _variants.Create(variant);
-        }
-
-        /// <summary>
-        /// Обновление варианта
-        /// </summary>
-        public async Task UpdateVariant(Variants variant)
-        {
-            await _variants.Update(variant.Id, variant);
-        }
-
-        /// <summary>
-        /// Удаление варианта
-        /// </summary>
-        public async Task DeleteVariant(ObjectId variantId)
-        {
-            await _results.DeleteMany(r => r.VariantId == variantId);
-
-            await _variants.Delete(variantId);
-        }
-
-        // Результаты
-
-        /// <summary>
-        /// Результаты теста
-        /// </summary>
-        public async Task<List<AbResults>> GetResults(ObjectId testId)
-        {
-            var variants = await _variants.Where(v => v.AbTestId == testId);
-
-            var ids = variants
-                .Select(v => v.Id)
-                .ToList();
-
-            return await _results.Where(r => ids.Contains(r.VariantId));
-        }
-
-        /// <summary>
-        /// Добавление результата
-        /// </summary>
-        public async Task AddResult(AbResults result)
-        {
-            await _results.Create(result);
-        }
-
-        /// <summary>
-        /// Получение результатов по экземпляру
-        /// </summary>
-        public async Task<List<AbResults>> GetResultsByInstance(ObjectId instanceId)
-        {
-            return await _results.Where(r => r.InstanceId == instanceId);
-        }
-
         // Приложения
 
-        /// <summary>
-        /// Все приложения
-        /// </summary>
-        public Task<List<Applications>> GetApplications()
+        public async Task<List<ApplicationDto>> GetApplications()
         {
-            return _applications.GetAll();
+            var apps = await _applications.GetAll();
+
+            return apps.Select(a => new ApplicationDto
+            {
+                Id = ToId(a.Id),
+                Name = a.Name,
+                Description = a.Description
+            }).ToList();
         }
 
-        /// <summary>
-        /// Приложение по id
-        /// </summary>
-        public async Task<Applications?> GetApplication(ObjectId id)
+        public async Task<ApplicationDto?> GetApplication(ObjectId id)
         {
-            return await _applications.GetById(id);
-        }
+            var a = await _applications.GetById(id);
+            if (a == null) return null;
 
-        /// <summary>
-        /// Создание приложения
-        /// </summary>
-        public async Task CreateApplication(Applications app)
-        {
-            await _applications.Create(app);
-        }
-
-        /// <summary>
-        /// Обновление приложения
-        /// </summary>
-        public async Task UpdateApplication(Applications app)
-        {
-            await _applications.Update(app.Id, app);
-        }
-
-        /// <summary>
-        /// Удаление приложения
-        /// </summary>
-        public async Task DeleteApplication(ObjectId id)
-        {
-            await _devRoles.DeleteMany(x => x.Application == id);
-
-            var instances = await _instances.Where(x => x.ApplicationId == id);
-
-            var instanceIds = instances
-                .Select(x => x.Id)
-                .ToList();
-
-            await _results.DeleteMany(x => instanceIds.Contains(x.InstanceId));
-
-            await _instances.DeleteMany(x => x.ApplicationId == id);
-
-            await _applications.Delete(id);
+            return new ApplicationDto
+            {
+                Id = ToId(a.Id),
+                Name = a.Name,
+                Description = a.Description
+            };
         }
 
         // Экземпляры
 
-        /// <summary>
-        /// Экземпляры приложения
-        /// </summary>
-        public async Task<List<Instances>> GetInstances(ObjectId appId)
+        public async Task<List<InstanceDto>> GetInstancesByApp(ObjectId appId)
         {
-            return await _instances.Where(x => x.ApplicationId == appId);
+            var instances = await _instances.Where(x => x.ApplicationId == appId);
+
+            return instances.Select(i => new InstanceDto
+            {
+                Id = ToId(i.Id),
+                ApplicationId = ToId(i.ApplicationId),
+                Version = i.Version,
+                Name = i.Name,
+                Date = i.Date
+            }).ToList();
         }
 
-        /// <summary>
-        /// Экземпляр по id
-        /// </summary>
-        public async Task<Instances?> GetInstance(ObjectId id)
+        public async Task<InstanceDto?> GetInstance(ObjectId id)
         {
-            return await _instances.GetById(id);
+            var i = await _instances.GetById(id);
+            if (i == null) return null;
+
+            return new InstanceDto
+            {
+                Id = ToId(i.Id),
+                ApplicationId = ToId(i.ApplicationId),
+                Version = i.Version,
+                Name = i.Name,
+                Date = i.Date
+            };
         }
 
-        /// <summary>
-        /// Создание экземпляра
-        /// </summary>
-        public async Task CreateInstance(Instances instance)
+        // Метрики 
+
+        public async Task<List<MetricWithTypeDto>> GetMetricsWithTypes(ObjectId appId)
         {
-            await _instances.Create(instance);
+            var metrics = await _metrics.Where(x => x.ApplicationId == appId);
+            var types = await _metricTypes.GetAll();
+
+            return metrics.Select(m =>
+            {
+                var type = types.FirstOrDefault(t => t.Id == m.MetricTypeId);
+
+                return new MetricWithTypeDto
+                {
+                    Metric = new MetricDto
+                    {
+                        Id = ToId(m.Id),
+                        ApplicationId = ToId(m.ApplicationId),
+                        MetricTypeId = ToId(m.MetricTypeId),
+                        Meaning = m.Meaning
+                    },
+                    TypeName = type?.Name
+                };
+            }).ToList();
         }
 
-        /// <summary>
-        /// Экземпляры по приложению
-        /// </summary>
-        public async Task<List<Instances>> GetInstancesByApp(ObjectId appId)
+        // Варианты
+
+        public async Task<List<DTO.VariantDto>> GetAllVariants()
         {
-            return await _instances.Where(i => i.ApplicationId == appId);
+            var variants = await _variants.GetAll();
+
+            return variants.Select(v => new VariantDto
+            {
+                Id = ToId(v.Id),
+                AbTestId = ToId(v.AbTestId),
+                Name = v.Name,
+                Description = v.Description,
+                Mean = v.Mean,
+                Audience = v.Audience
+            }).ToList();
         }
 
-        /// <summary>
-        /// Получить приложения вместе с экземплярами
-        /// </summary>
-        public async Task<List<ApplicationWithInstances>> GetApplicationsWithInstances()
+        // Результаты
+
+        public async Task<List<IdDto>> GetResults(ObjectId testId)
+        {
+            var variants = await _variants.Where(v => v.AbTestId == testId);
+
+            var ids = variants.Select(v => v.Id).ToList();
+
+            var res = await _results.Where(r => ids.Contains(r.VariantId));
+
+            return res.Select(r => new IdDto
+            {
+                Id = ToId(r.Id)
+            }).ToList();
+        }
+
+        // Анализ
+
+        public async Task<int> GetActiveTestsCount()
+        {
+            var tests = await _abTests.Where(x => x.Enabled);
+            return tests.Count;
+        }
+
+        public async Task<int> GetTestsCount()
+        {
+            var tests = await _abTests.GetAll();
+            return tests.Count;
+        }
+
+        public async Task<int> GetVariantsCount()
+        {
+            var variants = await _variants.GetAll();
+            return variants.Count;
+        }
+
+        public async Task DeleteTest(string id)
+        {
+            var objectId = ObjectId.Parse(id);
+
+            var variants = await _variants.Where(v => v.AbTestId == objectId);
+
+            var variantIds = variants.Select(v => v.Id).ToList();
+
+            await _results.DeleteMany(r => variantIds.Contains(r.VariantId));
+            await _variants.DeleteMany(v => v.AbTestId == objectId);
+            await _abTests.Delete(objectId);
+        }
+
+        public async Task StopTest(string id)
+        {
+            var test = await _abTests.GetById(ObjectId.Parse(id));
+            if (test == null) return;
+
+            test.Enabled = false;
+            await _abTests.Update(test.Id, test);
+        }
+
+        public async Task ResumeTest(string id)
+        {
+            var test = await _abTests.GetById(ObjectId.Parse(id));
+            if (test == null) return;
+
+            test.Enabled = true;
+            await _abTests.Update(test.Id, test);
+        }
+        public async Task<List<ApplicationWithInstancesDto>> GetApplicationsWithInstances()
         {
             var apps = await _applications.GetAll();
-
             var instances = await _instances.GetAll();
 
             var grouped = instances
                 .GroupBy(i => i.ApplicationId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            var result = new List<ApplicationWithInstances>();
+            var result = new List<ApplicationWithInstancesDto>();
 
             foreach (var app in apps)
             {
                 grouped.TryGetValue(app.Id, out var list);
 
-                result.Add(new ApplicationWithInstances
+                result.Add(new ApplicationWithInstancesDto
                 {
-                    Application = app,
-                    Instances = list ?? new List<Instances>()
+                    Application = new ApplicationDto
+                    {
+                        Id = app.Id.ToString(),
+                        Name = app.Name,
+                        Description = app.Description
+                    },
+                    Instances = (list ?? new List<Instances>())
+                        .Select(i => new InstanceDto
+                        {
+                            Id = i.Id.ToString(),
+                            ApplicationId = i.ApplicationId.ToString(),
+                            Name = i.Name,
+                            Version = i.Version,
+                            Date = i.Date
+                        }).ToList()
                 });
             }
 
             return result;
         }
-
-        // Метрики
-
-        /// <summary>
-        /// Метрики приложения
-        /// </summary>
-        public async Task<List<Metrics>> GetMetricsByApplication(ObjectId appId)
+        public async Task<List<ValueDto>> GetDeviceValues(ObjectId appId)
         {
-            return await _metrics.Where(x => x.ApplicationId == appId);
-        }
+            var instances = await _instances.Where(x => x.ApplicationId == appId);
+            var ids = instances.Select(i => i.Id).ToList();
 
-        /// <summary>
-        /// Все типы метрик
-        /// </summary>
-        public async Task<List<MetricTypes>> GetMetricTypes()
-        {
-            return await _metricTypes.GetAll();
-        }
+            var values = await _values.Where(x => ids.Contains(x.InstanceId));
 
-        /// <summary>
-        /// Метрики вместе с названиями типов
-        /// </summary>
-        public async Task<List<(Metrics Metric, MetricTypes? Type)>> GetMetricsWithTypes(ObjectId appId)
-        {
-            var metrics = await _metrics.Where(x => x.ApplicationId == appId);
-
-            var metricTypes = await _metricTypes.GetAll();
-
-            var result = new List<(Metrics, MetricTypes?)>();
-
-            foreach (var metric in metrics)
+            return values.Select(v => new ValueDto
             {
-                var type = metricTypes
-                    .FirstOrDefault(t => t.Id == metric.MetricTypeId);
+                Id = v.Id.ToString(),
+                InstanceId = v.InstanceId.ToString(),
+                ParamId = v.ParamId.ToString(),
+                MetricValue = v.MetricValue
+            }).ToList();
+        }
+        public async Task<List<EquipParamDto>> GetEquipParam()
+        {
+            var data = await _equipParam.GetAll();
 
-                result.Add((metric, type));
-            }
-
-            return result;
+            return data.Select(x => new EquipParamDto
+            {
+                Id = x.Id.ToString(),
+                Name = x.Name,
+                UnitMeasure = x.UnitMeasure
+            }).ToList();
         }
 
-        // Аналитика
-
-        /// <summary>
-        /// Количество активных тестов
-        /// </summary>
-        public async Task<int> GetActiveTestsCount()
+        public async Task<List<AbResultsDto>> GetResultsByInstance(ObjectId instanceId)
         {
-            var tests = await _abTests.Where(x => x.Enabled);
+            var results = await _results.Where(r => r.InstanceId == instanceId);
 
-            return tests.Count;
+            return results.Select(r => new AbResultsDto
+            {
+                Id = r.Id.ToString(),
+                InstanceId = r.InstanceId.ToString(),
+                VariantId = r.VariantId.ToString()
+            }).ToList();
         }
 
-        /// <summary>
-        /// Общее количество тестов
-        /// </summary>
-        public async Task<int> GetTestsCount()
+        public async Task UpdateTest(TestDto dto)
         {
-            var tests = await _abTests.GetAll();
+            var id = ObjectId.Parse(dto.Id);
 
-            return tests.Count;
+            var test = await _abTests.GetById(id);
+            if (test == null) return;
+
+            test.Name = dto.Name;
+            test.Description = dto.Description;
+            test.Enabled = dto.Enabled;
+
+            await _abTests.Update(test.Id, test);
         }
 
-        /// <summary>
-        /// Количество вариантов
-        /// </summary>
-        public async Task<int> GetVariantsCount()
-        {
-            var variants = await _variants.GetAll();
+        // Результаты по тесту
 
-            return variants.Count;
+        /// <summary> Получение результатов по тесту </summary>
+        public async Task<List<AbResultsDto>> GetResultsByTest(ObjectId testId)
+        {
+            // получаем все варианты теста
+            var variants = await _variants.Where(v => v.AbTestId == testId);
+
+            // собираем их Id
+            var variantIds = variants.Select(v => v.Id).ToList();
+
+            // получаем результаты по вариантам
+            var results = await _results.Where(r => variantIds.Contains(r.VariantId));
+
+            // маппинг в DTO
+            return results.Select(r => new AbResultsDto
+            {
+                Id = r.Id.ToString(),
+                VariantId = r.VariantId.ToString(),
+                InstanceId = r.InstanceId.ToString()
+            }).ToList();
+        }
+
+        public async Task<List<AbResultsDto>> GetAllResults()
+        {
+            var results = await _results.GetAll();
+
+            return results.Select(r => new AbResultsDto
+            {
+                Id = r.Id.ToString(),
+                InstanceId = r.InstanceId.ToString(),
+                VariantId = r.VariantId.ToString()
+            }).ToList();
+        }
+
+        public async Task<List<InstanceDto>> GetInstances()
+        {
+            var instances = await _instances.GetAll();
+
+            return instances.Select(i => new InstanceDto
+            {
+                Id = i.Id.ToString(),
+                ApplicationId = i.ApplicationId.ToString(),
+                Name = i.Name,
+                Version = i.Version,
+                Date = i.Date
+            }).ToList();
+        }
+
+        public async Task DeleteVariant(string id)
+        {
+            var objectId = ObjectId.Parse(id);
+
+            // удалить результаты варианта
+            await _results.DeleteMany(r => r.VariantId == objectId);
+
+            // удалить сам вариант
+            await _variants.Delete(objectId);
+        }
+
+        public async Task DeleteApplication(string id)
+        {
+            var objectId = ObjectId.Parse(id);
+
+            var instances =
+                await _instances.Where(x =>
+                    x.ApplicationId == objectId);
+
+            var instanceIds =
+                instances.Select(x => x.Id).ToList();
+
+            await _values.DeleteMany(v =>
+                instanceIds.Contains(v.InstanceId));
+
+            await _metrics.DeleteMany(m =>
+                m.ApplicationId == objectId);
+
+            await _instances.DeleteMany(i =>
+                i.ApplicationId == objectId);
+
+            await _applications.Delete(objectId);
+        }
+
+        public async Task CreateTest(string applicationId, string name,string description)
+        {
+            var test = new ABTests
+            {
+                Id = ObjectId.GenerateNewId(),
+
+                ApplicationId =
+                    ObjectId.Parse(applicationId),
+
+                Name = name,
+
+                Description = description,
+
+                Enabled = true
+            };
+
+            await _abTests.Create(test); 
+        }
+
+        public async Task SaveEvent(TestEvent evt)
+        {
+            // найти тест
+            var tests =
+                await _abTests.Where(x =>
+                    x.Name == evt.TestName);
+
+            var test = tests.FirstOrDefault();
+
+            if (test == null)
+                return;
+
+            // найти вариант
+            var variants =
+                await _variants.Where(x =>
+                    x.AbTestId == test.Id &&
+                    x.Name == evt.Variant);
+
+            var variant =
+                variants.FirstOrDefault();
+
+            if (variant == null)
+                return;
+
+            // создать результат
+            var result = new AbResults
+            {
+                Id = ObjectId.GenerateNewId(),
+
+                VariantId = variant.Id,
+
+                InstanceId = ObjectId.GenerateNewId()
+            };
+
+            await _results.Create(result);
+        }
+
+         /// <summary> Получение разработчика по логину </summary>
+        public async Task<DeveloperDto?> GetDeveloperByLogin(string login)
+        {
+            var developer = await _developers.FirstOrDefault(x => x.Login == login);
+
+            if (developer == null)
+                return null;
+
+            return new DeveloperDto
+            {
+                Id = developer.Id.ToString(),
+                Login = developer.Login,
+                PasswordHash = developer.PasswordHash
+            };
+        }
+
+        /// <summary> Регистрация нового разработчика </summary>
+        public async Task<bool> RegisterDeveloper(string login, string password)
+        {
+            // Проверяем, существует ли пользователь
+            var existing = await _developers.FirstOrDefault(x => x.Login == login);
+            if (existing != null)
+                return false;
+
+            // Создаем нового разработчика
+            var developer = new Developers
+            {
+                Id = ObjectId.GenerateNewId(),
+                Login = login,
+                PasswordHash = HashPassword(password)
+            };
+
+            await _developers.Create(developer);
+            return true;
+        }
+
+        /// <summary> Проверка пароля </summary>
+        public bool VerifyPassword(string password, string hash)
+        {
+            return HashPassword(password) == hash;
+        }
+
+        /// <summary> Хеширование пароля </summary>
+        private string HashPassword(string password)
+        {
+            using var sha = SHA256.Create();
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(bytes);
+        }
+
+        public async Task CreateVariant(string testId, string name, string description)
+        {
+            var variant = new Variants
+            {
+                Id = ObjectId.GenerateNewId(),
+                AbTestId = ObjectId.Parse(testId),
+                Name = name,
+                Description = description,
+                Mean = 0,
+                Audience = 0
+            };
+            await _variants.Create(variant);
         }
     }
 }

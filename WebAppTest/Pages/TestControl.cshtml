@@ -2,148 +2,132 @@
 @model WebAppTest.Pages.TestControlModel
 
 @{
-    ViewData["Title"] = "Управление";
+    ViewData["Title"] = "Управление тестами";
 }
 
-<header>
-    <nav>
-        <ul>
-            <!-- <li><a href="/Prof">Профиль</a></li> -->
-            <li><a href="/Index">Главная страница</a></li>
-            <li><a href="/Apps">Приложения</a></li>
-            <li><a href="/TestControl">Управление тестами</a></li>
-            <li><a href="/Manage">Справка</a></li>
-
-        </ul>
-    </nav>
-</header>
-
-<main>
+<main class="page-container">
+    <!-- Форма создания теста - половина ширины -->
+    <div class="create-test-card">
+        <h2>Создание теста</h2>
+        <form method="post" id="createTestForm" asp-page-handler="Create">
+            <div class="form-group">
+                <label>Название</label>
+                <input asp-for="CreateModel.Name" class="form-input" required />
+            </div>
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea asp-for="CreateModel.Description" class="form-input" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Приложение</label>
+                <select asp-for="CreateModel.ApplicationId" class="form-input" required>
+                    <option value="">Выберите приложение</option>
+                    @foreach (var app in Model.Applications)
+                    {
+                        <option value="@app.Id">@app.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Варианты (через запятую)</label>
+                <input asp-for="CreateModel.VariantsInput" class="form-input" placeholder="Вариант А, Вариант Б, Вариант В" />
+            </div>
+            <button type="submit" class="btn btn-primary">Создать тест</button>
+        </form>
+    </div>
 
     <h1>Управление A/B тестами</h1>
+    <p class="page-description">Создание, редактирование и мониторинг тестов</p>
 
-    <!-- блок действий -->
-    <section>
-
-        <div class="actions">
-
-            <button class="btn btn-primary">
-                + Создать тест
-            </button>
-
-        </div>
-
-    </section>
-
-    <!-- список тестов -->
-    <section>
-
-        <h2>Список тестов</h2>
-
-        @if (Model.Tests.Any())
-        {
+    @if (Model.Tests.Any())
+    {
+        <div class="tests-grid">
             @foreach (var test in Model.Tests)
             {
-                <section class="test-card">
-
-                    <!-- левая часть -->
-                    <div class="test-info">
-
-                        <h3>
-                            <a asp-page="/Tests" asp-route-id="@test.Id">
-                                @test.Name
-                            </a>
-                        </h3>
-
-                        <p class="test-description">
-                            @test.Description
-                        </p>
-
-                        <span class="test-status @(test.Enabled ? "status-active" : "status-stopped")">
-
+                <div class="test-card" data-test-id="@test.Id">
+                    <div class="test-card-header">
+                        <div>
+                            <h2>@test.Name</h2>
+                            <p>@(string.IsNullOrWhiteSpace(test.Description) ? "Описание отсутствует" : test.Description)</p>
+                        </div>
+                        <span class="status-badge @(test.Enabled ? "status-active" : "status-stopped")">
                             @(test.Enabled ? "Активен" : "Остановлен")
-
                         </span>
-
                     </div>
-
-                    <!-- правая часть -->
-                    <div class="actions">
-
-                        <!-- открыть -->
-                        <a class="btn btn-secondary"
-                           href="/Tests/@test.Id">
-
-                            Открыть
-
-                        </a>
-
-                        <!-- редактирование -->
-                        <a class="btn btn-primary"
-                           href="/Tests/@test.Id?mode=edit">
-
-                            Редактировать
-
-                        </a>
-
-                        <!-- остановка -->
-                        @if (test.Enabled)
-                        {
-                            <form method="post"
-                                  asp-page-handler="Stop"
-                                  asp-route-id="@test.Id">
-
-                                <button class="btn btn-warning"
-                                        type="submit">
-
-                                    Остановить
-
-                                </button>
-
-                            </form>
-                        }
-                        else
-                        {
-                            <!-- возобновление -->
-                            <form method="post"
-                                  asp-page-handler="Resume"
-                                  asp-route-id="@test.Id">
-
-                                <button class="btn btn-success"
-                                        type="submit">
-
-                                    Возобновить
-
-                                </button>
-
-                            </form>
-                        }
-
-                        <!-- удаление -->
-                        <form method="post"
-                              asp-page-handler="Delete"
-                              asp-route-id="@test.Id">
-
-                            <button class="btn btn-danger"
-                                    type="submit"
-                                    onclick="return confirm('Удалить тест?')">
-
-                                Удалить
-
+                    <div class="test-metrics">
+                        <div class="metric-item">
+                            <span>Вариантов</span>
+                            <strong>@test.VariantsCount</strong>
+                        </div>
+                        <div class="metric-item">
+                            <span>Установок</span>
+                            <strong>@test.InstallCount</strong>
+                        </div>
+                    </div>
+                    <div class="test-actions">
+                        <a class="btn btn-secondary btn-sm" href="/Tests/@test.Id">Открыть</a>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openEditModal('@test.Id', '@test.Name', '@test.Description')">Редактировать</button>
+                        <form method="post" asp-page-handler="Toggle" asp-route-id="@test.Id" style="display: inline;">
+                            <button type="submit" class="btn @(test.Enabled ? "btn-warning" : "btn-success") btn-sm">
+                                @(test.Enabled ? "Остановить" : "Запустить")
                             </button>
-
                         </form>
-
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@test.Id" style="display: inline;" onsubmit="return confirmDelete()">
+                            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                        </form>
                     </div>
-
-                </section>
+                </div>
             }
-        }
-        else
-        {
-            <p>Нет тестов</p>
-        }
-
-    </section>
-
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <h2>Тестов пока нет</h2>
+            <p>Создайте первый A/B тест</p>
+        </div>
+    }
 </main>
+
+<!-- Модальное окно редактирования -->
+<div id="editModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 24px; padding: 28px; z-index: 1000; min-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+    <h3 style="margin-top: 0;">Редактирование теста</h3>
+    <form method="post" asp-page-handler="Update" id="editForm">
+        <input type="hidden" name="id" id="editId" />
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="name" id="editName" class="form-input" required />
+        </div>
+        <div class="form-group">
+            <label>Описание</label>
+            <textarea name="description" id="editDescription" class="form-input" rows="3"></textarea>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+        </div>
+    </form>
+</div>
+<div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
+<script>
+    function openEditModal(id, name, description) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editName').value = name;
+        document.getElementById('editDescription').value = description;
+        document.getElementById('editModal').style.display = 'block';
+        document.getElementById('modalOverlay').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+        document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    function confirmDelete() {
+        return confirm('Удалить тест?');
+    }
+
+    // Закрытие по клику на overlay
+    document.getElementById('modalOverlay')?.addEventListener('click', closeModal);
+</script>

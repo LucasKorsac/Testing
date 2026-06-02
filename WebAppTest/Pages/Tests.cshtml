@@ -1,148 +1,280 @@
 ﻿@page "{id}"
+
 @model WebAppTest.Pages.TestsModel
+
 @using System.Text.Json
 
 @{
     ViewData["Title"] = "Тест";
 }
 
-<header>
-    <nav>
-        <ul>
-            <li><a href="/Index">Главная</a></li>
-            <li><a href="/Apps">Приложения</a></li>
-            <li><a href="/TestControl">Управление тестами</a></li>
-            <li><a href="/Manage">Справка</a></li>
-        </ul>
-    </nav>
-</header>
+@section Styles {
 
-<main>
+    <link rel="stylesheet"
+          href="~/css/charts.css"
+          asp-append-version="true" />
 
-    <!-- Информация о тесте -->
+}
 
-    <section class="content-card">
+<main class="page-container">
 
-        <h1>@Model.TestName</h1>
+    <section class="hero card">
 
-        <p>@Model.Description</p>
+        <div>
 
-        <span class="status-badge @(Model.IsActive
-                          ? "status-active"
-                          : "status-stopped")">
+            <h1>
+                @Model.TestName
+            </h1>
 
-            @(Model.IsActive ? "Активен" : "Остановлен")
+            <p class="description">
+                @Model.Description
+            </p>
 
-        </span>
+            <span class="status-badge
+                  @(Model.IsActive
+                                      ? "status-active"
+                                      : "status-stopped")">
 
-    </section>
+                @(Model.IsActive
+                                ? "Активен"
+                                : "Остановлен")
 
-    <!-- Таблица -->
-
-    <section class="content-card">
-
-        <h2>Информация о тесте</h2>
-
-        <table class="metrics-table">
-
-            <thead>
-                <tr>
-                    <th>Параметр</th>
-                    <th>Значение</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                @foreach (var row in Model.TableData)
-                {
-                    <tr>
-                        <td>@row.Key</td>
-                        <td>@row.Value</td>
-                    </tr>
-                }
-
-            </tbody>
-
-        </table>
-
-    </section>
-
-
-    <!-- График -->
-
-
-    <section class="content-card">
-
-        <h2>Распределение пользователей</h2>
-
-        <div class="chart-wrapper">
-
-            <canvas id="variantChart"></canvas>
+            </span>
 
         </div>
 
     </section>
 
-    <!--  Варианты -->
+    <section class="stats-grid">
 
-    <section class="content-card">
+        @foreach (var row in Model.TableData)
+        {
+            <div class="stat-card">
 
-        <h2>Варианты теста</h2>
+                <span>@row.Key</span>
 
-        <table class="metrics-table">
+                <strong>@row.Value</strong>
 
-            <thead>
-                <tr>
-                    <th>Вариант</th>
-                    <th>Пользователей</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                @for (int i = 0; i < Model.VariantLabels.Count; i++)
-                {
-                    <tr>
-                        <td>@Model.VariantLabels[i]</td>
-                        <td>@Model.VariantValues[i]</td>
-                    </tr>
-                }
-
-            </tbody>
-
-        </table>
+            </div>
+        }
 
     </section>
 
-    <div style="margin-top:20px;">
+    <section class="card">
 
-        <a class="btn btn-secondary"
-           href="/TestControl">
+        <div class="chart-layout">
 
-            ← Назад
+            <div class="chart-sidebar">
 
-        </a>
+                <h3>Настройки</h3>
 
-    </div>
+                <label>
+                    Тип графика
+                </label>
+
+                <select id="chartType">
+
+                    <option value="bar">
+                        Bar
+                    </option>
+
+                    <option value="line">
+                        Line
+                    </option>
+
+                    <option value="pie">
+                        Pie
+                    </option>
+
+                    <option value="doughnut">
+                        Doughnut
+                    </option>
+
+                </select>
+
+                <label>
+                    Показатель
+                </label>
+
+                <select id="chartMetric">
+
+                    <option value="installs">
+                        Установки
+                    </option>
+
+                    <option value="metrics">
+                        Метрики
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="chart-content">
+
+                <h2>
+                    Аналитика теста
+                </h2>
+
+                <div class="chart-container">
+
+                    <canvas id="variantChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <div class="results-header">
+
+            <div>
+
+                <h2>
+                    Результаты установок
+                </h2>
+
+                <p class="description">
+
+                    Метрики по вариантам
+
+                </p>
+
+            </div>
+
+            <div class="filter-box">
+
+                <label>
+                    Фильтр
+                </label>
+
+                <select id="variantFilter">
+
+                    <option value="all">
+                        Все варианты
+                    </option>
+
+                    @foreach (var variant
+                                        in Model.VariantLabels)
+                    {
+                        <option value="@variant">
+                            @variant
+                        </option>
+                    }
+
+                </select>
+
+            </div>
+
+        </div>
+
+        @if (Model.Results.Any())
+        {
+            <div class="table-scroll">
+
+                <table class="metrics-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Установка</th>
+
+                            <th>Вариант</th>
+
+                            <th>Тип метрики</th>
+
+                            <th>Метрика</th>
+
+                            <th>Значение</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var row in Model.Results)
+                        {
+                            <tr class="result-row"
+                                data-variant="@row.VariantName">
+
+                                <td>
+                                    @row.InstallId
+                                </td>
+
+                                <td>
+                                    @row.VariantName
+                                </td>
+
+                                <td>
+                                    @row.MetricType
+                                </td>
+
+                                <td>
+                                    @row.MetricName
+                                </td>
+
+                                <td>
+                                    @row.Value
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+
+                <p>
+                    Нет результатов
+                </p>
+
+            </div>
+        }
+
+    </section>
 
 </main>
 
-<!-- js -->
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="~/js/chart-helper.js"></script>
 
 <script>
 
-    window.variantChartData = {
+    window.variantData = {
 
         labels:
-            @Html.Raw(JsonSerializer.Serialize(Model.VariantLabels)),
+            @Html.Raw(
+                JsonSerializer.Serialize(
+                        Model.ChartLabels)
+                        ),
 
-        values:
-            @Html.Raw(JsonSerializer.Serialize(Model.VariantValues))
+        installs:
+            @Html.Raw(
+                                JsonSerializer.Serialize(
+                                        Model.ChartInstalls)
+                        ),
+
+        metrics:
+            @Html.Raw(
+                                JsonSerializer.Serialize(
+                                        Model.ChartMetrics)
+                        )
     };
 
 </script>
 
-<script src="~/js/tests.js"></script>
+<script src="~/js/tests.js"
+        asp-append-version="true"></script>

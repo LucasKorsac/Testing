@@ -1,112 +1,103 @@
 ﻿@page
 @model WebAppTest.Pages.IndexModel
+
 @{
     ViewData["Title"] = "Главная";
 }
 
-<header>
-    <nav>
-        <ul>
-            <!-- <li><a href="/Prof">Профиль</a></li> -->
-            <li><a href="/Index">Главная страница</a></li>
-            <li><a href="/Apps">Приложения</a></li>
-            <li><a href="/TestControl">Управление тестами</a></li>
-            <li><a href="/Manage">Справка</a></li>
-
-        </ul>
-    </nav>
-</header>
-
-<main>
+<main class="page-container">
 
     <h1>Главная страница</h1>
 
-    <!-- Аналитика -->
-
     <section>
-
-        <h2>Аналитика</h2>
-
-        <div class="stats-grid">
-
-            <div class="stat-card">
-                <span>Активные тесты</span>
-                <strong>@Model.ActiveCount</strong>
-            </div>
-
-            <div class="stat-card">
-                <span>Всего тестов</span>
-                <strong>@Model.TotalTests</strong>
-            </div>
-
-            <div class="stat-card">
-                <span>Всего вариантов</span>
-                <strong>@Model.TotalVariants</strong>
-            </div>
-
-        </div>
-
+        <h2>Общая аналитика</h2>
+        <table class="metrics-table">
+            <thead>
+                <tr>
+                    <th>Параметр</th>
+                    <th>Значение</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Всего установок</td>
+                    <td>@Model.Analytics.TotalUsers</td>
+                </tr>
+                <tr>
+                    <td>Всего тестов</td>
+                    <td>@Model.TotalTests</td>
+                </tr>
+                <tr>
+                    <td>Активных тестов</td>
+                    <td>@Model.ActiveCount</td>
+                </tr>
+                <tr>
+                    <td>Всего вариантов</td>
+                    <td>@Model.TotalVariants</td>
+                </tr>
+                <tr>
+                    <td>Среднее количество установок на тест</td>
+                    <td>@Model.Analytics.AvgUsersPerTest.ToString("0.0")</td>
+                </tr>
+            </tbody>
+        </table>
     </section>
 
-    <!-- График -->
-
-    <section>
+    <section class="chart-section">
         <h2>Активность тестов</h2>
-
-        <div class="chart-container" style="height:400px;">
-            <canvas id="testsChart"></canvas>
+        <div class="chart-layout">
+            <div class="chart-sidebar">
+                <label for="mainChartType">Тип графика</label>
+                <select id="mainChartType">
+                    <option value="line">Линейный</option>
+                    <option value="bar">Столбчатый</option>
+                    <option value="pie">Круговой</option>
+                </select>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="testsChart" style="width:100%; height:400px;"></canvas>
+            </div>
         </div>
     </section>
 
-    <!-- Активные тесты -->
-
     <section>
-
         <h2>Активные тесты</h2>
-
         @if (Model.ActiveTests.Any())
         {
-            <div class="tests-list">
-
-                @foreach (var t in Model.ActiveTests)
-                {
-                    <a class="test-item"
-                       href="/Tests/@t.Id">
-
-                        <div>
-
-                            <strong>@t.Name</strong>
-
-                            <p>
-                                Статус:
-                                @(t.Enabled ? "Активен" : "Остановлен")
-                            </p>
-
-                        </div>
-
-                    </a>
-                }
-
-            </div>
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Кол-во вариантов</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model.ActiveTests)
+                    {
+                        <tr>
+                            <td><a href="/Tests/@t.Id">@t.Name</a></td>
+                            <td>@(Model.VariantsPerTest.ContainsKey(t.Id) ? Model.VariantsPerTest[t.Id] : 0)</td>
+                            <td><span class="status-badge @(t.Enabled ? "status-active" : "status-stopped")">@(t.Enabled ? "Активен" : "Остановлен")</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
         else
         {
             <p>Нет активных тестов</p>
         }
-
     </section>
 
 </main>
 
-<!-- index.js -->
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/js/chart-helper.js"></script>
 <script>
     window.testsChartData = {
-        labels: @Html.Raw(Json.Serialize(Model.ChartLabels)),
-        values: @Html.Raw(Json.Serialize(Model.ChartValues))
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartLabels)),
+        values: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartValues))
     };
 </script>
-
-<script src="~/js/index.js"></script>
+<script src="~/js/index.js" asp-append-version="true"></script>

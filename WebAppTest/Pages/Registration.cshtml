@@ -1,105 +1,68 @@
 ﻿@page
-@model WebAppTest.Pages.Registration
+@model WebAppTest.Pages.RegistrationModel
+
 @{
     ViewData["Title"] = "Регистрация";
+    Layout = null; // Отключение основного layout для страницы регистрации
 }
 
-<header>
-    <nav>
-        <ul>
-            <li><a href="/Index">Главная</a></li>
-            <li><a href="/Login">Вход</a></li>
-            <li><a href="/Registration">Регистрация</a></li>
-        </ul>
-    </nav>
-</header>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Регистрация - AB Testing Dashboard</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="auth-page">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3 class="mb-0">Добро пожаловать!</h3>
+                        <p class="mb-0">Создайте аккаунт для работы с A/B тестированием</p>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-<main class="auth-page">
+                            <div class="mb-3">
+                                <label asp-for="Login" class="form-label">Логин</label>
+                                <input asp-for="Login" class="form-control" placeholder="Введите логин" />
+                                <span asp-validation-for="Login" class="text-danger"></span>
+                            </div>
 
-    <section class="auth-card">
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label">Пароль</label>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="Введите пароль" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
 
-        <div class="auth-header">
+                            <div class="mb-3">
+                                <label asp-for="ConfirmPassword" class="form-label">Подтверждение пароля</label>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Повторите пароль" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
 
-            <h1>Создание аккаунта</h1>
+                            <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                        </form>
 
-            <p>
-                Зарегистрируйтесь для работы с A/B тестированием
-            </p>
+                        <hr />
 
+                        <div class="text-center">
+                            <a asp-page="/Login" class="text-decoration-none">Уже есть аккаунт? Войдите</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <form method="post" class="auth-form">
-
-            <div class="form-group">
-
-                <label>Логин</label>
-
-                <input asp-for="Login"
-                       placeholder="Введите логин" />
-
-                <span asp-validation-for="Login"
-                      class="validation-error"></span>
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Пароль</label>
-
-                <input asp-for="Password"
-                       type="password"
-                       placeholder="Введите пароль" />
-
-                <span asp-validation-for="Password"
-                      class="validation-error"></span>
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Повторите пароль</label>
-
-                <input asp-for="ConfirmPassword"
-                       type="password"
-                       placeholder="Повторите пароль" />
-
-                <span asp-validation-for="ConfirmPassword"
-                      class="validation-error"></span>
-
-            </div>
-
-            <button class="btn btn-primary btn-full"
-                    type="submit">
-
-                Зарегистрироваться
-
-            </button>
-
-        </form>
-
-        @if (!string.IsNullOrWhiteSpace(Model.Message))
-        {
-            <div class="success-box">
-
-                @Model.Message
-
-            </div>
-        }
-
-        <div class="auth-footer">
-
-            <span>Уже есть аккаунт?</span>
-
-            <a href="/Login">
-                Войти
-            </a>
-
-        </div>
-
-    </section>
-
-</main>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

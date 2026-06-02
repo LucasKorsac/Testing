@@ -1,58 +1,111 @@
-﻿using Testing.Pattern;
-using static Testing.Base.BaseMongo;
+﻿using ABLibrary.Models;
+using Testing.DTO;
 
 namespace WebAppTest.Control
 {
     public interface IUiService
     {
+        // Тесты
+
         Task<Dictionary<string, string>> GetActiveTestsAsync(string appId);
 
-        // Тесты
-        Task<List<ABTests>> GetTestsAsync();
-        Task<List<ABTests>> GetAllTestsAsync();
-        Task<ABTests?> GetTestByIdAsync(string id);
+        Task<List<TestDto>> GetTestsAsync();
 
-        Task StopTestAsync(string id);
-        Task ResumeTestAsync(string id);
-        Task DeleteTestAsync(string id);
+        Task<List<TestDto>> GetAllTestsAsync();
+
+        Task<TestDto?> GetTestByIdAsync(string id);
+
+        Task CreateTestAsync(
+            string applicationId,
+            string name,
+            string description);
 
         Task UpdateTestAsync(
             string id,
             string name,
             string description);
 
-        // Варианты
-        Task<List<Variants>> GetVariantsAsync();
-        Task<List<Variants>> GetAllVariantsAsync();
+        Task StopTestAsync(string id);
 
-        Task<List<TestWithVariants>> GetTestsWithVariantsAsync();
+        Task ResumeTestAsync(string id);
+
+        Task DeleteTestAsync(string id);
+
+        // Варианты
+
+        Task<List<VariantDto>> GetVariantsAsync();
+
+        Task<List<VariantDto>> GetAllVariantsAsync();
+
+        Task<List<TestWithVariantsDto>>
+            GetTestsWithVariantsAsync();
+
+        Task DeleteVariantAsync(string id);
 
         // Результаты
-        Task<List<AbResults>> GetResultsAsync(string testId);
 
-        Task<List<AbResults>> GetResultsByInstanceAsync(string instanceId);
+        Task<List<AbResultsDto>>
+            GetResultsAsync(string testId);
+
+        Task<List<AbResultsDto>>
+            GetResultsByInstanceAsync(string instanceId);
 
         // Приложения
-        Task<List<Applications>> GetApplicationsAsync();
 
-        Task<Applications?> GetApplicationAsync(string id);
+        Task<List<ApplicationDto>>
+            GetApplicationsAsync();
 
-        Task<List<ApplicationWithInstances>>
+        Task<ApplicationDto?>
+            GetApplicationAsync(string id);
+
+        Task<List<ApplicationWithInstancesDto>>
             GetApplicationWithInstanceAsync();
 
-        // Экземпляры
-        Task<List<Instances>> GetInstancesAsync(string appId);
+        Task DeleteApplicationAsync(string id);
 
-        Task<Instances?> GetInstanceAsync(string id);
+        // Экземпляры
+
+        Task<List<InstanceDto>>
+            GetInstancesAsync(string appId);
+
+        Task<InstanceDto?>
+            GetInstanceAsync(string id);
 
         // Метрики
-        Task<List<Metrics>> GetMetricsByApplicationAsync(string appId);
 
-        Task<List<MetricTypes>> GetMetricTypesAsync();
+        Task<List<MetricWithTypeDto>>
+            GetMetricsWithTypesAsync(string appId);
 
-        Task<List<(Metrics Metric, MetricTypes? Type)>> GetMetricsWithTypesAsync(string appId);
-        Task<List<ABTests>> GetActiveTestsOnlyAsync();
+        // Оборудование
+
+        Task<List<EquipParamDto>>
+            GetEquipParamsAsync();
+
+        Task<List<ValueDto>>
+            GetValuesByApplicationAsync(string appId);
+
         // Аналитика
+
+        Task<List<TestDto>> GetActiveTestsOnlyAsync();
+
+        Task<AnalyticDto> GetAnalyticsAsync();
+
         Task<int> GetTotalVariants();
+
+        Task SaveEventAsync(TestEvent evt);
+
+        // Аутентификация
+
+        /// <summary> Получение разработчика по логину </summary>
+        Task<DeveloperDto?> GetDeveloperByLoginAsync(string login);
+
+        /// <summary> Регистрация нового разработчика </summary>
+        Task<bool> RegisterDeveloperAsync(string login, string password);
+
+        /// <summary> Проверка пароля </summary>
+        Task<bool> VerifyPasswordAsync(string password, string hash);
+
+        Task CreateVariantAsync(string testId, string name, string description);
+
     }
 }

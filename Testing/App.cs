@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Testing.Base;
-using Testing.Data;
+using Testing.DTO;
 using Testing.Pattern;
 using static Testing.Base.BaseMongo;
 
@@ -19,59 +19,61 @@ namespace Testing
         {
             Console.WriteLine("Starting app...");
 
-            // инициализация базы
-            await SinteticData.Init(
-                _factory.Create<Roles>(),
-                _factory.Create<Developers>(),
-                _factory.Create<DevelopRoleApplic>(),
-                _factory.Create<Applications>(),
-                _factory.Create<MetricTypes>(),
-                _factory.Create<Metrics>(),
-                _factory.Create<Instances>(),
-                _factory.Create<EquipParam>(),
-                _factory.Create<Values>(),
-                _factory.Create<ABTests>(),
-                _factory.Create<Variants>(),
-                _factory.Create<AbResults>()
-            );
+             // репозитории
 
-            // репозитории
             var abTestRepo = _factory.Create<ABTests>();
+
             var variantRepo = _factory.Create<Variants>();
+
             var resultRepo = _factory.Create<AbResults>();
+
             var instanceRepo = _factory.Create<Instances>();
+
             var applicationRepo = _factory.Create<Applications>();
+
             var devRoleAppRepo = _factory.Create<DevelopRoleApplic>();
+
             var metricsRepo = _factory.Create<Metrics>();
+
             var metricTypesRepo = _factory.Create<MetricTypes>();
 
-            // Facade
-            var facade = new Facade(
-                abTestRepo,
-                variantRepo,
-                resultRepo,
-                instanceRepo,
-                applicationRepo,
-                devRoleAppRepo,
-                metricsRepo,
-                metricTypesRepo
-            );
+            var roleRepo = _factory.Create<Roles>();
+
+            var developerRepo = _factory.Create<Developers>();
+
+            var equipParamRepo = _factory.Create<EquipParam>();
+
+            var valueRepo = _factory.Create<Values>();
+
+            // facade
+
+            var facade = new Facade(abTestRepo, variantRepo, resultRepo, instanceRepo, applicationRepo,
+                devRoleAppRepo, metricsRepo, metricTypesRepo, roleRepo, developerRepo, equipParamRepo,
+                valueRepo);
 
             // статистика
-            var valuesRepo = _factory.Create<Values>();
 
             var statsBuilder = new StatsBuilder(
                 variantRepo,
                 resultRepo,
-                valuesRepo
+                valueRepo
             );
 
-            var weightStrategy = new WeightStrategy();
-            var adaptation = new Adaptation(statsBuilder, weightStrategy);
+            var weightStrategy =
+                new WeightStrategy();
 
-            // Тесты
-            var tests = await facade.GetAllTests();
-            var test = tests.FirstOrDefault();
+            var adaptation =
+                new Adaptation(
+                    statsBuilder,
+                    weightStrategy);
+
+            // тесты
+
+            var tests =
+                await facade.GetAllTests();
+
+            var test =
+                tests.FirstOrDefault();
 
             if (test == null)
             {
@@ -79,14 +81,19 @@ namespace Testing
                 return;
             }
 
-            var name = test.Name ?? string.Empty;
+            var name =
+                test.Name ?? string.Empty;
 
-            IStrategy<Variants> strategy =
-                name.Contains("adaptive", StringComparison.OrdinalIgnoreCase)
-                    ? new AdaptiveStrategy(adaptation)
-                    : new RandomStrategy<Variants>();
+            IStrategy<VariantDto> strategy =
+                name.Contains(
+                    "adaptive",
+                    StringComparison.OrdinalIgnoreCase)
+                    ? new AdaptStrategy(adaptation)
+                    : new RandomStrategy<VariantDto>();
 
-            var example = new Example(facade, strategy);
+            var example =
+                new Example(facade, strategy);
+
             await example.Init();
 
             Console.WriteLine("A/B test finished");

@@ -1,6 +1,10 @@
-﻿namespace ABLibrary.Models;
+﻿using System.Collections.Generic;
 
-public class ServerConfig
+namespace ABLibrary.Models
 {
-    public Dictionary<string, string> Tests { get; set; } = new();
+
+    public class ServerConfig
+    {
+        public Dictionary<string, string> Tests { get; set; } = new Dictionary<string, string>();
+    }
 }

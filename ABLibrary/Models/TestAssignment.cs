@@ -1,12 +1,16 @@
-﻿namespace ABLibrary.Models;
+﻿using System;
 
-public class TestAssignment
+namespace ABLibrary.Models
 {
-    public string TestName { get; set; } = "";
 
-    public string Variant { get; set; } = "";
+    public class TestAssignment
+    {
+        public string TestName { get; set; } = "";
 
-    public string UserId { get; set; } = "";
+        public string Variant { get; set; } = "";
 
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public string UserId { get; set; } = "";
+
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    }
 }

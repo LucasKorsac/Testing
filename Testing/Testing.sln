@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAppTest", "..\WebAppTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABLibrary", "..\ABLibrary\ABLibrary.csproj", "{113AC137-2993-4A2B-A74D-5404C9D5B5F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABProjectTests", "..\ABLibraryTests\ABProjectTests.csproj", "{ECD689EE-C8CD-436A-A17F-9F1AA01C8F2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{113AC137-2993-4A2B-A74D-5404C9D5B5F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{113AC137-2993-4A2B-A74D-5404C9D5B5F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{113AC137-2993-4A2B-A74D-5404C9D5B5F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECD689EE-C8CD-436A-A17F-9F1AA01C8F2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECD689EE-C8CD-436A-A17F-9F1AA01C8F2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECD689EE-C8CD-436A-A17F-9F1AA01C8F2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECD689EE-C8CD-436A-A17F-9F1AA01C8F2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

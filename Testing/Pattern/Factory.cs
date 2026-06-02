@@ -30,7 +30,7 @@ namespace Testing.Pattern
             // базовый репозиторий
             var repo = new MongoRepo<T>(_database);
 
-            // декоратор логирования (ВАЖНО: у тебя он называется Decorator)
+            // декоратор логирования
             var loggedRepo = new Decorator<T>(repo, _logger);
 
             return loggedRepo;

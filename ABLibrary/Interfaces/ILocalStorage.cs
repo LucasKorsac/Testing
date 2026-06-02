@@ -1,8 +1,10 @@
-﻿namespace ABLibrary.Interfaces;
-
-public interface ILocalStorage
+﻿namespace ABLibrary.Interfaces
 {
-    void Save<T>(string key, T data);
 
-    T? Load<T>(string key);
+    public interface ILocalStorage
+    {
+        void Save<T>(string key, T data);
+
+        T Load<T>(string key);
+    }
 }

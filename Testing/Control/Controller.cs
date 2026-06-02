@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Testing
+namespace Testing.Control
 {
     internal class Controller
     {

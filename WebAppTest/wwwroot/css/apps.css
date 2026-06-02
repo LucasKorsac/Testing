@@ -1,0 +1,58 @@
+﻿.apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.app-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid #eef2f6;
+    transition: all 0.3s ease;
+}
+
+    .app-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .app-card h2 {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        color: #0f172a;
+    }
+
+    .app-card p {
+        color: #64748b;
+        margin-bottom: 16px;
+    }
+
+    .app-card label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .app-card select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+    .btn-danger:hover {
+        background: #dc2626;
+    }

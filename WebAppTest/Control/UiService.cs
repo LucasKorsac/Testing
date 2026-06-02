@@ -1,15 +1,14 @@
-﻿using MongoDB.Bson;
-//using Testing.Base;
+﻿using ABLibrary.Models;
+using MongoDB.Bson;
+using Testing.DTO;
 using Testing.Pattern;
-using WebAppTest.Controllers;
-using static System.Net.Mime.MediaTypeNames;
-using static Testing.Base.BaseMongo;
 
 namespace WebAppTest.Control
 {
     public class UiService : IUiService
     {
         private readonly ServiceControl _service;
+
         private readonly Facade _facade;
 
         public UiService(ServiceControl service, Facade facade)
@@ -18,146 +17,267 @@ namespace WebAppTest.Control
             _facade = facade;
         }
 
-        public Task<List<ApplicationWithInstances>> GetApplicationWithInstanceAsync()
-            => _facade.GetApplicationsWithInstances();
+        // Тесты
 
-        public Task<Dictionary<string, string>> GetActiveTestsAsync(string appId)
-            => _service.Run(appId);
-
-        public Task<List<ABTests>> GetTestsAsync()
-            => _facade.GetAllTests();
-
-        public async Task<List<Variants>> GetVariantsAsync()
+        public Task<Dictionary<string, string>>
+            GetActiveTestsAsync(string appId)
         {
-            var tests = await _facade.GetTests();
-            return tests.SelectMany(t => t.Variants).ToList();
+            return _service.Run(appId);
         }
 
-        public async Task<List<TestWithVariants>> GetTestsWithVariantsAsync()
+        public Task<List<TestDto>>
+            GetTestsAsync()
         {
-            return await _facade.GetTests();
+            return _facade.GetAllTests();
         }
-        public async Task<ABTests?> GetTestByIdAsync(string id)
-        {
-            if (!ObjectId.TryParse(id, out var objectId))
-                return null;
 
-            return await _facade.GetById(objectId);
-        }
-        public async Task<int> GetTotalVariants()
+        public Task<List<TestDto>>
+            GetAllTestsAsync()
         {
-            var tests = await _facade.GetTests();
-            return tests.Sum(t => t.Variants?.Count ?? 0);
+            return _facade.GetAllTests();
         }
-        public async Task StopTestAsync(string id)
+
+        public Task<TestDto?>
+            GetTestByIdAsync(string id)
         {
-            if (!ObjectId.TryParse(id, out var objectId))
+            return _facade.GetById(
+                ObjectId.Parse(id));
+        }
+
+        public async Task CreateTestAsync(
+            string applicationId,
+            string name,
+            string description)
+        {
+            await _facade.CreateTest(
+                applicationId,
+                name,
+                description);
+        }
+
+        public async Task UpdateTestAsync(
+            string id,
+            string name,
+            string description)
+        {
+            var test =
+                await _facade.GetById(
+                    ObjectId.Parse(id));
+
+            if (test == null)
+            {
                 return;
-
-            await _facade.StopTest(objectId);
-        }
-
-        public async Task DeleteTestAsync(string id)
-        {
-            if (!ObjectId.TryParse(id, out var objectId))
-                return;
-
-            await _facade.DeleteTest(objectId);
-        }
-
-        public async Task UpdateTestAsync(string id, string name, string description)
-        {
-            var test = await _facade.GetById(ObjectId.Parse(id));
-            if (test == null) return;
+            }
 
             test.Name = name;
             test.Description = description;
 
             await _facade.UpdateTest(test);
         }
-        public async Task<List<AbResults>> GetResultsAsync(string testId)
-        {
-            var objectId = ObjectId.Parse(testId);
 
-            return await _facade.GetResults(objectId);
-        }
-        public async Task ResumeTestAsync(string id)
+        public Task StopTestAsync(string id)
         {
-            if (!ObjectId.TryParse(id, out var objectId))
-                return;
-
-            await _facade.ResumeTest(objectId);
-        }
-        public async Task<List<Applications>> GetApplicationsAsync()
-        {
-            return await _facade.GetApplications();
-        }
-        public async Task<Applications?> GetApplicationAsync(string id)
-        {
-            if (!ObjectId.TryParse(id, out var objectId))
-                return null;
-
-            return await _facade.GetApplication(objectId);
-        }
-        public async Task<List<Instances>> GetInstancesAsync(string appId)
-        {
-            return await _facade.GetInstancesByApp(ObjectId.Parse(appId));
+            return _facade.StopTest(id);
         }
 
-        public async Task<List<AbResults>> GetResultsByInstanceAsync(string instanceId)
+        public Task ResumeTestAsync(string id)
         {
-            return await _facade.GetResultsByInstance(ObjectId.Parse(instanceId));
-        }
-        public async Task<Instances?> GetInstanceAsync(string id)
-        {
-            if (!ObjectId.TryParse(id, out var objectId))
-                return null;
-
-            return await _facade.GetInstance(objectId);
+            return _facade.ResumeTest(id);
         }
 
-        public async Task<List<Variants>> GetAllVariantsAsync()
+        public Task DeleteTestAsync(string id)
         {
-            return await _facade.GetAllVariants();
+            return _facade.DeleteTest(id);
         }
 
-        public async Task<List<ABTests>> GetAllTestsAsync()
+        // Варианты
+
+        public Task<List<VariantDto>>
+            GetVariantsAsync()
         {
-            return await _facade.GetAllTests();
+            return _facade.GetAllVariants();
         }
 
-        public async Task<List<Metrics>>
-    GetMetricsByApplicationAsync(string appId)
+        public Task<List<VariantDto>>
+            GetAllVariantsAsync()
         {
-            if (!ObjectId.TryParse(appId, out var objectId))
-                return new List<Metrics>();
-
-            return await _facade.GetMetricsByApplication(objectId);
+            return _facade.GetAllVariants();
         }
 
-        public async Task<List<MetricTypes>>
-            GetMetricTypesAsync()
+        public Task<List<TestWithVariantsDto>>
+            GetTestsWithVariantsAsync()
         {
-            return await _facade.GetMetricTypes();
+            return _facade.GetTests();
         }
 
-        public async Task<List<(Metrics Metric, MetricTypes? Type)>>
+        public Task DeleteVariantAsync(string id)
+        {
+            return _facade.DeleteVariant(id);
+        }
+
+        // Результаты
+
+        public Task<List<AbResultsDto>>
+            GetResultsAsync(string testId)
+        {
+            return _facade.GetResultsByTest(
+                ObjectId.Parse(testId));
+        }
+
+        public Task<List<AbResultsDto>>
+            GetResultsByInstanceAsync(string instanceId)
+        {
+            return _facade.GetResultsByInstance(
+                ObjectId.Parse(instanceId));
+        }
+
+        // Приложения
+
+        public Task<List<ApplicationDto>>
+            GetApplicationsAsync()
+        {
+            return _facade.GetApplications();
+        }
+
+        public Task<ApplicationDto?>
+            GetApplicationAsync(string id)
+        {
+            return _facade.GetApplication(
+                ObjectId.Parse(id));
+        }
+
+        public Task<List<ApplicationWithInstancesDto>>
+            GetApplicationWithInstanceAsync()
+        {
+            return _facade.GetApplicationsWithInstances();
+        }
+
+        public Task DeleteApplicationAsync(string id)
+        {
+            return _facade.DeleteApplication(id);
+        }
+
+        // Экземпляры
+
+        public Task<List<InstanceDto>>
+            GetInstancesAsync(string appId)
+        {
+            return _facade.GetInstancesByApp(
+                ObjectId.Parse(appId));
+        }
+
+        public Task<InstanceDto?>
+            GetInstanceAsync(string id)
+        {
+            return _facade.GetInstance(
+                ObjectId.Parse(id));
+        }
+
+        // Метрики
+
+        public Task<List<MetricWithTypeDto>>
             GetMetricsWithTypesAsync(string appId)
         {
-            if (!ObjectId.TryParse(appId, out var objectId))
-            {
-                return new List<(Metrics, MetricTypes?)>();
-            }
-
-            return await _facade
-                .GetMetricsWithTypes(objectId);
+            return _facade.GetMetricsWithTypes(
+                ObjectId.Parse(appId));
         }
 
-        public async Task<List<ABTests>> GetActiveTestsOnlyAsync()
+        // Оборудование
+
+        public Task<List<EquipParamDto>>
+            GetEquipParamsAsync()
         {
-            var tests = await _facade.GetAllTests();
-            return tests.Where(t => t.Enabled).ToList();
+            return _facade.GetEquipParam();
         }
-        public Task<List<ApplicationWithInstances>> GetApplicationsWithInstancesAsync() => _facade.GetApplicationsWithInstances();
+
+        public Task<List<ValueDto>>
+            GetValuesByApplicationAsync(string appId)
+        {
+            return _facade.GetDeviceValues(
+                ObjectId.Parse(appId));
+        }
+
+        // Аналитика
+
+        public async Task<List<TestDto>>
+            GetActiveTestsOnlyAsync()
+        {
+            var tests =
+                await _facade.GetAllTests();
+
+            return tests
+                .Where(x => x.Enabled)
+                .ToList();
+        }
+
+        public async Task<AnalyticDto>
+            GetAnalyticsAsync()
+        {
+            var tests =
+                await _facade.GetAllTests();
+
+            var variants =
+                await _facade.GetAllVariants();
+
+            var results =
+                await _facade.GetAllResults();
+
+            var totalUsers =
+                results.Count;
+
+            return new AnalyticDto
+            {
+                TotalTests =
+                    tests.Count,
+
+                ActiveTests =
+                    tests.Count(t => t.Enabled),
+
+                TotalVariants =
+                    variants.Count,
+
+                TotalUsers =
+                    totalUsers,
+
+                AvgUsersPerTest =
+                    tests.Count == 0
+                        ? 0
+                        : (double)totalUsers
+                            / tests.Count
+            };
+        }
+
+        public Task<int>
+            GetTotalVariants()
+        {
+            return _facade.GetVariantsCount();
+        }
+
+        public async Task SaveEventAsync(TestEvent evt)
+        {
+            await _facade.SaveEvent(evt);
+        }
+
+        // Аутентификация
+
+        public async Task<DeveloperDto?> GetDeveloperByLoginAsync(string login)
+        {
+            return await _facade.GetDeveloperByLogin(login);
+        }
+
+        public async Task<bool> RegisterDeveloperAsync(string login, string password)
+        {
+            return await _facade.RegisterDeveloper(login, password);
+        }
+
+        public async Task<bool> VerifyPasswordAsync(string password, string hash)
+        {
+            return await Task.Run(() => _facade.VerifyPassword(password, hash));
+        }
+
+        public async Task CreateVariantAsync(string testId, string name, string description)
+        {
+            await _facade.CreateVariant(testId, name, description);
+        }
     }
 }

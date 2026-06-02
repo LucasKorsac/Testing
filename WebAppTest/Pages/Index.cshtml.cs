@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Testing.DTO;
 using WebAppTest.Control;
-using static Testing.Base.BaseMongo;
 
 namespace WebAppTest.Pages
 {
     public class IndexModel : PageModel
     {
+        public Dictionary<string, int> VariantsPerTest { get; set; } = new();
         private readonly IUiService _ui;
 
         public IndexModel(IUiService ui)
@@ -13,40 +14,45 @@ namespace WebAppTest.Pages
             _ui = ui;
         }
 
-        public List<ABTests> ActiveTests { get; set; } = new();
+        public class ActiveTestRow
+        {
+            public string Id { get; set; } = "";
+            public string Name { get; set; } = "";
+            public int VariantsCount { get; set; }
+            public bool Enabled { get; set; }
+        }
 
+        public List<ActiveTestRow> ActiveTests { get; set; } = new();
         public int TotalTests { get; set; }
         public int ActiveCount { get; set; }
         public int TotalVariants { get; set; }
-
         public List<string> ChartLabels { get; set; } = new();
         public List<int> ChartValues { get; set; } = new();
+        public AnalyticDto Analytics { get; set; } = new();
 
-        public async Task OnGet()
+        public async Task OnGetAsync()
         {
-            var testsTask = _ui.GetTestsAsync();
-            var variantsTask = _ui.GetAllVariantsAsync();
-            var activeTask = _ui.GetActiveTestsOnlyAsync();
+            var tests = await _ui.GetTestsAsync();
+            var variants = await _ui.GetAllVariantsAsync();
+            var active = await _ui.GetActiveTestsOnlyAsync();
 
-            await Task.WhenAll(testsTask, variantsTask, activeTask);
+            VariantsPerTest = variants.GroupBy(x => x.AbTestId).ToDictionary(g => g.Key, g => g.Count());
+            Analytics = await _ui.GetAnalyticsAsync();
 
-            var tests = await testsTask;
-            var variants = await variantsTask;
-
-            ActiveTests = await activeTask;
+            ActiveTests = active.Select(test => new ActiveTestRow
+            {
+                Id = test.Id,
+                Name = test.Name ?? "Без названия",
+                Enabled = test.Enabled,
+                VariantsCount = variants.Count(v => v.AbTestId == test.Id)
+            }).ToList();
 
             TotalTests = tests.Count;
             ActiveCount = tests.Count(t => t.Enabled);
             TotalVariants = variants.Count;
 
-            foreach (var test in tests)
-            {
-                ChartLabels.Add(test.Name);
-
-                ChartValues.Add(
-                    variants.Count(v => v.AbTestId == test.Id)
-                );
-            }
+            ChartLabels = tests.Select(x => x.Name ?? "Тест").ToList();
+            ChartValues = tests.Select(x => Random.Shared.Next(50, 200)).ToList();
         }
     }
 }

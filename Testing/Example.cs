@@ -1,40 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Testing.Base;
+using Testing.DTO;
 using Testing.Pattern;
-using static Testing.Base.BaseMongo;
 
 namespace Testing
 {
-    /// <summary> Запуск A/B тестов </summary>
+    /// <summary>
+    /// Запуск A/B тестов
+    /// </summary>
     internal class Example
     {
         private readonly Facade _facade;
-        private readonly IStrategy<Variants> _strategy;
 
-        public Example(Facade facade, IStrategy<Variants> strategy)
+        // стратегия теперь работает с DTO
+        private readonly IStrategy<VariantDto> _strategy;
+
+        public Example(
+            Facade facade,
+            IStrategy<VariantDto> strategy)
         {
             _facade = facade;
             _strategy = strategy;
         }
 
-        /// <summary> Инициализация тестирования </summary>
+        /// <summary>
+        /// Инициализация тестирования
+        /// </summary>
         public async Task Init()
         {
             var data = await _facade.GetTests();
 
             foreach (var item in data)
             {
-                // защита от пустых данных
-                if (item.Variants == null || item.Variants.Count == 0)
+                // защита от null
+                var variants = item.Variants ?? new List<VariantDto>();
+
+                if (variants.Count == 0)
                     continue;
 
-                // выбор варианта через стратегию
-                var selected = _strategy.Choose(item.Variants, item.Variants[0]);
+                // fallback
+                var fallback = variants[0];
 
-                // вывод результата
-                Console.WriteLine($"Test: {item.Test.Name} → Variant: {selected.Name}");
+                // выбор варианта
+                var selected =  _strategy.Choose(variants, fallback);
+
+                Console.WriteLine($"Test: {item.Test.Name} - Variant: {selected.Name}");
             }
         }
     }

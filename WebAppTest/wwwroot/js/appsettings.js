@@ -1,0 +1,16 @@
+﻿{
+    "ApiBaseUrl": "https://localhost:5001/",
+        "Authentication": {
+        "Google": {
+            "ClientId": "YOUR_GOOGLE_CLIENT_ID",
+                "ClientSecret": "YOUR_GOOGLE_CLIENT_SECRET"
+        }
+    },
+    "Logging": {
+        "LogLevel": {
+            "Default": "Information",
+                "Microsoft.AspNetCore": "Warning"
+        }
+    },
+    "AllowedHosts": "*"
+}

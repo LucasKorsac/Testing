@@ -1,20 +1,21 @@
-﻿using Testing.Base;
+﻿using Testing.DTO;
 using Testing.Pattern;
-using static Testing.Base.BaseMongo;
 
 namespace WebAppTest.Control
 {
+    /// <summary> Сервис запуска A/B тестов </summary>
     public class ServiceControl
     {
         private readonly Facade _facade;
-        private readonly IStrategy<Variants> _strategy;
+        private readonly IStrategy<VariantDto> _strategy;
 
-        public ServiceControl(Facade facade, IStrategy<Variants> strategy)
+        public ServiceControl(Facade facade, IStrategy<VariantDto> strategy)
         {
             _facade = facade;
             _strategy = strategy;
         }
 
+        /// <summary> Запуск тестов для приложения </summary>
         public async Task<Dictionary<string, string>> Run(string applicationId)
         {
             var result = new Dictionary<string, string>();
@@ -29,14 +30,16 @@ namespace WebAppTest.Control
                 if (!item.Test.Enabled)
                     continue;
 
-                if (item.Variants == null || item.Variants.Count == 0)
+                var variants = item.Variants ?? new List<VariantDto>();
+
+                if (variants.Count == 0)
                     continue;
 
-                var fallback = item.Variants.First();
-                var selected = _strategy.Choose(item.Variants, fallback);
+                var fallback = variants.First();
 
-                var key = item.Test.Name ?? "unknown";
-                result[key] = selected.Name;
+                var selected = _strategy.Choose(variants, fallback);
+
+                result[item.Test.Name] = selected.Name;
             }
 
             return result;

@@ -27,9 +27,7 @@ namespace Testing.Pattern
             _logger = logger;
         }
 
-        /// <summary>
-        /// Прямой доступ к IQueryable коллекции (без логирования, так как это не операция)
-        /// </summary>
+        /// <summary> Прямой доступ к IQueryable коллекции </summary>
         public IQueryable<T> Query => _inner.Query;
 
         public async Task<T?> GetById(ObjectId id, CancellationToken ct = default)

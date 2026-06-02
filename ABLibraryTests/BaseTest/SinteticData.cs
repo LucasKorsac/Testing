@@ -1,10 +1,15 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Testing.Base;
 using static Testing.Base.BaseMongo;
+using MongoDB.Bson;
 
-namespace Testing.Data
+namespace ABProjectTests.BaseTest
 {
-    public static class SinteticData
+    public class SinteticData
     {
         private static readonly Random _rnd = new();
 
@@ -47,7 +52,7 @@ namespace Testing.Data
 
             await roleRepo.CreateMany(roles);
 
- 
+
             // Разрабы
 
             var developers = Enumerable.Range(1, 15)

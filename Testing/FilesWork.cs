@@ -8,7 +8,7 @@ namespace Testing
 {
     internal class FilesWork
     {
-        /// <summary> Сервис для работы с файлами TXT и JSON </summary>
+        /// <summary> Сервис для работы с файлами JSON и XLSX </summary>
         public class DataFileService
         {
             private void EnsureDirectory(string path)

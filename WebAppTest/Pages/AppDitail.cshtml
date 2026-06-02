@@ -13,7 +13,6 @@
             <li><a href="/Apps">Приложения</a></li>
             <li><a href="/TestControl">Управление тестами</a></li>
             <li><a href="/Manage">Справка</a></li>
-
         </ul>
     </nav>
 </header>
@@ -32,17 +31,17 @@
 
         <h2>Экземпляры приложения</h2>
 
-        @if (Model.Instances.Any())
+        @if (Model.Instances != null && Model.Instances.Any())
         {
-            @foreach (var instance in Model.Instances)
+            foreach (var instance in Model.Instances)
             {
                 <div class="test-card">
 
                     <h3>@instance.Name</h3>
 
-                    <p>Версия: @instance.Version</p>
+                    <p><strong>Версия:</strong> @instance.Version</p>
 
-                    <p>Дата: @instance.Date.ToShortDateString()</p>
+                    <p><strong>Дата:</strong> @instance.Date.ToShortDateString()</p>
 
                     <a class="btn btn-secondary"
                        href="/InstanceDetail/@instance.Id">

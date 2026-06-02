@@ -1,38 +1,81 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using MongoDB.Driver;
 using Testing;
 using Testing.Base;
+using Testing.DTO;
 using Testing.Pattern;
 using WebAppTest.Control;
 using static Testing.Base.BaseMongo;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorPages();
+// mvc и razor pages
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AllowAnonymousToPage("/Login");
+    options.Conventions.AllowAnonymousToPage("/Registration");
+    options.Conventions.AllowAnonymousToPage("/AccessDenied");
+});
+
 builder.Services.AddControllers();
 builder.Services.AddApplicationInsightsTelemetry();
 
+// аутентификация
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Login";
+        options.LogoutPath = "/Logout";
+        options.AccessDeniedPath = "/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    })
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "GOOGLE_CLIENT_ID";
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "GOOGLE_SECRET";
+    });
 
-/// MongoDB
-builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient("mongodb://localhost:27017"));
-
-builder.Services.AddSingleton<IMongoDatabase>(sp =>
+builder.Services.AddAuthorization(options =>
 {
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("ABTesting");
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
 });
 
-/// HTTP
+// http клиент для api
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:5001/");
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "https://localhost:5001/");
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 
-/// Репозиторий
+// ========================================
+// регистрация mongodb (необходимо для testing)
+// ========================================
 
+// регистрация клиента mongodb
+builder.Services.AddSingleton<IMongoClient>(_ =>
+    new MongoClient(builder.Configuration.GetConnectionString("MongoDB") ?? "mongodb://localhost:27017"));
+
+// регистрация базы данных
+builder.Services.AddScoped(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    var databaseName = builder.Configuration["DatabaseName"] ?? "ABTesting";
+    return client.GetDatabase(databaseName);
+});
+
+// регистрация репозиториев
 builder.Services.AddScoped(typeof(IMongoRepo<>), typeof(MongoRepo<>));
 
-
-/// Facade
+// ========================================
+// регистрация facade (главный сервис testing)
+// ========================================
 
 builder.Services.AddScoped<Facade>(sp =>
 {
@@ -44,22 +87,47 @@ builder.Services.AddScoped<Facade>(sp =>
         sp.GetRequiredService<IMongoRepo<Applications>>(),
         sp.GetRequiredService<IMongoRepo<DevelopRoleApplic>>(),
         sp.GetRequiredService<IMongoRepo<Metrics>>(),
-        sp.GetRequiredService<IMongoRepo<MetricTypes>>()
+        sp.GetRequiredService<IMongoRepo<MetricTypes>>(),
+        sp.GetRequiredService<IMongoRepo<Roles>>(),
+        sp.GetRequiredService<IMongoRepo<Developers>>(),
+        sp.GetRequiredService<IMongoRepo<EquipParam>>(),
+        sp.GetRequiredService<IMongoRepo<Values>>()
     );
 });
 
-/// Бизнес-слой
-builder.Services.AddScoped<ServiceControl>();
-builder.Services.AddScoped<Adaptation>();
+// регистрация построителя статистики
+builder.Services.AddScoped<IStatsBuilder, StatsBuilder>(sp =>
+{
+    return new StatsBuilder(
+        sp.GetRequiredService<IMongoRepo<Variants>>(),
+        sp.GetRequiredService<IMongoRepo<AbResults>>(),
+        sp.GetRequiredService<IMongoRepo<Values>>()
+    );
+});
 
-builder.Services.AddScoped<IStrategy<Variants>, AdaptiveStrategy>();
-builder.Services.AddScoped<IStatsBuilder, StatsBuilder>();
+// ========================================
+// регистрация стратегий и сервисов
+// ========================================
+
+// стратегии
+builder.Services.AddScoped<IStrategy<VariantDto>, AdaptStrategy>();
 builder.Services.AddScoped<IWeightStrategy, WeightStrategy>();
 
+// сервисы testing
+builder.Services.AddScoped<Adaptation>();
+builder.Services.AddScoped<ServiceControl>();
+
+// ui сервисы
 builder.Services.AddScoped<IUiService, UiService>();
+builder.Services.AddScoped<ChartService>();
+
+// ========================================
+// построение приложения
+// ========================================
 
 var app = builder.Build();
 
+// настройка pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -69,8 +137,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<RedirectMiddleware>();
 app.MapRazorPages();
 app.MapControllers();
 

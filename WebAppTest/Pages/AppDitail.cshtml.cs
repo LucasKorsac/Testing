@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Bson;
 using WebAppTest.Control;
-using static Testing.Base.BaseMongo;
+using Testing.DTO;
 
 namespace WebAppTest.Pages
 {
@@ -18,12 +17,15 @@ namespace WebAppTest.Pages
             _ui = ui;
         }
 
-        public Applications? Application { get; set; }
-        public List<Instances> Instances { get; set; } = new();
+        /// <summary> Приложение </summary>
+        public ApplicationDto? Application { get; set; }
+
+        /// <summary> Список инстансов приложения </summary>
+        public List<InstanceDto> Instances { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
-            if (!ObjectId.TryParse(id, out var objectId))
+            if (string.IsNullOrWhiteSpace(id))
                 return RedirectToPage("/Apps");
 
             Application = await _ui.GetApplicationAsync(id);
@@ -31,7 +33,7 @@ namespace WebAppTest.Pages
             if (Application == null)
                 return RedirectToPage("/Apps");
 
-            Instances = await _ui.GetInstancesAsync(Application.Id.ToString());
+            Instances = await _ui.GetInstancesAsync(id);
 
             return Page();
         }

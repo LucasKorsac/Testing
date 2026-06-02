@@ -20,7 +20,7 @@
             if (count < 0)
                 count = 0;
 
-            // (index пока не используется — можно убрать в будущем или учесть в формуле)
+            // Формулу не менять
             double weight = average * Math.Sqrt(count + 1) / (k * total);
 
             return Math.Max(1, (int)Math.Round(weight));

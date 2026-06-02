@@ -1,41 +1,57 @@
 ﻿using MongoDB.Driver;
-using System;
-using System.Threading.Tasks;
+using Testing;
 using Testing.Pattern;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Testing
+namespace TestingApp
 {
     internal class Program
     {
-        static async Task Main()
+        static async Task Main(string[] args)
         {
-            var services = new ServiceCollection();
+            Console.WriteLine("Application started");
 
-            // MongoDB подключение
-            services.AddSingleton<IMongoDatabase>(sp =>
+            try
             {
-                var client = new MongoClient("mongodb://localhost:27017");
-                return client.GetDatabase("ABTesting");
-            });
+                // подключение MongoDB
 
-            // ✔ ВАЖНО: регистрируем КЛАСС, а не интерфейс
-            services.AddSingleton<RepositoryLogger>();
+                var client =
+                    new MongoClient(
+                        "mongodb://localhost:27017");
 
-            // (если хочешь — можешь оставить и интерфейс тоже)
-            services.AddSingleton<IRepositoryLogger, RepositoryLogger>();
+                var database =
+                    client.GetDatabase("ABTesting");
 
-            // Фабрика репозиториев
-            services.AddSingleton<IMongoFactory, MongoFactory>();
+                // логгер
 
-            // Приложение
-            services.AddSingleton<App>();
+                var logger =
+                    new RepositoryLogger();
 
-            var provider = services.BuildServiceProvider();
+                // фабрика
 
-            var app = provider.GetRequiredService<App>();
+                IMongoFactory factory =
+                    new MongoFactory(
+                        database,
+                        logger);
 
-            await app.Init();
+                // запуск приложения
+
+                var app =
+                    new App(factory);
+
+                await app.Init();
+
+                Console.WriteLine("Application finished");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Fatal error:");
+
+                Console.WriteLine(ex.Message);
+
+                Console.WriteLine(ex.StackTrace);
+            }
+
+            Console.WriteLine("Press any key...");
 
             Console.ReadKey();
         }

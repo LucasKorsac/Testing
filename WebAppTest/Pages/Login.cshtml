@@ -1,0 +1,62 @@
+﻿@page
+@model WebAppTest.Pages.LoginModel
+
+@{
+    ViewData["Title"] = "Вход";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Вход - AB Testing Dashboard</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="auth-page">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3 class="mb-0">Вход в систему</h3>
+                        <p class="mb-0">Управление A/B тестированием</p>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Login" class="form-label">Логин</label>
+                                <input asp-for="Login" class="form-control" placeholder="Введите логин" />
+                                <span asp-validation-for="Login" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label">Пароль</label>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="Введите пароль" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Войти</button>
+                        </form>
+
+                        <hr />
+
+                        <div class="text-center">
+                            <a asp-page="/Registration" class="text-decoration-none">Нет аккаунта? Зарегистрируйтесь</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

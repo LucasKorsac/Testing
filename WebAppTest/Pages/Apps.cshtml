@@ -5,19 +5,9 @@
     ViewData["Title"] = "Приложения";
 }
 
-
-<header>
-    <nav>
-        <ul>
-            <!-- <li><a href="/Prof">Профиль</a></li> -->
-            <li><a href="/Index">Главная страница</a></li>
-            <li><a href="/Apps">Приложения</a></li>
-            <li><a href="/TestControl">Управление тестами</a></li>
-            <li><a href="/Manage">Справка</a></li>
-
-        </ul>
-    </nav>
-</header>
+@section Styles {
+    <link rel="stylesheet" href="~/css/apps.css" />
+}
 
 <main>
 
@@ -31,34 +21,56 @@
             {
                 <section class="app-card">
 
-                    <!-- название приложения -->
-                    <h2>@item.Application.Name</h2>
+                    <h2>
+                        @item.Application.Name
+                    </h2>
 
-                    <p>@item.Application.Description</p>
+                    <p>
+                        @item.Application.Description
+                    </p>
 
-                    <!-- выпадающий список экземпляров -->
-                    <label>Экземпляры:</label>
+                    <label>
+                        Экземпляры
+                    </label>
 
-                    <select onchange="if(this.value) window.location.href=this.value">
+                    <select onchange="
+                                if(this.value)
+                                window.location.href=this.value">
 
-                        <option value="">-- выбрать версию --</option>
+                        <option value="">
+                            -- выбрать --
+                        </option>
 
                         @foreach (var inst in item.Instances)
                         {
                             <option value="/InstanceDetail/@inst.Id">
-                                @inst.Name (v@inst.Version)
+
+                                @inst.Name
+                                (v@inst.Version)
+
                             </option>
                         }
 
                     </select>
 
-                    <br /><br />
+                    <br />
+                    <br />
 
-                    <a class="btn btn-primary"
-                       asp-page="/AppDetail"
-                       asp-route-id="@item.Application.Id">
-                        Открыть приложение
-                    </a>
+                    <form method="post"
+                          asp-page-handler="Delete"
+                          asp-route-id="@item.Application.Id">
+
+                        <button type="submit"
+                                class="btn btn-danger"
+                                onclick="
+                                        return confirm(
+                                            'Удалить приложение?')">
+
+                            Удалить
+
+                        </button>
+
+                    </form>
 
                 </section>
             }
@@ -69,4 +81,5 @@
     {
         <p>Приложений нет</p>
     }
+
 </main>

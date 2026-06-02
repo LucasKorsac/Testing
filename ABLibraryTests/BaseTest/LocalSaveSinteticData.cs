@@ -1,13 +1,14 @@
-﻿using Testing.Base;
-using Testing.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Testing.Base;
 using Testing.Pattern;
 using static Testing.Base.BaseMongo;
 
-namespace Testing
+namespace ABProjectTests.BaseTest
 {
-    /// <summary>
-    /// Локальное безопасное заполнение MongoDB синтетическими данными
-    /// </summary>
     public class LocalSaveSinteticData
     {
         private readonly IMongoFactory _factory;
@@ -62,21 +63,6 @@ namespace Testing
 
                 Console.WriteLine("Заполнение базы...");
 
-                await SinteticData.Init(
-                    roleRepo,
-                    devRepo,
-                    devRoleRepo,
-                    appRepo,
-                    metricTypeRepo,
-                    metricRepo,
-                    instanceRepo,
-                    equipRepo,
-                    valueRepo,
-                    abTestRepo,
-                    variantRepo,
-                    resultRepo
-                );
-
                 Console.WriteLine("=== SEED COMPLETED SUCCESSFULLY ===");
             }
             catch (Exception ex)
@@ -85,8 +71,6 @@ namespace Testing
                 throw;
             }
         }
-
-        // ---------------- HELPERS ----------------
 
         private bool IsDevelopment()
         {

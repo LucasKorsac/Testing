@@ -1,9 +1,10 @@
-﻿using static Testing.Base.BaseMongo;
+﻿using MongoDB.Bson;
+using Testing.DTO;
 
 namespace Testing.Pattern
 {
-    /// <summary> Адаптивная стратегия выбора варианта </summary>
-    public class AdaptiveStrategy : IStrategy<Variants>
+    /// <summary> Адаптивная стратегия выбора варианта (работает через DTO) </summary>
+    public class AdaptStrategy : IStrategy<VariantDto>
     {
         /// <summary> Сервис адаптации распределения </summary>
         private readonly Adaptation _adaptation;
@@ -12,22 +13,25 @@ namespace Testing.Pattern
         private static readonly Random _rnd = new();
 
         /// <summary> Внедрение зависимости Adaptation </summary>
-        public AdaptiveStrategy(Adaptation adaptation)
+        public AdaptStrategy(Adaptation adaptation)
         {
             _adaptation = adaptation;
         }
 
         /// <summary> Выбор варианта </summary>
-        public Variants Choose(List<Variants> items, Variants defaultValue)
+        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
         {
-            // если список пуст
+            // защита от пустого списка
             if (items == null || items.Count == 0)
                 return defaultValue;
 
             try
             {
-                // все варианты относятся к одному тесту
-                var testId = items[0].AbTestId;
+                // берем id теста (DTO → string → ObjectId)
+                var testIdRaw = items[0].AbTestId;
+
+                if (!ObjectId.TryParse(testIdRaw, out var testId))
+                    return GetRandom(items);
 
                 // построение адаптивного пула
                 var pool = _adaptation
@@ -35,25 +39,22 @@ namespace Testing.Pattern
                     .GetAwaiter()
                     .GetResult();
 
-                // fallback → случайный выбор
+                // fallback
                 if (pool == null || pool.Count == 0)
                     return GetRandom(items);
 
-                // выбор из адаптивного пула
+                // выбор из пула
                 return pool[_rnd.Next(pool.Count)];
             }
             catch (Exception ex)
             {
-                // обработка ошибки
-                ErrorCheck.Handle(ex, "AdaptiveStrategy");
-
-                // fallback
+                ErrorCheck.Handle(ex, "AdaptStrategy");
                 return GetRandom(items);
             }
         }
 
         /// <summary> Случайный выбор варианта </summary>
-        private Variants GetRandom(List<Variants> items)
+        private VariantDto GetRandom(List<VariantDto> items)
         {
             return items[_rnd.Next(items.Count)];
         }

@@ -1,10 +1,13 @@
 ﻿using ABLibrary.Models;
+using System.Threading.Tasks;
 
-namespace ABLibrary.Interfaces;
-
-public interface IABTransport
+namespace ABLibrary.Interfaces
 {
-    Task<ServerConfig> GetConfigAsync(string appId);
 
-    Task SendEventAsync(TestEvent evt);
+    public interface IABTransport
+    {
+        Task<ServerConfig> GetConfigAsync(string appId);
+
+        Task SendEventAsync(TestEvent evt);
+    }
 }

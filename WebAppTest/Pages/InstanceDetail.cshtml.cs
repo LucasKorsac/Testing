@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Bson;
+using Testing.DTO;
 using WebAppTest.Control;
-using static Testing.Base.BaseMongo;
 
 namespace WebAppTest.Pages
 {
@@ -15,79 +14,87 @@ namespace WebAppTest.Pages
             _ui = ui;
         }
 
-        // =========================================
-        // TABLE MODEL
-        // =========================================
-
-        public class TableRow
-        {
-            public string User { get; set; } = "";
-
-            public Dictionary<string, string> Values { get; set; } = new();
-        }
-
-        // =========================================
-        // DATA
-        // =========================================
-
-        public Instances? Instance { get; set; }
+        public InstanceDto? Instance { get; set; }
 
         public List<TableRow> Table { get; set; } = new();
 
-        public List<string> Headers { get; set; } = new();
+        public class TableRow
+        {
+            public string InstallId { get; set; } = "";
 
-        // =========================================
-        // PAGE
-        // =========================================
+            public int VariantsCount { get; set; }
+
+            public string VariantName { get; set; } = "";
+
+            public string Type { get; set; } = "";
+
+            public string Value { get; set; } = "";
+
+            public double NumericValue { get; set; }
+        }
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
-            if (!ObjectId.TryParse(id, out var objectId))
+            if (string.IsNullOrWhiteSpace(id))
+            {
                 return RedirectToPage("/Apps");
+            }
 
-            // экземпляр
             Instance = await _ui.GetInstanceAsync(id);
 
             if (Instance == null)
+            {
                 return RedirectToPage("/Apps");
-
-            // приложение
-            var apps = await _ui.GetApplicationWithInstanceAsync();
-
-            var app = apps
-                .FirstOrDefault(x =>
-                    x.Application.Id == Instance.ApplicationId);
-
-            if (app == null)
-                return Page();
-
-            // метрики приложения
-            var metrics = await _ui.GetMetricsWithTypesAsync(
-                app.Application.Id.ToString());
-
-            // строка таблицы
-            var row = new TableRow
-            {
-                User = "User 1"
-            };
-
-            foreach (var item in metrics)
-            {
-                var metric = item.Metric;
-
-                var type = item.Type;
-
-                if (type == null)
-                    continue;
-
-                row.Values[type.Name] =
-                    metric.Meaning.ToString("0.##");
             }
 
-            Table.Add(row);
+            var results =
+                await _ui.GetResultsByInstanceAsync(id);
 
-            // заголовки
-            Headers = row.Values.Keys.ToList();
+            var metrics =
+                await _ui.GetMetricsWithTypesAsync(
+                    Instance.ApplicationId);
+
+            var variants =
+                await _ui.GetAllVariantsAsync();
+
+            foreach (var result in results)
+            {
+                var variant =
+                    variants.FirstOrDefault(v =>
+                        v.Id == result.VariantId);
+
+                if (variant == null)
+                {
+                    continue;
+                }
+
+                foreach (var metric in metrics)
+                {
+                    Table.Add(new TableRow
+                    {
+                        InstallId = result.InstanceId,
+
+                        VariantsCount =
+                            variants.Count(v =>
+                                v.AbTestId ==
+                                variant.AbTestId),
+
+                        VariantName =
+                            variant.Name,
+
+                        Type =
+                            metric.TypeName ??
+                            "Метрика",
+
+                        Value =
+                            metric.Metric.Meaning
+                                .ToString("0.00"),
+
+                        NumericValue =
+                            metric.Metric.Meaning
+                    });
+                }
+            }
 
             return Page();
         }

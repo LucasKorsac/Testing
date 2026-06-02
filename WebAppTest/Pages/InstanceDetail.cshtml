@@ -1,84 +1,221 @@
 ﻿@page "{id}"
+
 @model WebAppTest.Pages.InstanceDetail
 
 @{
     ViewData["Title"] = "Экземпляр";
 }
 
-<header>
-    <nav>
-        <ul>
-            <!-- <li><a href="/Prof">Профиль</a></li> -->
-            <li><a href="/Index">Главная страница</a></li>
-            <li><a href="/Apps">Приложения</a></li>
-            <li><a href="/TestControl">Управление тестами</a></li>
-            <li><a href="/Manage">Справка</a></li>
+@section Styles {
 
-        </ul>
-    </nav>
-</header>
+    <link rel="stylesheet"
+          href="~/css/charts.css"
+          asp-append-version="true" />
+
+}
 
 @if (Model.Instance == null)
 {
-    <div class="alert alert-danger">
+    <div class="empty-state">
         Экземпляр не найден
     </div>
-
-    return;
-}
-
-<h1>@Model.Instance.Name</h1>
-
-<div class="mb-4">
-    <p>
-        <strong>Версия:</strong>
-        @Model.Instance.Version
-    </p>
-
-    <p>
-        <strong>Дата:</strong>
-        @Model.Instance.Date.ToShortDateString()
-    </p>
-</div>
-
-<h2 class="mb-3">Результаты A/B тестов</h2>
-
-@if (Model.Table.Any())
-{
-    <table class="table table-bordered table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                @* <th>Пользователь</th> *@
-
-                @foreach (var header in Model.Headers)
-                {
-                    <th>@header</th>
-                }
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach (var row in Model.Table)
-            {
-                <tr>
-                    @* <td>@row.User</td> *@
-
-                    @foreach (var header in Model.Headers)
-                    {
-                        <td>
-                            @(row.Values.ContainsKey(header)
-                                            ? row.Values[header]
-                                            : "-")
-            </td>
-                        }
-                </tr>
-            }
-        </tbody>
-    </table>
 }
 else
 {
-    <div class="alert alert-secondary">
-        Нет результатов
-    </div>
+    <main class="page-container">
+
+        <section class="hero card">
+
+            <div>
+
+                <h1>
+                    @Model.Instance.Name
+                </h1>
+
+                <p class="description">
+                    Аналитика экземпляра приложения
+                </p>
+
+            </div>
+
+            <div class="hero-stats">
+
+                <div class="hero-card">
+
+                    <span>Версия</span>
+
+                    <strong>
+                        @Model.Instance.Version
+                    </strong>
+
+                </div>
+
+                <div class="hero-card">
+
+                    <span>Дата</span>
+
+                    <strong>
+                        @Model.Instance.Date.ToString("dd.MM.yyyy")
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="chart-layout">
+
+                <aside class="chart-sidebar">
+
+                    <h3>Настройки</h3>
+
+                    <label>
+                        Тип графика
+                    </label>
+
+                    <select id="chartType">
+
+                        <option value="bar">Bar</option>
+                        <option value="line">Line</option>
+                        <option value="pie">Pie</option>
+                        <option value="doughnut">Doughnut</option>
+
+                    </select>
+
+                    <label>
+                        Данные
+                    </label>
+
+                    <select id="metricSelect">
+
+                        <option value="metric">
+                            Метрики
+                        </option>
+
+                        <option value="device">
+                            Устройства
+                        </option>
+
+                    </select>
+
+                    <button id="updateChartBtn"
+                            class="btn btn-primary">
+
+                        Обновить
+
+                    </button>
+
+                </aside>
+
+                <div class="chart-content">
+
+                    <h2>
+                        График
+                    </h2>
+
+                    <div class="chart-container">
+
+                        <canvas id="metricsChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>
+                Метрики
+            </h2>
+
+            @if (Model.Table.Any())
+            {
+                <div class="table-scroll">
+
+                    <table class="metrics-table"
+                           id="metricsTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Установка</th>
+
+                                <th>Кол-во вариантов</th>
+
+                                <th>Вариант</th>
+
+                                <th class="type-column">
+                                    Тип метрики
+                                </th>
+
+                                <th class="value-column">
+                                    Метрика
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var row in Model.Table)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @row.InstallId
+                                    </td>
+
+                                    <td>
+                                        @row.VariantsCount
+                                    </td>
+
+                                    <td>
+                                        @row.VariantName
+                                    </td>
+
+                                    <td class="type-cell">
+                                        @row.Type
+                                    </td>
+
+                                    <td class="value-cell"
+                                        data-value="@row.NumericValue">
+
+                                        @row.Value
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+
+                    Нет данных
+
+                </div>
+            }
+
+        </section>
+
+    </main>
 }
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="~/js/instance.js"
+        asp-append-version="true"></script>

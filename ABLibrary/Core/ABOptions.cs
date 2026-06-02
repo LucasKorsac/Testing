@@ -1,8 +1,9 @@
-﻿namespace ABLibrary.Core;
-
-public class ABOptions
+﻿namespace ABLibrary.Core
 {
-    public string StorageKey { get; set; } = "ab_events";
+    public class ABOptions
+    {
+        public string StorageKey { get; set; } = "ab_events";
 
-    public bool AutoFlush { get; set; } = true;
+        public bool AutoFlush { get; set; } = true;
+    }
 }

@@ -1,31 +1,34 @@
-﻿namespace ABLibrary.Core;
+﻿using System.Threading.Tasks;
 
-public class ABManager
+namespace ABLibrary.Core
 {
-    private readonly ABClient _client;
-
-    public ABManager(ABClient client)
+    public class ABManager
     {
-        _client = client;
-    }
+        private readonly ABClient _client;
 
-    public async Task InitAsync(string appId)
-    {
-        await _client.InitializeAsync(appId);
-    }
+        public ABManager(ABClient client)
+        {
+            _client = client;
+        }
 
-    public string GetVariant(string testName)
-    {
-        return _client.GetVariant(testName);
-    }
+        public async Task InitAsync(string appId)
+        {
+            await _client.InitializeAsync(appId);
+        }
 
-    public async Task TrackAsync(string testName, string userId, string eventType = "conversion")
-    {
-        await _client.TrackAsync(testName, userId, eventType);
-    }
+        public string GetVariant(string testName)
+        {
+            return _client.GetVariant(testName);
+        }
 
-    public async Task FlushAsync()
-    {
-        await _client.FlushAsync();
+        public async Task TrackAsync(string testName, string userId, string eventType = "conversion")
+        {
+            await _client.TrackAsync(testName, userId, eventType);
+        }
+
+        public async Task FlushAsync()
+        {
+            await _client.FlushAsync();
+        }
     }
 }

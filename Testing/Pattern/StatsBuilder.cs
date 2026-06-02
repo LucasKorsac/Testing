@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using Testing.Base;
+using Testing.DTO;
 using static Testing.Base.BaseMongo;
 
 namespace Testing.Pattern
@@ -8,7 +9,7 @@ namespace Testing.Pattern
     public class VariantStat
     {
         /// <summary> Вариант теста </summary>
-        public Variants Variant { get; set; }
+        public VariantDto Variant { get; set; } = new();
 
         /// <summary> Количество значений </summary>
         public int Count { get; set; }
@@ -38,7 +39,10 @@ namespace Testing.Pattern
         /// <summary> Репозиторий метрик </summary>
         private readonly IMongoRepo<Values> _valueRepo;
 
-        public StatsBuilder(IMongoRepo<Variants> variantRepo, IMongoRepo<AbResults> resultRepo, IMongoRepo<Values> valueRepo)
+        public StatsBuilder(
+            IMongoRepo<Variants> variantRepo,
+            IMongoRepo<AbResults> resultRepo,
+            IMongoRepo<Values> valueRepo)
         {
             _variantRepo = variantRepo;
             _resultRepo = resultRepo;
@@ -49,39 +53,54 @@ namespace Testing.Pattern
         public async Task<List<VariantStat>> Build(ObjectId testId)
         {
             // варианты теста
-            var variants = await _variantRepo.Where(v => v.AbTestId == testId);
+            var variants = await _variantRepo
+                .Where(v => v.AbTestId == testId);
 
             var stats = new List<VariantStat>();
 
             foreach (var variant in variants)
             {
                 // результаты по варианту
-                var results = await _resultRepo.Where(r => r.VariantId == variant.Id);
+                var results = await _resultRepo
+                    .Where(r => r.VariantId == variant.Id);
 
-                var instanceIds = results.Select(r => r.InstanceId).ToList();
+                var instanceIds = results
+                    .Select(r => r.InstanceId)
+                    .ToList();
 
                 // если результатов нет
                 if (instanceIds.Count == 0)
                     continue;
 
                 // значения метрик
-                var values = await _valueRepo.Where(v => instanceIds.Contains(v.InstanceId));
+                var values = await _valueRepo
+                    .Where(v => instanceIds.Contains(v.InstanceId));
 
                 // если метрик нет
                 if (values.Count == 0)
                     continue;
 
+                var average = values.Average(v => v.MetricValue);
+
                 // статистика
                 stats.Add(new VariantStat
                 {
-                    Variant = variant,
+                    Variant = new VariantDto
+                    {
+                        Id = variant.Id.ToString(),
+                        AbTestId = variant.AbTestId.ToString(),
+                        Name = variant.Name,
+                        Description = variant.Description,
+                        Mean = variant.Mean,
+                        Audience = variant.Audience
+                    },
 
                     Count = values.Count,
 
-                    Average = values.Average(v => v.MetricValue),
+                    Average = average,
 
                     // пока вес = среднему значению
-                    Weight = (int)Math.Round(values.Average(v => v.MetricValue))
+                    Weight = (int)Math.Round(average)
                 });
             }
 
