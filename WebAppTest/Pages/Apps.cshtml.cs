@@ -48,6 +48,15 @@ namespace WebAppTest.Pages
 
         public List<ApplicationWithInstancesDto> AppsList { get; set; } = new();
 
+        [BindProperty]
+        public CreateAppInput CreateModel { get; set; } = new();
+
+        public class CreateAppInput
+        {
+            public string Name { get; set; } = "";
+            public string Description { get; set; } = "";
+        }
+
         public async Task OnGetAsync()
         {
             AppsList = await _ui.GetApplicationWithInstanceAsync();

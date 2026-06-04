@@ -19,7 +19,7 @@ namespace ABProjectTests.BaseTest
 
         public async Task Init()
         {
-            Console.WriteLine("Starting app...");
+            Console.WriteLine("Инициализация приложения...");
 
             // синтетические данные
             await SinteticData.Init(
@@ -37,7 +37,7 @@ namespace ABProjectTests.BaseTest
                 _factory.Create<AbResults>()
             );
 
-            // facade
+            // фасад
             var facade = new Facade(
                 _factory.Create<ABTests>(),
                 _factory.Create<Variants>(),
@@ -56,28 +56,24 @@ namespace ABProjectTests.BaseTest
             // получаем тесты
             var tests = await facade.GetTests();
 
-            foreach (var item in tests)
+            Console.WriteLine($"\nНайдено тестов: {tests.Count}");
+            Console.WriteLine("\nПримеры тестов (первые 10):");
+
+            foreach (var item in tests.Take(10))
             {
-                var variants =
-                    item.Variants ?? new List<VariantDto>();
+                var variants = item.Variants ?? new List<VariantDto>();
 
                 if (variants.Count == 0)
                     continue;
 
                 // random стратегия
-                var strategy =
-                    new RandomStrategy<VariantDto>();
+                var strategy = new RandomStrategy<VariantDto>();
+                var selected = strategy.Choose(variants, variants[0]);
 
-                var selected =
-                    strategy.Choose(
-                        variants,
-                        variants[0]);
-
-                Console.WriteLine(
-                    $"Test: {item.Test.Name} → Variant: {selected.Name}");
+                Console.WriteLine($"  Test: {item.Test.Name} → Variant: {selected.Name}");
             }
 
-            Console.WriteLine("A/B test finished");
+            Console.WriteLine("\nA/B тестирование завершено");
         }
     }
 }

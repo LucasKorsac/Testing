@@ -46,74 +46,19 @@ canvas {
         text-decoration: underline;
     }
 
-
-/*.chart-wrapper,
 .chart-container {
     position: relative;
     width: 100%;
-    min-height: 440px;
+    min-height: 450px;
 }
 
-.chart-layout {
-    display: flex;
-    gap: 28px;
-    align-items: stretch;
-}
-
-.chart-sidebar {
-    width: 260px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-    .chart-sidebar label {
-        font-weight: 600;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #64748b;
-    }
-
-    .chart-sidebar select {
-        width: 100%;
-        border-radius: 12px;
-    }
-
-.chart-content {
-    flex: 1;
+#metricsChart {
+    display: block;
+    width: 100% !important;
+    height: 400px !important;
 }
 
 canvas {
-    width: 100% !important;
-    height: 420px !important;
+    display: block;
+    max-width: 100%;
 }
-
-.table-link {
-    color: #2563eb;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
-
-    .table-link:hover {
-        color: #1e40af;
-        text-decoration: underline;
-    }*/
-
-/* Анимации для графиков */
-/*@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.chart-container {
-    animation: fadeIn 0.4s ease-out;
-}*/

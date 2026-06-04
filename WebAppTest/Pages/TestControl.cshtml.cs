@@ -36,7 +36,6 @@ namespace WebAppTest.Pages
                         CreateModel.Name,
                         CreateModel.Description);
 
-                    // Создаем варианты если указаны
                     if (!string.IsNullOrWhiteSpace(CreateModel.VariantsInput))
                     {
                         var variantNames = CreateModel.VariantsInput.Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -115,12 +114,26 @@ namespace WebAppTest.Pages
             Applications = await GetApplicationsAsync();
             var tests = await GetTestsAsync();
             var variants = await GetVariantsAsync();
+            var allVariants = await _ui.GetAllVariantsAsync();
+
+            // Получаем все результаты
+            var allResults = await _ui.GetAllResultsAsync();
+
+            // Создаем словарь: VariantId -> AbTestId
+            var variantToTestMap = allVariants.ToDictionary(v => v.Id, v => v.AbTestId);
 
             Tests = new List<TestCard>();
 
             foreach (var test in tests)
             {
-                var results = await _ui.GetResultsAsync(test.Id);
+                // Находим все Id вариантов этого теста
+                var testVariantIds = allVariants
+                    .Where(v => v.AbTestId == test.Id)
+                    .Select(v => v.Id)
+                    .ToHashSet();
+
+                // Считаем количество результатов для вариантов этого теста
+                var installCount = allResults.Count(r => testVariantIds.Contains(r.VariantId));
 
                 Tests.Add(new TestCard
                 {
@@ -129,7 +142,7 @@ namespace WebAppTest.Pages
                     Description = test.Description ?? "",
                     Enabled = test.Enabled,
                     VariantsCount = variants.Count(v => v.AbTestId == test.Id),
-                    InstallCount = results.Count
+                    InstallCount = installCount
                 });
             }
         }

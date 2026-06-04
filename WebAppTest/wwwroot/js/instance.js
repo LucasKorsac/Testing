@@ -1,99 +1,64 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
 
-    const table = document.getElementById("metricsTable");
-
-    if (!table) {
-        console.warn("Таблица metricsTable не найдена");
+    if (!window.chartData) {
+        console.error("Нет данных для графика");
         return;
     }
 
-    // получаем заголовки (пропускаем первый столбец "Установка")
-    const headers = Array.from(table.querySelectorAll("thead th"))
-        .slice(1)
-        .map(function (th) { return th.innerText; });
-
-    const metricSelect = document.getElementById("metricSelect");
     const chartTypeSelect = document.getElementById("chartType");
-    const canvas = document.getElementById("metricsChart");
-    const updateBtn = document.getElementById("updateChartBtn");
 
-    if (!metricSelect || !chartTypeSelect || !canvas) {
-        console.error("Элементы управления не найдены");
+    if (!chartTypeSelect) {
+        console.error("Элемент chartType не найден");
         return;
     }
 
-    const ctx = canvas.getContext("2d");
     let currentChart = null;
 
-    // заполняем выпадающий список метрик
-    headers.forEach(function (header) {
-        const option = document.createElement("option");
-        option.value = header;
-        option.textContent = header;
-        metricSelect.appendChild(option);
-    });
-
     function renderChart() {
-        const selectedMetric = metricSelect.value;
-        const chartType = chartTypeSelect.value;
+        const labels = window.chartData.labels;
+        const values = window.chartData.values;
 
-        const rows = Array.from(table.querySelectorAll("tbody tr"));
+        if (!labels || !values || labels.length === 0) {
+            console.warn("Нет данных для отображения");
+            return;
+        }
 
-        const labels = [];
-        const values = [];
+        const canvas = document.getElementById("metricsChart");
+        if (!canvas) return;
 
-        // находим индекс выбранной метрики
-        const metricIndex = headers.indexOf(selectedMetric);
-
-        rows.forEach(function (row) {
-            const cols = row.querySelectorAll("td");
-            if (cols.length > metricIndex + 1) {
-                const label = cols[0]?.innerText || "Unknown";
-                const valueCell = cols[metricIndex + 1];
-                const value = parseFloat(valueCell?.dataset?.value || valueCell?.innerText || 0);
-
-                labels.push(label);
-                values.push(value);
-            }
-        });
+        const ctx = canvas.getContext('2d');
 
         if (currentChart) {
             currentChart.destroy();
         }
 
         currentChart = new Chart(ctx, {
-            type: chartType,
+            type: chartTypeSelect.value,
             data: {
                 labels: labels,
                 datasets: [{
-                    label: selectedMetric,
+                    label: "Количество значений",
                     data: values,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
                     borderColor: 'rgb(54, 162, 235)',
-                    borderWidth: 2
+                    borderWidth: 2,
+                    borderRadius: 8
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                scales: (chartType === 'pie' || chartType === 'doughnut') ? {} : {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Распределение метрик' }
+                },
+                scales: chartTypeSelect.value !== 'pie' && chartTypeSelect.value !== 'doughnut' ? {
+                    y: { beginAtZero: true }
+                } : {}
             }
         });
     }
 
-    // рендерим начальный график
-    if (headers.length > 0) {
-        renderChart();
-    }
-
-    // обработчики событий
-    if (updateBtn) {
-        updateBtn.addEventListener("click", renderChart);
-    }
+    setTimeout(renderChart, 100);
     chartTypeSelect.addEventListener("change", renderChart);
-    metricSelect.addEventListener("change", renderChart);
 });

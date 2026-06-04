@@ -53,6 +53,12 @@
                     <option value="bar">Столбчатый</option>
                     <option value="pie">Круговой</option>
                 </select>
+                <label for="metricSelect" style="margin-top: 16px;">Показатель</label>
+                <select id="metricSelect">
+                    <option value="tests">Количество тестов</option>
+                    <option value="variants">Количество вариантов</option>
+                    <option value="applications">Количество приложений</option>
+                </select>
             </div>
             <div class="chart-wrapper">
                 <canvas id="testsChart" style="width:100%; height:400px;"></canvas>
@@ -95,9 +101,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="~/js/chart-helper.js"></script>
 <script>
-    window.testsChartData = {
-        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartLabels)),
-        values: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartValues))
+    window.chartData = {
+        dates: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartDates)),
+        values: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartTestsValues)),
+        variantsValues: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartVariantsValues)),
+        applicationsValues: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartApplicationsValues))
     };
 </script>
 <script src="~/js/index.js" asp-append-version="true"></script>

@@ -13,82 +13,68 @@ namespace ABLibrary.Transport
     {
         private readonly string _baseUrl;
 
-        // НОВЫЙ КОНСТРУКТОР: принимает строку с базовым URL
         public HttpABTransport(string baseUrl)
         {
             _baseUrl = baseUrl;
         }
 
-        // СТАРЫЙ КОНСТРУКТОР (закомментирован, использовал HttpClient)
-        //private readonly HttpClient _http;
-        //public HttpABTransport(HttpClient http)
-        //{
-        //    _http = http;
-        //}
-
         public async Task<ServerConfig> GetConfigAsync(string appId)
         {
-            // СТАРЫЙ КОД (использовал HttpClient)
-            //var response = await _http.GetAsync("api/ab/config/" + appId);
-
-            // НОВЫЙ КОД: используем WebRequest вместо HttpClient
-            // Создаем запрос к серверу
             var request = WebRequest.Create(_baseUrl + "api/ab/config/" + appId);
-            request.Method = "GET";  // Устанавливаем метод GET
-            request.Timeout = 10000; // Таймаут 10 секунд
+            request.Method = "GET";
+            request.Timeout = 10000;
 
-            // Получаем ответ от сервера
-            var webResponse = await request.GetResponseAsync();
-
-            // Читаем JSON из ответа
-            string json;
-            using (var stream = webResponse.GetResponseStream())
-            using (var reader = new StreamReader(stream))
+            try
             {
-                json = await reader.ReadToEndAsync();
+                using (var webResponse = await request.GetResponseAsync())
+                {
+                    string json;
+                    using (var stream = webResponse.GetResponseStream())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        json = await reader.ReadToEndAsync();
+                    }
+
+                    var result = JsonConvert.DeserializeObject<ServerConfig>(json);
+                    return result ?? new ServerConfig();
+                }
             }
-
-            // СТАРЫЙ КОД (для HttpClient)
-            //response.EnsureSuccessStatusCode();
-            //var json = await response.Content.ReadAsStringAsync();
-
-            // Десериализуем JSON в объект
-            var result = JsonConvert.DeserializeObject<ServerConfig>(json);
-
-            return result ?? new ServerConfig();
+            catch (WebException ex)
+            {
+                // В случае ошибки возвращаем пустую конфигурацию
+                Console.WriteLine($"Error getting config: {ex.Message}");
+                return new ServerConfig();
+            }
         }
 
         public async Task SendEventAsync(TestEvent evt)
         {
-            // Сериализуем событие в JSON
             var json = JsonConvert.SerializeObject(evt);
-
-            // НОВЫЙ КОД: создаем и отправляем POST запрос через WebRequest
             var request = WebRequest.Create(_baseUrl + "api/ab/event");
-            request.Method = "POST";           // Метод POST
-            request.ContentType = "application/json"; // Тип содержимого
-            request.Timeout = 10000;           // Таймаут 10 секунд
+            request.Method = "POST";
+            request.ContentType = "application/json";
+            request.Timeout = 10000;
 
-            // Преобразуем JSON в байты для отправки
             byte[] bytes = Encoding.UTF8.GetBytes(json);
             request.ContentLength = bytes.Length;
 
-            // Отправляем данные
             using (var stream = await request.GetRequestStreamAsync())
             {
                 await stream.WriteAsync(bytes, 0, bytes.Length);
             }
 
-            // Получаем ответ от сервера
-            using (var response = await request.GetResponseAsync())
+            try
             {
-                // Успешная отправка, ничего не делаем
+                using (var response = await request.GetResponseAsync())
+                {
+                    // Успешная отправка
+                }
             }
-
-            // СТАРЫЙ КОД (использовал HttpClient)
-            //var content = new StringContent(json, Encoding.UTF8, "application/json");
-            //var response = await _http.PostAsync("api/ab/event", content);
-            //response.EnsureSuccessStatusCode();
+            catch (WebException ex)
+            {
+                // Логируем ошибку, но не выбрасываем исключение
+                Console.WriteLine($"Error sending event: {ex.Message}");
+            }
         }
     }
 }

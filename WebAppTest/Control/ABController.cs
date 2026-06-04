@@ -15,20 +15,20 @@ namespace WebAppTest.Control
         }
 
         // GET api/ab/config/{appId}
-        [HttpGet("config/{appId}")]
-        public async Task<IActionResult> GetConfig(string appId)
-        {
-            var tests =
-                await _ui.GetActiveTestsAsync(appId);
+        //[HttpGet("config/{appId}")]
+        //public async Task<IActionResult> GetConfig(string appId)
+        //{
+        //    var tests =
+        //        await _ui.GetActiveTestsAsync(appId);
 
-            var config =
-                new ServerConfig
-                {
-                    Tests = tests
-                };
+        //    var config =
+        //        new ServerConfig
+        //        {
+        //            Tests = tests.ToString()
+        //        };
 
-            return Ok(config);
-        }
+        //    return Ok(config);
+        //}
 
         // POST api/ab/event
         [HttpPost("event")]

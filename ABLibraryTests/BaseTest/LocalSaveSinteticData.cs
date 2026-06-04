@@ -20,7 +20,7 @@ namespace ABProjectTests.BaseTest
 
         public async Task Run()
         {
-            Console.WriteLine("=== START SEED ===");
+            Console.WriteLine("Начало...");
 
             // Защита: только Development
             if (!IsDevelopment())
@@ -63,7 +63,7 @@ namespace ABProjectTests.BaseTest
 
                 Console.WriteLine("Заполнение базы...");
 
-                Console.WriteLine("=== SEED COMPLETED SUCCESSFULLY ===");
+                Console.WriteLine("Успешно");
             }
             catch (Exception ex)
             {

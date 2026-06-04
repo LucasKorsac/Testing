@@ -7,79 +7,438 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/apps.css" />
+    <style>
+        .create-app-card {
+            max-width: 600px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 40px;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+            .create-app-card h2 {
+                margin-top: 0;
+                margin-bottom: 24px;
+                font-size: 20px;
+                color: #0f172a;
+            }
+
+        .app-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .app-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .app-info {
+            flex: 1;
+        }
+
+            .app-info h2 {
+                margin: 0 0 8px 0;
+                font-size: 18px;
+                color: #0f172a;
+            }
+
+            .app-info p {
+                margin: 0;
+                color: #64748b;
+                font-size: 14px;
+            }
+
+        .app-stats {
+            display: flex;
+            gap: 24px;
+            margin: 16px 0;
+            padding: 12px 0;
+            border-top: 1px solid #eef2f6;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+            .stat-item span {
+                color: #64748b;
+                font-size: 12px;
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            .stat-item strong {
+                font-size: 24px;
+                color: #0f172a;
+            }
+
+        .instances-list {
+            margin: 16px 0;
+        }
+
+        .instance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+            .instance-item:last-child {
+                border-bottom: none;
+            }
+
+        .instance-name {
+            cursor: pointer;
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+            .instance-name:hover {
+                text-decoration: underline;
+            }
+
+        .instance-version {
+            color: #64748b;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .instance-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-instance {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-instance-edit {
+            color: #f59e0b;
+        }
+
+            .btn-instance-edit:hover {
+                background: #fef3c7;
+            }
+
+        .btn-instance-delete {
+            color: #ef4444;
+        }
+
+            .btn-instance-delete:hover {
+                background: #fee2e2;
+            }
+
+        .no-instances {
+            color: #64748b;
+            font-size: 14px;
+            padding: 16px 0;
+            text-align: center;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .select-wrapper {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+            .select-wrapper .form-group {
+                flex: 1;
+                margin-bottom: 0;
+            }
+    </style>
 }
 
-<main>
+<main class="page-container">
+    <!-- Форма создания приложения -->
+    <div class="create-app-card">
+        <h2>Создание приложения</h2>
+        <form method="post" asp-page-handler="Create">
+            <div class="form-group">
+                <label>Название</label>
+                <input asp-for="CreateModel.Name" class="form-input" required />
+            </div>
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea asp-for="CreateModel.Description" class="form-input" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Создать приложение</button>
+        </form>
+    </div>
 
-    <h1>Приложения</h1>
+    <h1>Управление приложениями</h1>
+    <p class="page-description">Создание, редактирование и управление экземплярами приложений</p>
 
     @if (Model.AppsList.Any())
     {
-        <div class="apps-grid">
-
+        <div class="tests-grid">
             @foreach (var item in Model.AppsList)
             {
-                <section class="app-card">
+                <div class="test-card">
+                    <div class="app-card-header">
+                        <div class="app-info">
+                            <h2>@item.Application.Name</h2>
+                            <p>@(string.IsNullOrWhiteSpace(item.Application.Description) ? "Описание отсутствует" : item.Application.Description)</p>
+                        </div>
+                        <div class="app-actions">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="openEditAppModal('@item.Application.Id', '@item.Application.Name', '@item.Application.Description')">Редактировать</button>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@item.Application.Id" style="display: inline;" onsubmit="return confirmDelete()">
+                                <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                            </form>
+                        </div>
+                    </div>
 
-                    <h2>
-                        @item.Application.Name
-                    </h2>
+                    <div class="app-stats">
+                        <div class="stat-item">
+                            <span>Экземпляров</span>
+                            <strong>@item.Instances.Count</strong>
+                        </div>
+                    </div>
 
-                    <p>
-                        @item.Application.Description
-                    </p>
+                    <div class="select-wrapper">
+                        <div class="form-group">
+                            <label>Выберите экземпляр</label>
+                            <select id="instanceSelect_@item.Application.Id" class="form-input">
+                                <option value="">-- выберите экземпляр --</option>
+                                @foreach (var inst in item.Instances)
+                                {
+                                    <option value="@inst.Id">@inst.Name (v@inst.Version)</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="openSelectedInstance('@item.Application.Id')">Открыть</button>
+                        <button type="button" class="btn btn-warning btn-sm" onclick="openEditInstanceModalFromSelect('@item.Application.Id')">Редактировать</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteInstanceModalFromSelect('@item.Application.Id')">Удалить</button>
+                    </div>
 
-                    <label>
-                        Экземпляры
-                    </label>
-
-                    <select onchange="
-                                if(this.value)
-                                window.location.href=this.value">
-
-                        <option value="">
-                            -- выбрать --
-                        </option>
-
-                        @foreach (var inst in item.Instances)
-                        {
-                            <option value="/InstanceDetail/@inst.Id">
-
-                                @inst.Name
-                                (v@inst.Version)
-
-                            </option>
-                        }
-
-                    </select>
-
-                    <br />
-                    <br />
-
-                    <form method="post"
-                          asp-page-handler="Delete"
-                          asp-route-id="@item.Application.Id">
-
-                        <button type="submit"
-                                class="btn btn-danger"
-                                onclick="
-                                        return confirm(
-                                            'Удалить приложение?')">
-
-                            Удалить
-
+                    <div class="instances-list">
+                        <button type="button" class="btn btn-success btn-sm" style="width: 100%; margin-top: 16px;" onclick="openAddInstanceModal('@item.Application.Id', '@item.Application.Name')">
+                            + Добавить экземпляр
                         </button>
-
-                    </form>
-
-                </section>
+                    </div>
+                </div>
             }
-
         </div>
     }
     else
     {
-        <p>Приложений нет</p>
+        <div class="empty-state">
+            <h2>Приложений пока нет</h2>
+            <p>Создайте первое приложение</p>
+        </div>
+    }
+</main>
+
+<!-- Модальное окно редактирования приложения -->
+<div id="editAppModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 24px; padding: 28px; z-index: 1000; min-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+    <h3 style="margin-top: 0;">Редактирование приложения</h3>
+    <form method="post" asp-page-handler="UpdateApp">
+        <input type="hidden" name="id" id="editAppId" />
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="name" id="editAppName" class="form-input" required />
+        </div>
+        <div class="form-group">
+            <label>Описание</label>
+            <textarea name="description" id="editAppDescription" class="form-input" rows="3"></textarea>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeEditAppModal()">Отмена</button>
+        </div>
+    </form>
+</div>
+
+<!-- Модальное окно добавления экземпляра -->
+<div id="addInstanceModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 24px; padding: 28px; z-index: 1000; min-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+    <h3 style="margin-top: 0;">Добавление экземпляра</h3>
+    <form method="post" asp-page-handler="CreateInstance">
+        <input type="hidden" name="applicationId" id="addInstanceAppId" />
+        <div class="form-group">
+            <label>Приложение</label>
+            <input type="text" id="addInstanceAppName" class="form-input" readonly style="background: #f8fafc;" />
+        </div>
+        <div class="form-group">
+            <label>Название экземпляра</label>
+            <input type="text" name="name" id="addInstanceName" class="form-input" required />
+        </div>
+        <div class="form-group">
+            <label>Версия</label>
+            <input type="number" name="version" id="addInstanceVersion" class="form-input" required min="1" />
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeAddInstanceModal()">Отмена</button>
+        </div>
+    </form>
+</div>
+
+<!-- Модальное окно редактирования экземпляра -->
+<div id="editInstanceModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 24px; padding: 28px; z-index: 1000; min-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+    <h3 style="margin-top: 0;">Редактирование экземпляра</h3>
+    <form method="post" asp-page-handler="UpdateInstance">
+        <input type="hidden" name="id" id="editInstanceId" />
+        <input type="hidden" name="applicationId" id="editInstanceAppId" />
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="name" id="editInstanceName" class="form-input" required />
+        </div>
+        <div class="form-group">
+            <label>Версия</label>
+            <input type="number" name="version" id="editInstanceVersion" class="form-input" required min="1" />
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeEditInstanceModal()">Отмена</button>
+        </div>
+    </form>
+</div>
+
+<!-- Модальное окно подтверждения удаления экземпляра -->
+<div id="deleteInstanceModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 24px; padding: 28px; z-index: 1000; min-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+    <h3 style="margin-top: 0;">Удаление экземпляра</h3>
+    <p>Вы уверены, что хотите удалить экземпляр <strong id="deleteInstanceName"></strong>?</p>
+    <form method="post" asp-page-handler="DeleteInstance" id="deleteInstanceForm">
+        <input type="hidden" name="id" id="deleteInstanceId" />
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteInstanceModal()">Отмена</button>
+        </div>
+    </form>
+</div>
+
+<div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
+<script>
+    // Хранилище для select элементов и экземпляров
+    let instancesCache = {};
+
+    function confirmDelete() {
+        return confirm('Удалить приложение? Все связанные экземпляры будут также удалены!');
     }
 
-</main>
+    // Открытие модальных окон
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+        document.getElementById('modalOverlay').style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    // Редактирование приложения
+    function openEditAppModal(id, name, description) {
+        document.getElementById('editAppId').value = id;
+        document.getElementById('editAppName').value = name;
+        document.getElementById('editAppDescription').value = description;
+        openModal('editAppModal');
+    }
+
+    function closeEditAppModal() {
+        closeModal('editAppModal');
+    }
+
+    // Добавление экземпляра
+    function openAddInstanceModal(appId, appName) {
+        document.getElementById('addInstanceAppId').value = appId;
+        document.getElementById('addInstanceAppName').value = appName;
+        document.getElementById('addInstanceName').value = '';
+        document.getElementById('addInstanceVersion').value = '';
+        openModal('addInstanceModal');
+    }
+
+    function closeAddInstanceModal() {
+        closeModal('addInstanceModal');
+    }
+
+    // Редактирование экземпляра из select
+    function openEditInstanceModalFromSelect(appId) {
+        const select = document.getElementById('instanceSelect_' + appId);
+        const selectedValue = select.value;
+        const selectedText = select.options[select.selectedIndex]?.text;
+
+        if (!selectedValue) {
+            alert('Выберите экземпляр для редактирования');
+            return;
+        }
+
+        // Парсим имя и версию из текста "Name (vX)"
+        const match = selectedText.match(/(.+)\s\(v(\d+)\)/);
+        if (match) {
+            document.getElementById('editInstanceId').value = selectedValue;
+            document.getElementById('editInstanceAppId').value = appId;
+            document.getElementById('editInstanceName').value = match[1];
+            document.getElementById('editInstanceVersion').value = match[2];
+            openModal('editInstanceModal');
+        }
+    }
+
+    function closeEditInstanceModal() {
+        closeModal('editInstanceModal');
+    }
+
+    // Удаление экземпляра из select
+    function openDeleteInstanceModalFromSelect(appId) {
+        const select = document.getElementById('instanceSelect_' + appId);
+        const selectedValue = select.value;
+        const selectedText = select.options[select.selectedIndex]?.text;
+
+        if (!selectedValue) {
+            alert('Выберите экземпляр для удаления');
+            return;
+        }
+
+        document.getElementById('deleteInstanceId').value = selectedValue;
+        document.getElementById('deleteInstanceName').textContent = selectedText;
+        openModal('deleteInstanceModal');
+    }
+
+    function closeDeleteInstanceModal() {
+        closeModal('deleteInstanceModal');
+    }
+
+    // Открытие выбранного экземпляра
+    function openSelectedInstance(appId) {
+        const select = document.getElementById('instanceSelect_' + appId);
+        const selectedValue = select.value;
+
+        if (!selectedValue) {
+            alert('Выберите экземпляр');
+            return;
+        }
+
+        window.location.href = '/InstanceDetail/' + selectedValue;
+    }
+
+    // Закрытие по клику на overlay
+    document.getElementById('modalOverlay')?.addEventListener('click', function() {
+        document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+            modal.style.display = 'none';
+        });
+        this.style.display = 'none';
+    });
+</script>

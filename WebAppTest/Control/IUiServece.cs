@@ -107,5 +107,8 @@ namespace WebAppTest.Control
 
         Task CreateVariantAsync(string testId, string name, string description);
 
+        // Получение всех результатов
+        Task<List<AbResultsDto>> GetAllResultsAsync(); 
+
     }
 }

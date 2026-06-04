@@ -279,5 +279,10 @@ namespace WebAppTest.Control
         {
             await _facade.CreateVariant(testId, name, description);
         }
+
+        public async Task<List<AbResultsDto>> GetAllResultsAsync()
+        {
+            return await _facade.GetAllResults();
+        }
     }
 }

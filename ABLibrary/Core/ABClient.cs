@@ -7,15 +7,11 @@ using System.Threading.Tasks;
 
 namespace ABLibrary.Core
 {
-
     public class ABClient
     {
         private readonly IABTransport _transport;
-
         private readonly ILocalStorage _storage;
-
         private readonly ABOptions _options;
-
         private readonly List<TestEvent> _buffer;
 
         public ServerConfig Config { get; private set; } = new ServerConfig();
@@ -30,7 +26,6 @@ namespace ABLibrary.Core
             _transport = transport;
             _storage = storage;
             _options = options ?? new ABOptions();
-
             _buffer = _storage.Load<List<TestEvent>>(_options.StorageKey) ?? new List<TestEvent>();
         }
 
@@ -48,6 +43,7 @@ namespace ABLibrary.Core
 
         public string GetVariant(string testName)
         {
+            // Теперь Tests это Dictionary<string, string>, поэтому ToString не нужен
             return Config.Tests.TryGetValue(testName, out var variant) ? variant : "default";
         }
 
@@ -63,7 +59,6 @@ namespace ABLibrary.Core
             };
 
             _buffer.Add(evt);
-
             SaveBuffer();
 
             if (_options.AutoFlush)
@@ -79,7 +74,6 @@ namespace ABLibrary.Core
                 try
                 {
                     await _transport.SendEventAsync(evt);
-
                     _buffer.Remove(evt);
                 }
                 catch
@@ -87,7 +81,6 @@ namespace ABLibrary.Core
                     // keep in queue
                 }
             }
-
             SaveBuffer();
         }
 

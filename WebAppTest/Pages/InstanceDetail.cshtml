@@ -1,5 +1,4 @@
 ﻿@page "{id}"
-
 @model WebAppTest.Pages.InstanceDetail
 
 @{
@@ -7,11 +6,7 @@
 }
 
 @section Styles {
-
-    <link rel="stylesheet"
-          href="~/css/charts.css"
-          asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/css/charts.css" asp-append-version="true" />
 }
 
 @if (Model.Instance == null)
@@ -23,199 +18,143 @@
 else
 {
     <main class="page-container">
-
         <section class="hero card">
-
             <div>
-
-                <h1>
-                    @Model.Instance.Name
-                </h1>
-
-                <p class="description">
-                    Аналитика экземпляра приложения
-                </p>
-
+                <h1>@Model.Instance.Name</h1>
+                <p class="description">Аналитика экземпляра приложения</p>
             </div>
-
             <div class="hero-stats">
-
                 <div class="hero-card">
-
                     <span>Версия</span>
-
-                    <strong>
-                        @Model.Instance.Version
-                    </strong>
-
+                    <strong>@Model.Instance.Version</strong>
                 </div>
-
                 <div class="hero-card">
-
                     <span>Дата</span>
-
-                    <strong>
-                        @Model.Instance.Date.ToString("dd.MM.yyyy")
-                    </strong>
-
+                    <strong>@Model.Instance.Date.ToString("dd.MM.yyyy")</strong>
                 </div>
-
             </div>
-
         </section>
 
         <section class="card">
-
             <div class="chart-layout">
-
                 <aside class="chart-sidebar">
-
                     <h3>Настройки</h3>
-
-                    <label>
-                        Тип графика
-                    </label>
-
+                    <label>Тип графика</label>
                     <select id="chartType">
-
-                        <option value="bar">Bar</option>
-                        <option value="line">Line</option>
-                        <option value="pie">Pie</option>
-                        <option value="doughnut">Doughnut</option>
-
+                        <option value="bar">Столбчатый</option>
+                        <option value="line">Линейный</option>
+                        <option value="pie">Круговой</option>
+                        <option value="doughnut">Кольцевой</option>
                     </select>
-
-                    <label>
-                        Данные
-                    </label>
-
-                    <select id="metricSelect">
-
-                        <option value="metric">
-                            Метрики
-                        </option>
-
-                        <option value="device">
-                            Устройства
-                        </option>
-
-                    </select>
-
-                    <button id="updateChartBtn"
-                            class="btn btn-primary">
-
-                        Обновить
-
-                    </button>
-
                 </aside>
-
-                <div class="chart-content">
-
-                    <h2>
-                        График
-                    </h2>
-
-                    <div class="chart-container">
-
-                        <canvas id="metricsChart"></canvas>
-
-                    </div>
-
+                <div class="chart-wrapper">
+                    <canvas id="metricsChart" style="width:100%; height:400px;"></canvas>
                 </div>
-
             </div>
-
         </section>
 
         <section class="card">
-
-            <h2>
-                Метрики
-            </h2>
-
+            <h2>Детальная таблица метрик</h2>
             @if (Model.Table.Any())
             {
                 <div class="table-scroll">
-
-                    <table class="metrics-table"
-                           id="metricsTable">
-
+                    <table class="metrics-table" id="metricsTable">
                         <thead>
-
                             <tr>
-
                                 <th>Установка</th>
-
                                 <th>Кол-во вариантов</th>
-
                                 <th>Вариант</th>
-
-                                <th class="type-column">
-                                    Тип метрики
-                                </th>
-
-                                <th class="value-column">
-                                    Метрика
-                                </th>
-
+                                <th>Тип метрики</th>
+                                <th>Значение</th>
                             </tr>
-
                         </thead>
-
                         <tbody>
-
                             @foreach (var row in Model.Table)
                             {
                                 <tr>
-
-                                    <td>
-                                        @row.InstallId
-                                    </td>
-
-                                    <td>
-                                        @row.VariantsCount
-                                    </td>
-
-                                    <td>
-                                        @row.VariantName
-                                    </td>
-
-                                    <td class="type-cell">
-                                        @row.Type
-                                    </td>
-
-                                    <td class="value-cell"
-                                        data-value="@row.NumericValue">
-
-                                        @row.Value
-
-                                    </td>
-
+                                    <td>@row.InstallId</td>
+                                    <td>@row.VariantsCount</td>
+                                    <td>@row.VariantName</td>
+                                    <td class="type-cell">@row.Type</td>
+                                    <td class="value-cell" data-value="@row.NumericValue">@row.Value</td>
                                 </tr>
                             }
-
                         </tbody>
-
                     </table>
-
                 </div>
             }
             else
             {
-                <div class="empty-state">
-
-                    Нет данных
-
-                </div>
+                <div class="empty-state">Нет данных для отображения</div>
             }
-
         </section>
-
     </main>
 }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Проверяем наличие данных и передаем их в JavaScript
+    const chartLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartLabels ?? new List<string>()));
+    const chartValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartValues ?? new List<int>()));
 
-<script src="~/js/instance.js"
-        asp-append-version="true"></script>
+    console.log("ChartLabels:", chartLabels);
+    console.log("ChartValues:", chartValues);
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const chartTypeSelect = document.getElementById("chartType");
+        const canvas = document.getElementById("metricsChart");
+
+        if (!chartTypeSelect || !canvas) {
+            console.error("Элементы не найдены");
+            return;
+        }
+
+        if (!chartLabels || !chartValues || chartLabels.length === 0) {
+            console.warn("Нет данных для графика");
+            const ctx = canvas.getContext('2d');
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#999";
+            ctx.fillText("Нет данных для отображения", 50, 200);
+            return;
+        }
+
+        let currentChart = null;
+
+        function renderChart() {
+            const ctx = canvas.getContext('2d');
+
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            currentChart = new Chart(ctx, {
+                type: chartTypeSelect.value,
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: "Количество значений",
+                        data: chartValues,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Распределение метрик' }
+                    },
+                    scales: chartTypeSelect.value !== 'pie' && chartTypeSelect.value !== 'doughnut' ? {
+                        y: { beginAtZero: true }
+                    } : {}
+                }
+            });
+        }
+
+        renderChart();
+        chartTypeSelect.addEventListener("change", renderChart);
+    });
+</script>
