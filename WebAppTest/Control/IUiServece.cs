@@ -1,5 +1,6 @@
 ﻿using ABLibrary.Models;
 using Testing.DTO;
+using WebAppTest.Pages;
 
 namespace WebAppTest.Control
 {
@@ -108,7 +109,21 @@ namespace WebAppTest.Control
         Task CreateVariantAsync(string testId, string name, string description);
 
         // Получение всех результатов
-        Task<List<AbResultsDto>> GetAllResultsAsync(); 
+        Task<List<AbResultsDto>> GetAllResultsAsync();
+
+        // Приложения
+        Task CreateApplicationAsync(string name, string description);
+        Task UpdateApplicationAsync(string id, string name, string description);
+
+        // Экземпляры
+        Task CreateInstanceAsync(string applicationId, string name, int version);
+        Task UpdateInstanceAsync(string id, string name, int version);
+        Task DeleteInstanceAsync(string id);
+
+        // Управление стратегией теста
+        Task<string?> GetTestStrategyAsync(string testId);
+        Task SetTestStrategyAsync(string testId, string strategy);
+        Task<List<TestsModel.MABStatRow>> GetMABStatsAsync(string testId);
 
     }
 }

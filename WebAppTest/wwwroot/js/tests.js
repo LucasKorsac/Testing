@@ -1,10 +1,6 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
+﻿document.addEventListener("DOMContentLoaded", async function () {
 
-    if (!window.variantData) {
-        console.error("Нет данных для графика");
-        return;
-    }
-
+    const testId = window.testId || getTestIdFromUrl();
     const chartTypeSelect = document.getElementById("chartType");
     const chartMetricSelect = document.getElementById("chartMetric");
 
@@ -14,13 +10,20 @@
     }
 
     let currentChart = null;
+    let chartData = null;
+
+    function getTestIdFromUrl() {
+        const path = window.location.pathname;
+        const match = path.match(/\/Tests\/(.+)/);
+        return match ? match[1] : null;
+    }
 
     function getMetricData() {
         switch (chartMetricSelect.value) {
             case "metrics":
-                return window.variantData.metrics || [];
+                return chartData?.metrics || [];
             default:
-                return window.variantData.installs || [];
+                return chartData?.installs || [];
         }
     }
 
@@ -34,11 +37,16 @@
     }
 
     function renderChart() {
-        const labels = window.variantData.labels;
+        if (!chartData) {
+            console.warn("Нет данных для графика");
+            return;
+        }
+
+        const labels = chartData.labels || [];
         const values = getMetricData();
 
         if (!labels || !values || labels.length === 0) {
-            console.warn("Нет данных для графика");
+            console.warn("Нет данных для отображения");
             return;
         }
 
@@ -77,7 +85,27 @@
         });
     }
 
-    renderChart();
+    async function loadData() {
+        try {
+            console.log("Загрузка данных теста с API...");
+            const response = await fetch(`/api/charts/test/${testId}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            chartData = await response.json();
+            console.log("Данные теста получены:", chartData);
+            renderChart();
+        } catch (error) {
+            console.error("Ошибка загрузки данных:", error);
+        }
+    }
+
+    if (testId) {
+        await loadData();
+    }
+
     chartTypeSelect.addEventListener("change", renderChart);
     chartMetricSelect.addEventListener("change", renderChart);
 

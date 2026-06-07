@@ -105,13 +105,18 @@ builder.Services.AddScoped<IStatsBuilder, StatsBuilder>(sp =>
     );
 });
 
-// ========================================
 // регистраци€ стратегий и сервисов
-// ========================================
+
 
 // стратегии
 builder.Services.AddScoped<IStrategy<VariantDto>, AdaptStrategy>();
+//јдаптивна€
 builder.Services.AddScoped<IWeightStrategy, WeightStrategy>();
+// MAB
+builder.Services.AddScoped<ThompsonSamplingStrategy>();
+builder.Services.AddScoped<UCBStrategy>();
+builder.Services.AddScoped<EpsilonGreedyStrategy>();
+builder.Services.AddScoped<MABManager>();
 
 // сервисы testing
 builder.Services.AddScoped<Adaptation>();
@@ -121,9 +126,7 @@ builder.Services.AddScoped<ServiceControl>();
 builder.Services.AddScoped<IUiService, UiService>();
 builder.Services.AddScoped<ChartService>();
 
-// ========================================
 // построение приложени€
-// ========================================
 
 var app = builder.Build();
 

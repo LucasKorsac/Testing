@@ -5,172 +5,6 @@
     ViewData["Title"] = "Приложения";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/apps.css" />
-    <style>
-        .create-app-card {
-            max-width: 600px;
-            width: 100%;
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 28px;
-            margin-bottom: 40px;
-            border: 1px solid #eef2f6;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-            .create-app-card h2 {
-                margin-top: 0;
-                margin-bottom: 24px;
-                font-size: 20px;
-                color: #0f172a;
-            }
-
-        .app-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .app-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .app-info {
-            flex: 1;
-        }
-
-            .app-info h2 {
-                margin: 0 0 8px 0;
-                font-size: 18px;
-                color: #0f172a;
-            }
-
-            .app-info p {
-                margin: 0;
-                color: #64748b;
-                font-size: 14px;
-            }
-
-        .app-stats {
-            display: flex;
-            gap: 24px;
-            margin: 16px 0;
-            padding: 12px 0;
-            border-top: 1px solid #eef2f6;
-            border-bottom: 1px solid #eef2f6;
-        }
-
-        .stat-item {
-            flex: 1;
-        }
-
-            .stat-item span {
-                color: #64748b;
-                font-size: 12px;
-                display: block;
-                margin-bottom: 4px;
-            }
-
-            .stat-item strong {
-                font-size: 24px;
-                color: #0f172a;
-            }
-
-        .instances-list {
-            margin: 16px 0;
-        }
-
-        .instance-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-            .instance-item:last-child {
-                border-bottom: none;
-            }
-
-        .instance-name {
-            cursor: pointer;
-            color: #2563eb;
-            font-weight: 500;
-        }
-
-            .instance-name:hover {
-                text-decoration: underline;
-            }
-
-        .instance-version {
-            color: #64748b;
-            font-size: 12px;
-            margin-left: 8px;
-        }
-
-        .instance-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-instance {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-instance-edit {
-            color: #f59e0b;
-        }
-
-            .btn-instance-edit:hover {
-                background: #fef3c7;
-            }
-
-        .btn-instance-delete {
-            color: #ef4444;
-        }
-
-            .btn-instance-delete:hover {
-                background: #fee2e2;
-            }
-
-        .no-instances {
-            color: #64748b;
-            font-size: 14px;
-            padding: 16px 0;
-            text-align: center;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-
-        .select-wrapper {
-            margin-top: 16px;
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-            .select-wrapper .form-group {
-                flex: 1;
-                margin-bottom: 0;
-            }
-    </style>
-}
-
 <main class="page-container">
     <!-- Форма создания приложения -->
     <div class="create-app-card">
@@ -332,9 +166,6 @@
 <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
 
 <script>
-    // Хранилище для select элементов и экземпляров
-    let instancesCache = {};
-
     function confirmDelete() {
         return confirm('Удалить приложение? Все связанные экземпляры будут также удалены!');
     }
@@ -350,7 +181,6 @@
         document.getElementById('modalOverlay').style.display = 'none';
     }
 
-    // Редактирование приложения
     function openEditAppModal(id, name, description) {
         document.getElementById('editAppId').value = id;
         document.getElementById('editAppName').value = name;
@@ -362,12 +192,11 @@
         closeModal('editAppModal');
     }
 
-    // Добавление экземпляра
     function openAddInstanceModal(appId, appName) {
         document.getElementById('addInstanceAppId').value = appId;
         document.getElementById('addInstanceAppName').value = appName;
         document.getElementById('addInstanceName').value = '';
-        document.getElementById('addInstanceVersion').value = '';
+        document.getElementById('addInstanceVersion').value = '1';
         openModal('addInstanceModal');
     }
 
@@ -375,7 +204,6 @@
         closeModal('addInstanceModal');
     }
 
-    // Редактирование экземпляра из select
     function openEditInstanceModalFromSelect(appId) {
         const select = document.getElementById('instanceSelect_' + appId);
         const selectedValue = select.value;
@@ -386,7 +214,6 @@
             return;
         }
 
-        // Парсим имя и версию из текста "Name (vX)"
         const match = selectedText.match(/(.+)\s\(v(\d+)\)/);
         if (match) {
             document.getElementById('editInstanceId').value = selectedValue;
@@ -401,7 +228,6 @@
         closeModal('editInstanceModal');
     }
 
-    // Удаление экземпляра из select
     function openDeleteInstanceModalFromSelect(appId) {
         const select = document.getElementById('instanceSelect_' + appId);
         const selectedValue = select.value;
@@ -421,7 +247,6 @@
         closeModal('deleteInstanceModal');
     }
 
-    // Открытие выбранного экземпляра
     function openSelectedInstance(appId) {
         const select = document.getElementById('instanceSelect_' + appId);
         const selectedValue = select.value;

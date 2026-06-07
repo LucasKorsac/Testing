@@ -1,0 +1,139 @@
+﻿/* Стили для страницы справки */
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-description {
+    color: #64748b;
+    margin-bottom: 32px;
+    font-size: 16px;
+}
+
+.help-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid #eef2f6;
+}
+
+    .help-section h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 22px;
+        color: #0f172a;
+        border-bottom: 2px solid #2563eb;
+        padding-bottom: 8px;
+        display: inline-block;
+    }
+
+    .help-section h3 {
+        margin-top: 24px;
+        margin-bottom: 12px;
+        font-size: 18px;
+        color: #1e293b;
+    }
+
+    .help-section p, .help-section li {
+        color: #334155;
+        line-height: 1.5;
+    }
+
+    .help-section ul, .help-section ol {
+        margin: 12px 0;
+        padding-left: 24px;
+    }
+
+    .help-section code {
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 13px;
+        color: #e11d48;
+    }
+
+    .help-section pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 16px;
+        border-radius: 12px;
+        overflow-x: auto;
+        font-size: 13px;
+        margin: 16px 0;
+    }
+
+        .help-section pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            font-family: monospace;
+        }
+
+.strategy-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
+    border-left: 4px solid #2563eb;
+}
+
+    .strategy-card h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+
+    .strategy-card p {
+        margin: 8px 0;
+    }
+
+.note {
+    background: #fef3c7;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    margin-top: 16px;
+}
+
+.download-area {
+    margin: 20px 0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+}
+
+    .btn-primary:hover {
+        background: #1e40af;
+        transform: translateY(-1px);
+    }
+
+@media (max-width: 768px) {
+    .page-container {
+        padding: 12px;
+    }
+
+    .help-section {
+        padding: 16px;
+    }
+
+        .help-section pre {
+            font-size: 11px;
+        }
+}

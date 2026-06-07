@@ -75,6 +75,12 @@
         const labels = window.chartData.dates || window.chartData.labels || [];
         const values = getMetricData();
 
+        console.log("Рендер графика:", {
+            metric: metricSelect?.value,
+            labels: labels,
+            values: values
+        });
+
         if (!labels || !values || labels.length === 0) {
             console.warn("Нет данных для отображения");
             return;
@@ -89,10 +95,9 @@
             currentChart.destroy();
         }
 
-        // Форматируем подписи для оси X (показываем только дату)
+        // Форматируем подписи для оси X
         const formattedLabels = labels.map(label => {
-            // Если это дата в формате ISO или другой
-            if (label.includes('-') && (label.length === 10 || label.includes('T'))) {
+            if (label && label.includes('-') && (label.length === 10 || label.includes('T'))) {
                 return formatDate(label);
             }
             return label;
@@ -109,7 +114,7 @@
                     borderColor: 'rgb(54, 162, 235)',
                     borderWidth: 2,
                     borderRadius: 8,
-                    tension: 0.3, // для сглаживания линий
+                    tension: 0.3,
                     fill: chartTypeSelect.value === 'line' ? false : undefined
                 }]
             },
@@ -119,9 +124,7 @@
                 plugins: {
                     legend: {
                         position: 'top',
-                        labels: {
-                            font: { size: 12 }
-                        }
+                        labels: { font: { size: 12 } }
                     },
                     title: {
                         display: true,
@@ -174,29 +177,6 @@
         currentChart = new Chart(ctx, chartConfig);
     }
 
-    // Загружаем данные с сервера при выборе метрики
-    async function fetchAndRender() {
-        const metric = metricSelect ? metricSelect.value : 'tests';
-
-        try {
-            // Получаем данные с сервера
-            const response = await fetch(`/api/charts/data?metric=${metric}`);
-            if (response.ok) {
-                const data = await response.json();
-                window.chartData = {
-                    dates: data.dates,
-                    values: data.testsValues,
-                    variantsValues: data.variantsValues,
-                    applicationsValues: data.applicationsValues
-                };
-            }
-        } catch (error) {
-            console.error("Ошибка загрузки данных:", error);
-        }
-
-        renderChart();
-    }
-
     // Первоначальный рендеринг
     setTimeout(renderChart, 100);
 
@@ -205,6 +185,7 @@
 
     if (metricSelect) {
         metricSelect.addEventListener("change", function () {
+            console.log("Метрика изменена на:", metricSelect.value);
             renderChart();
         });
     }

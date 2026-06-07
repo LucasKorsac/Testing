@@ -100,12 +100,4 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="~/js/chart-helper.js"></script>
-<script>
-    window.chartData = {
-        dates: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartDates)),
-        values: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartTestsValues)),
-        variantsValues: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartVariantsValues)),
-        applicationsValues: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartApplicationsValues))
-    };
-</script>
 <script src="~/js/index.js" asp-append-version="true"></script>

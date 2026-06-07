@@ -583,5 +583,72 @@ namespace Testing.Pattern
             };
             await _variants.Create(variant);
         }
+
+        // ========== ПРИЛОЖЕНИЯ ==========
+
+        /// <summary> Создание приложения </summary>
+        public async Task CreateApplication(string name, string description)
+        {
+            var app = new Applications
+            {
+                Id = ObjectId.GenerateNewId(),
+                Name = name,
+                Description = description ?? ""
+            };
+            await _applications.Create(app);
+        }
+
+        /// <summary> Обновление приложения </summary>
+        public async Task UpdateApplication(string id, string name, string description)
+        {
+            var objectId = ObjectId.Parse(id);
+            var app = await _applications.GetById(objectId);
+            if (app == null) return;
+
+            app.Name = name;
+            app.Description = description ?? "";
+            await _applications.Update(app.Id, app);
+        }
+
+        /// <summary> Создание экземпляра приложения </summary>
+        public async Task CreateInstance(string applicationId, string name, int version)
+        {
+            var instance = new Instances
+            {
+                Id = ObjectId.GenerateNewId(),
+                ApplicationId = ObjectId.Parse(applicationId),
+                Name = name,
+                Version = version,
+                Date = DateTime.UtcNow
+            };
+            await _instances.Create(instance);
+        }
+
+        /// <summary> Обновление экземпляра </summary>
+        public async Task UpdateInstance(string id, string name, int version)
+        {
+            var objectId = ObjectId.Parse(id);
+            var instance = await _instances.GetById(objectId);
+            if (instance == null) return;
+
+            instance.Name = name;
+            instance.Version = version;
+            await _instances.Update(instance.Id, instance);
+        }
+
+        /// <summary> Удаление экземпляра </summary>
+        public async Task DeleteInstance(string id)
+        {
+            var objectId = ObjectId.Parse(id);
+
+            // Удаляем значения метрик экземпляра
+            await _values.DeleteMany(v => v.InstanceId == objectId);
+
+            // Удаляем результаты экземпляра
+            await _results.DeleteMany(r => r.InstanceId == objectId);
+
+            // Удаляем сам экземпляр
+            await _instances.Delete(objectId);
+        }
     }
 }

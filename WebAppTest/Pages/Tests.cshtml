@@ -9,155 +9,157 @@
 }
 
 @section Styles {
-
-    <link rel="stylesheet"
-          href="~/css/charts.css"
-          asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/css/charts.css" asp-append-version="true" />
 }
 
 <main class="page-container">
 
-    <section class="hero card">
-
-        <div>
-
-            <h1>
-                @Model.TestName
-            </h1>
-
-            <p class="description">
-                @Model.Description
-            </p>
-
-            <span class="status-badge
-                  @(Model.IsActive
-                                      ? "status-active"
-                                      : "status-stopped")">
-
-                @(Model.IsActive
-                                ? "Активен"
-                                : "Остановлен")
-
-            </span>
-
+    <div class="tests-header">
+        <div class="strategy-selector">
+            <label>
+                <span>Распределение трафика:</span>
+                <select id="strategySelect">
+                    <option value="Random">Случайное</option>
+                    <option value="Adapt">Адаптивное</option>
+@*                     <option value="ThompsonSampling">Выборка Томпсона</option>
+                    <option value="UCB">Верхняя граница доверительного интервала</option>
+                    <option value="EpsilonGreedy">Эпсилон-Жадный</option> *@
+                </select>
+            </label>
+            <button type="button" class="btn btn-primary btn-sm" id="applyStrategyBtn">Применить</button>
         </div>
+        <div class="export-buttons">
+            <button type="button" class="btn btn-primary btn-sm" onclick="exportData('excel')">Экспорт в Excel</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportData('txt')">Экспорт в TXT</button>
+        </div>
+    </div>
 
+    <section class="hero card">
+        <div>
+            <h1>@Model.TestName</h1>
+            <p class="description">@Model.Description</p>
+            <div class="test-status">
+                <span class="status-badge @(Model.IsActive ? "status-active" : "status-stopped")">
+                    @(Model.IsActive ? "Активен" : "Остановлен")
+                </span>
+                @if (!string.IsNullOrEmpty(Model.CurrentStrategy))
+                {
+                    <span class="strategy-badge">Текущая стратегия: @Model.CurrentStrategy</span>
+                }
+            </div>
+        </div>
     </section>
 
     <section class="stats-grid">
-
         @foreach (var row in Model.TableData)
         {
             <div class="stat-card">
-
                 <span>@row.Key</span>
-
                 <strong>@row.Value</strong>
-
             </div>
         }
-
     </section>
 
     <section class="card">
-
         <div class="chart-layout">
-
             <div class="chart-sidebar">
-
                 <h3>Настройки</h3>
-
-                <label>
-                    Тип графика
-                </label>
-
+                <label>Тип графика</label>
                 <select id="chartType">
-
-                    <option value="bar">
-                        Bar
-                    </option>
-
-                    <option value="line">
-                        Line
-                    </option>
-
-                    <option value="pie">
-                        Pie
-                    </option>
-
-                    <option value="doughnut">
-                        Doughnut
-                    </option>
-
+                    <option value="bar">Bar</option>
+                    <option value="line">Line</option>
+                    <option value="pie">Pie</option>
+                    <option value="doughnut">Doughnut</option>
                 </select>
-
-                <label>
-                    Показатель
-                </label>
-
+                <label>Показатель</label>
                 <select id="chartMetric">
-
-                    <option value="installs">
-                        Установки
-                    </option>
-
-                    <option value="metrics">
-                        Метрики
-                    </option>
-
+                    <option value="installs">Установки</option>
+                    <option value="metrics">Метрики</option>
                 </select>
-
             </div>
-
             <div class="chart-content">
-
-                <h2>
-                    Аналитика теста
-                </h2>
-
+                <h2>Аналитика теста</h2>
                 <div class="chart-container">
-
                     <canvas id="variantChart"></canvas>
-
                 </div>
-
             </div>
-
         </div>
-
     </section>
 
+    @if (Model.MABStats.Any())
+    {
+        <section class="card">
+            <h2>Статистика MAB стратегии</h2>
+            <div class="table-scroll">
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Вариант</th>
+                            <th>Показы</th>
+                            <th>Успехи</th>
+                            <th>Конверсия</th>
+                            <th>Доверительный интервал</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in Model.MABStats)
+                        {
+                            <tr>
+                                <td>@stat.VariantName</td>
+                                <td>@stat.Count</td>
+                                <td>@stat.Successes</td>
+                                <td>@stat.ConversionRate.ToString("P2")</td>
+                                <td>@stat.ConfidenceInterval</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script src="~/js/chart-helper.js"></script>
-
 <script>
+    window.testId = '@Model.Id';
 
     window.variantData = {
-
-        labels:
-            @Html.Raw(
-                JsonSerializer.Serialize(
-                        Model.ChartLabels)
-                        ),
-
-        installs:
-            @Html.Raw(
-                                JsonSerializer.Serialize(
-                                        Model.ChartInstalls)
-                        ),
-
-        metrics:
-            @Html.Raw(
-                                JsonSerializer.Serialize(
-                                        Model.ChartMetrics)
-                        )
+        labels: @Html.Raw(JsonSerializer.Serialize(Model.ChartLabels)),
+        installs: @Html.Raw(JsonSerializer.Serialize(Model.ChartInstalls)),
+        metrics: @Html.Raw(JsonSerializer.Serialize(Model.ChartMetrics))
     };
 
-</script>
+    function exportData(format) {
+        const testId = '@Model.Id';
+        if (format === 'excel') {
+            window.location.href = '/api/export/excel/' + testId;
+        } else if (format === 'txt') {
+            window.location.href = '/api/export/txt/' + testId;
+        }
+    }
 
-<script src="~/js/tests.js"
-        asp-append-version="true"></script>
+    document.getElementById('applyStrategyBtn')?.addEventListener('click', async function() {
+        const strategy = document.getElementById('strategySelect').value;
+        const testId = window.testId;
+
+        try {
+            const response = await fetch('/api/tests/strategy/' + testId, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ strategy: strategy })
+            });
+
+            if (response.ok) {
+                alert('Стратегия "' + strategy + '" успешно применена к тесту');
+                location.reload();
+            } else {
+                alert('Ошибка при применении стратегии');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ошибка сети');
+        }
+    });
+</script>
+<script src="~/js/tests.js" asp-append-version="true"></script>

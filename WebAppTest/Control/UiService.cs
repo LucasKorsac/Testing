@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using Testing.DTO;
 using Testing.Pattern;
+using WebAppTest.Pages;
 
 namespace WebAppTest.Control
 {
@@ -284,5 +285,89 @@ namespace WebAppTest.Control
         {
             return await _facade.GetAllResults();
         }
+
+        // Приложения
+        public async Task CreateApplicationAsync(string name, string description)
+        {
+            await _facade.CreateApplication(name, description);
+        }
+
+        public async Task UpdateApplicationAsync(string id, string name, string description)
+        {
+            await _facade.UpdateApplication(id, name, description);
+        }
+
+        // Экземпляры
+        public async Task CreateInstanceAsync(string applicationId, string name, int version)
+        {
+            await _facade.CreateInstance(applicationId, name, version);
+        }
+
+        public async Task UpdateInstanceAsync(string id, string name, int version)
+        {
+            await _facade.UpdateInstance(id, name, version);
+        }
+
+        public async Task DeleteInstanceAsync(string id)
+        {
+            await _facade.DeleteInstance(id);
+        }
+
+        private static readonly Dictionary<string, string> _testStrategies = new();
+
+        public Task<string?> GetTestStrategyAsync(string testId)
+        {
+            _testStrategies.TryGetValue(testId, out var strategy);
+            return Task.FromResult<string?>(strategy);
+        }
+
+        public Task SetTestStrategyAsync(string testId, string strategy)
+        {
+            _testStrategies[testId] = strategy;
+            return Task.CompletedTask;
+        }
+
+        public async Task<List<TestsModel.MABStatRow>> GetMABStatsAsync(string testId)
+        {
+            var results = await _facade.GetResultsByTest(ObjectId.Parse(testId));
+            var variants = await _facade.GetAllVariants();
+            var testVariants = variants.Where(v => v.AbTestId == testId).ToList();
+
+            var stats = new List<TestsModel.MABStatRow>();
+
+            foreach (var variant in testVariants)
+            {
+                var variantResults = results.Count(r => r.VariantId == variant.Id);
+                var variantSuccesses = variantResults; // Для бинарных метрик
+
+                stats.Add(new TestsModel.MABStatRow
+                {
+                    VariantId = variant.Id,
+                    VariantName = variant.Name,
+                    Count = variantResults,
+                    Successes = variantSuccesses,
+                    ConversionRate = variantResults > 0 ? (double)variantSuccesses / variantResults : 0,
+                    ConfidenceInterval = CalculateConfidenceInterval(variantSuccesses, variantResults)
+                });
+            }
+
+            return stats;
+        }
+
+        private string CalculateConfidenceInterval(int successes, int total)
+        {
+            if (total == 0) return "Нет данных";
+
+            double p = (double)successes / total;
+            double z = 1.96; // 95% доверительный интервал
+            double se = Math.Sqrt(p * (1 - p) / total);
+            double ci = z * se;
+
+            double lower = Math.Max(0, p - ci);
+            double upper = Math.Min(1, p + ci);
+
+            return $"{p:P1} (±{ci:P1})";
+        }
+
     }
 }
