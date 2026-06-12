@@ -19,7 +19,10 @@ namespace Testing.Pattern
         }
 
         /// <summary> Выбор варианта </summary>
-        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
+        /// <param name="items">Список вариантов</param>
+        /// <param name="defaultValue">Значение по умолчанию</param>
+        /// <param name="instanceId">ID экземпляра приложения (нужен для T-оценки)</param>
+        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue, string? instanceId = null)
         {
             // защита от пустого списка
             if (items == null || items.Count == 0)
@@ -33,9 +36,16 @@ namespace Testing.Pattern
                 if (!ObjectId.TryParse(testIdRaw, out var testId))
                     return GetRandom(items);
 
-                // построение адаптивного пула
+                // Проверяем, есть ли instanceId
+                if (string.IsNullOrEmpty(instanceId))
+                {
+                    // Если нет instanceId — используем случайный выбор
+                    return GetRandom(items);
+                }
+
+                // построение адаптивного пула с передачей instanceId
                 var pool = _adaptation
-                    .BuildPool(testId)
+                    .BuildPool(testId, instanceId)  // ← добавили instanceId
                     .GetAwaiter()
                     .GetResult();
 

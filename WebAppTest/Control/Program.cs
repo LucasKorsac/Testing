@@ -7,6 +7,8 @@ using Testing.DTO;
 using Testing.Pattern;
 using WebAppTest.Control;
 using static Testing.Base.BaseMongo;
+using OfficeOpenXml;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -119,7 +121,14 @@ builder.Services.AddScoped<EpsilonGreedyStrategy>();
 builder.Services.AddScoped<MABManager>();
 
 // сервисы testing
-builder.Services.AddScoped<Adaptation>();
+//builder.Services.AddScoped<Adaptation>();
+
+builder.Services.AddScoped<Adaptation>(sp =>
+{
+    return new Adaptation(sp.GetRequiredService<IStatsBuilder>(), sp.GetRequiredService<IWeightStrategy>(),
+        sp.GetRequiredService<IMongoRepo<Values>>(), sp.GetRequiredService<IMongoRepo<EquipParam>>());
+});
+
 builder.Services.AddScoped<ServiceControl>();
 
 // ui сервисы

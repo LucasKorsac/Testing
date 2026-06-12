@@ -211,22 +211,74 @@ namespace ABProjectTests.ServerTest
         }
 
         [Fact]
-        public async Task GetTests_ShouldReturnTestsWithVariants()
+        public async Task GetTests_ShouldReturnTestsWithVariants_Debug()
         {
             // Arrange
             var appId = await CreateTestApplication();
+            Console.WriteLine($"1. AppId: {appId}");
+
+            // Создаём тест
             await _facade.CreateTest(appId, "Тест с вариантами", "Описание");
-            var tests = await _facade.GetAllTests();
-            var testId = tests.First().Id;
+            Console.WriteLine("2. Тест создан");
+
+            // Проверяем через GetAllTests
+            var allTests = await _facade.GetAllTests();
+            Console.WriteLine($"3. GetAllTests вернул: {allTests?.Count ?? 0} тестов");
+
+            if (allTests != null && allTests.Any())
+            {
+                foreach (var t in allTests)
+                {
+                    Console.WriteLine($"   - Тест: {t.Name}, Id: {t.Id}, Enabled: {t.Enabled}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("   Нет тестов в БД!");
+            }
+
+            Assert.NotNull(allTests);
+            Assert.NotEmpty(allTests);
+
+            var testId = allTests.First().Id;
+            Console.WriteLine($"4. TestId: {testId}");
+
+            // Создаём варианты
             await _facade.CreateVariant(testId, "Вариант A", "Описание A");
             await _facade.CreateVariant(testId, "Вариант B", "Описание B");
+            Console.WriteLine("5. Варианты созданы");
 
-            // Act
+            // Проверяем варианты
+            var allVariants = await _facade.GetAllVariants();
+            Console.WriteLine($"6. GetAllVariants вернул: {allVariants?.Count ?? 0} вариантов");
+
+            if (allVariants != null && allVariants.Any())
+            {
+                foreach (var v in allVariants)
+                {
+                    Console.WriteLine($"   - Вариант: {v.Name}, TestId: {v.AbTestId}");
+                }
+            }
+
+            // Проверяем GetTests
             var testsWithVariants = await _facade.GetTests();
+            Console.WriteLine($"7. GetTests вернул: {testsWithVariants?.Count ?? 0} тестов с вариантами");
+
+            if (testsWithVariants != null && testsWithVariants.Any())
+            {
+                foreach (var tv in testsWithVariants)
+                {
+                    Console.WriteLine($"   - Тест: {tv.Test?.Name}, Вариантов: {tv.Variants?.Count ?? 0}");
+                }
+            }
 
             // Assert
-            var test = testsWithVariants.FirstOrDefault(t => t.Test.Name == "Тест с вариантами");
+            Assert.NotNull(testsWithVariants);
+            Assert.NotEmpty(testsWithVariants);
+
+            var test = testsWithVariants.FirstOrDefault(t => t.Test?.Name == "Тест с вариантами");
             Assert.NotNull(test);
+            Assert.NotNull(test.Variants);
             Assert.Equal(2, test.Variants.Count);
         }
 

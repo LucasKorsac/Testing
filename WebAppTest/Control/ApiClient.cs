@@ -18,8 +18,7 @@ namespace WebAppTest.Control
 
         public async Task<ServerConfig?> GetConfigAsync(string appId)
         {
-            return await _http.GetFromJsonAsync<ServerConfig>(
-                $"api/ab/config/{appId}");
+            return await _http.GetFromJsonAsync<ServerConfig>($"api/ab/config/{appId}");
         }
 
         public async Task SendEventAsync(TestEvent evt)

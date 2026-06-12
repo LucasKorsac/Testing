@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ABLibrary.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebAppTest.Control
 {
@@ -69,7 +70,6 @@ namespace WebAppTest.Control
         /// <summary>
         /// Получение данных для графика теста
         /// </summary>
-        [HttpGet("charts/test/{testId}")]
         /// <summary>
         /// Получение данных для графика теста
         /// </summary>
@@ -90,27 +90,13 @@ namespace WebAppTest.Control
             var labels = variants.Select(v => v.Name).ToList();
             var installs = variants.Select(v => results.Count(r => r.VariantId == v.Id)).ToList();
 
-            // Исправлено: убираем обращение к InstanceId
             var metricsValues = variants.Select(v =>
             {
                 var variantResults = results.Where(r => r.VariantId == v.Id).ToList();
-                // Используем среднее значение метрик напрямую, без привязки к InstanceId
                 return metrics.Any() ? Math.Round(metrics.Average(m => m.Metric.Meaning), 2) : 0;
             }).ToList();
 
-            return Ok(new
-            {
-                labels = labels,
-                installs = installs,
-                metrics = metricsValues
-            });
-
-            return Ok(new
-            {
-                labels = labels,
-                installs = installs,
-                metrics = metricsValues
-            });
+            return Ok(new {labels = labels, installs = installs, metrics = metricsValues });
         }
 
         /// <summary>
@@ -219,10 +205,34 @@ namespace WebAppTest.Control
             return Ok(stats);
         }
 
+        /// <summary>
+        /// Получение конфигурации A/B тестов для клиента (SDK)
+        /// </summary>
+        [HttpGet("ab/config/{appId}")]
+        public async Task<IActionResult> GetABConfig(string appId)
+        {
+            try
+            {
+                var activeTests = await _ui.GetActiveTestsAsync(appId);
+
+                // Возвращаем в формате ServerConfig
+                var config = new ServerConfig
+                {
+                    Tests = activeTests
+                };
+
+                return Ok(config);
+            }
+            catch (Exception ex)
+            {
+                return Ok(new ServerConfig { Tests = new Dictionary<string, string>() });
+            }
+        }
+
         public class StrategyRequest
         {
             public string Strategy { get; set; } = "";
         }
-
     }
+
 }

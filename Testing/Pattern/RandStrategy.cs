@@ -9,7 +9,19 @@ namespace Testing.Pattern
         private static readonly Random _rnd = new();
 
         /// <summary> Случайный выбор элемента из списка </summary>
-        public T Choose(List<T> items, T defaultValue)
+        //public T Choose(List<T> items, T defaultValue)
+        //{
+        //    // если список пуст
+        //    if (items == null || items.Count == 0)
+        //        return defaultValue;
+
+        //    // случайный индекс
+        //    var index = _rnd.Next(items.Count);
+
+        //    return items[index];
+        //}
+
+        public T Choose(List<T> items, T defaultValue, string? instanceId = null)
         {
             // если список пуст
             if (items == null || items.Count == 0)

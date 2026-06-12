@@ -19,7 +19,7 @@ namespace Testing.Pattern
             _c = c;
         }
 
-        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
+        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue, string? instanceId = null)
         {
             if (items == null || items.Count == 0)
                 return defaultValue;

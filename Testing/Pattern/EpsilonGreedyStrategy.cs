@@ -19,7 +19,36 @@ namespace Testing.Pattern
             _epsilon = epsilon;
         }
 
-        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
+        //public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
+        //{
+        //    if (items == null || items.Count == 0)
+        //        return defaultValue;
+
+        //    foreach (var item in items)
+        //    {
+        //        if (!_stats.ContainsKey(item.Id))
+        //        {
+        //            _stats[item.Id] = new VariantStats
+        //            {
+        //                VariantId = item.Id,
+        //                VariantName = item.Name
+        //            };
+        //        }
+        //    }
+
+        //    if (_random.NextDouble() < _epsilon)
+        //    {
+        //        return items[_random.Next(items.Count)];
+        //    }
+
+        //    var bestVariant = items
+        //        .OrderByDescending(v => _stats[v.Id].ConversionRate)
+        //        .FirstOrDefault();
+
+        //    return bestVariant ?? defaultValue;
+        //}
+
+        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue, string? instanceId = null)
         {
             if (items == null || items.Count == 0)
                 return defaultValue;

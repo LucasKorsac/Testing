@@ -62,10 +62,11 @@ namespace Testing
             var weightStrategy =
                 new WeightStrategy();
 
-            var adaptation =
-                new Adaptation(
-                    statsBuilder,
-                    weightStrategy);
+            var adaptation = new Adaptation(
+                statsBuilder,
+                weightStrategy,
+                _factory.Create<Values>(),   
+                _factory.Create<EquipParam>());
 
             // тесты
 

@@ -21,9 +21,9 @@
                 <select id="strategySelect">
                     <option value="Random">Случайное</option>
                     <option value="Adapt">Адаптивное</option>
-@*                     <option value="ThompsonSampling">Выборка Томпсона</option>
+                    <option value="ThompsonSampling">Выборка Томпсона</option>
                     <option value="UCB">Верхняя граница доверительного интервала</option>
-                    <option value="EpsilonGreedy">Эпсилон-Жадный</option> *@
+                    <option value="EpsilonGreedy">Эпсилон-Жадный</option>
                 </select>
             </label>
             <button type="button" class="btn btn-primary btn-sm" id="applyStrategyBtn">Применить</button>
@@ -32,6 +32,10 @@
             <button type="button" class="btn btn-primary btn-sm" onclick="exportData('excel')">Экспорт в Excel</button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="exportData('txt')">Экспорт в TXT</button>
         </div>
+
+        @section Scripts {
+            <script src="~/js/export.js"></script>
+        }
     </div>
 
     <section class="hero card">

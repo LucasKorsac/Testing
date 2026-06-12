@@ -369,5 +369,9 @@ namespace WebAppTest.Control
             return $"{p:P1} (±{ci:P1})";
         }
 
+        public Task<Dictionary<string, string>> GetActiveTestsAsync(string appId, string? instanceId = null)
+        {
+            return _service.Run(appId, instanceId);
+        }
     }
 }

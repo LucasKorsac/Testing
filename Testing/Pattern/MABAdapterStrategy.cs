@@ -21,9 +21,14 @@ namespace Testing.Pattern
             _mabStrategy = mabStrategy;
         }
 
-        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
+        //public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
+        //{
+        //    return _mabStrategy.Choose(items, defaultValue);
+        //}
+
+        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue, string? instanceId = null)
         {
-            return _mabStrategy.Choose(items, defaultValue);
+            return _mabStrategy.Choose(items, defaultValue, instanceId);
         }
 
         public void UpdateReward(string variantId, double reward)

@@ -20,7 +20,47 @@ namespace Testing.Pattern
             _epsilon = epsilon;
         }
 
-        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
+        //public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue)
+        //{
+        //    if (items == null || items.Count == 0)
+        //        return defaultValue;
+
+        //    // Инициализация статистики для новых вариантов
+        //    foreach (var item in items)
+        //    {
+        //        if (!_stats.ContainsKey(item.Id))
+        //        {
+        //            _stats[item.Id] = new VariantStats
+        //            {
+        //                VariantId = item.Id,
+        //                VariantName = item.Name
+        //            };
+        //        }
+        //    }
+
+        //    // Эпсилон-жадное исследование
+        //    if (_random.NextDouble() < _epsilon && _totalCount > 100)
+        //    {
+        //        return items[_random.Next(items.Count)];
+        //    }
+
+        //    // Thompson Sampling: выбор варианта с максимальным сэмплом
+        //    var bestVariant = items
+        //        .Select(item => new
+        //        {
+        //            Variant = item,
+        //            Sample = SampleBeta(
+        //                _stats[item.Id].Successes + 1,
+        //                _stats[item.Id].Failures + 1
+        //            )
+        //        })
+        //        .OrderByDescending(x => x.Sample)
+        //        .FirstOrDefault();
+
+        //    return bestVariant?.Variant ?? defaultValue;
+        //}
+
+        public VariantDto Choose(List<VariantDto> items, VariantDto defaultValue, string? instanceId = null)
         {
             if (items == null || items.Count == 0)
                 return defaultValue;

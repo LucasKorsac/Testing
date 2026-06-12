@@ -125,5 +125,7 @@ namespace WebAppTest.Control
         Task SetTestStrategyAsync(string testId, string strategy);
         Task<List<TestsModel.MABStatRow>> GetMABStatsAsync(string testId);
 
+        Task<Dictionary<string, string>> GetActiveTestsAsync(string appId, string? instanceId = null);
+
     }
 }

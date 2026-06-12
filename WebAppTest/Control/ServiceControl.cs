@@ -16,7 +16,7 @@ namespace WebAppTest.Control
         }
 
         /// <summary> Запуск тестов для приложения </summary>
-        public async Task<Dictionary<string, string>> Run(string applicationId)
+        public async Task<Dictionary<string, string>> Run(string applicationId, string? instanceId = null)
         {
             var result = new Dictionary<string, string>();
 
@@ -37,7 +37,8 @@ namespace WebAppTest.Control
 
                 var fallback = variants.First();
 
-                var selected = _strategy.Choose(variants, fallback);
+                // Передаём instanceId в стратегию
+                var selected = _strategy.Choose(variants, fallback, instanceId);
 
                 result[item.Test.Name] = selected.Name;
             }

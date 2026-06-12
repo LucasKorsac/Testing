@@ -8,6 +8,7 @@ namespace Testing.Pattern
 {
     public interface IStrategy<T>
     {
-        T Choose(List<T> items, T defaultValue);
+        //T Choose(List<T> items, T defaultValue);
+        T Choose(List<T> items, T defaultValue, string? instanceId = null);
     }
 }
