@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ABLibrary.Models;
+using Microsoft.AspNetCore.Mvc;
 using Testing.Base;
 using Testing.Pattern;
 using WebAppTest.Control;
@@ -14,6 +15,25 @@ namespace WebAppTest.Controllers
         public AbController(IUiService ui)
         {
             _ui = ui;
+        }
+
+        [HttpPost("event")]
+        public async Task<IActionResult> SendEvent([FromBody] TestEvent evt)
+        {
+            if (evt == null)
+            {
+                return BadRequest("Event data is required");
+            }
+
+            // Проверяем наличие InstanceId
+            if (string.IsNullOrEmpty(evt.InstanceId))
+            {
+                return BadRequest("InstanceId is required");
+            }
+
+            await _ui.SaveEventAsync(evt);
+
+            return Ok();
         }
 
         [HttpPost("run")]

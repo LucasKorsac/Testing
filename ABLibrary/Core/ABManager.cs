@@ -11,9 +11,14 @@ namespace ABLibrary.Core
             _client = client;
         }
 
-        public async Task InitAsync(string appId)
+        //public async Task InitAsync(string appId)
+        //{
+        //    await _client.InitializeAsync(appId);
+        //}
+
+        public async Task InitAsync(string appId, string instanceId = "")
         {
-            await _client.InitializeAsync(appId);
+            await _client.InitializeAsync(appId, instanceId);
         }
 
         public string GetVariant(string testName)

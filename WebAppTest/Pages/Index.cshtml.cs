@@ -96,6 +96,8 @@ namespace WebAppTest.Pages
                     ChartApplicationsValues.Add(random.Next(1, maxApplications));
                 }
             }
+
+
         }
     }
 }

@@ -254,6 +254,11 @@ namespace WebAppTest.Control
             return _facade.GetVariantsCount();
         }
 
+        //public async Task SaveEventAsync(TestEvent evt)
+        //{
+        //    await _facade.SaveEvent(evt);
+        //}
+
         public async Task SaveEventAsync(TestEvent evt)
         {
             await _facade.SaveEvent(evt);

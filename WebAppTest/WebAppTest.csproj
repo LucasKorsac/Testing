@@ -34,8 +34,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Testing\Testing.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="wwwroot\download\" />
-  </ItemGroup>
 	
 </Project>

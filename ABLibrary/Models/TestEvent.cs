@@ -13,6 +13,8 @@ namespace ABLibrary.Models
 
         public string EventType { get; set; } = "conversion";
 
+        public string InstanceId { get; set; }
+
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 }

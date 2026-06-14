@@ -483,44 +483,80 @@ namespace Testing.Pattern
             await _abTests.Create(test); 
         }
 
+        //public async Task SaveEvent(TestEvent evt)
+        //{
+        //    // найти тест
+        //    var tests =
+        //        await _abTests.Where(x =>
+        //            x.Name == evt.TestName);
+
+        //    var test = tests.FirstOrDefault();
+
+        //    if (test == null)
+        //        return;
+
+        //    // найти вариант
+        //    var variants =
+        //        await _variants.Where(x =>
+        //            x.AbTestId == test.Id &&
+        //            x.Name == evt.Variant);
+
+        //    var variant =
+        //        variants.FirstOrDefault();
+
+        //    if (variant == null)
+        //        return;
+
+        //    // создать результат
+        //    var result = new AbResults
+        //    {
+        //        Id = ObjectId.GenerateNewId(),
+
+        //        VariantId = variant.Id,
+
+        //        InstanceId = ObjectId.GenerateNewId()
+        //    };
+
+        //    await _results.Create(result);
+        //}
+
         public async Task SaveEvent(TestEvent evt)
         {
-            // найти тест
-            var tests =
-                await _abTests.Where(x =>
-                    x.Name == evt.TestName);
-
+            // найти тест по имени
+            var tests = await _abTests.Where(x => x.Name == evt.TestName);
             var test = tests.FirstOrDefault();
 
             if (test == null)
                 return;
 
-            // найти вариант
-            var variants =
-                await _variants.Where(x =>
-                    x.AbTestId == test.Id &&
-                    x.Name == evt.Variant);
-
-            var variant =
-                variants.FirstOrDefault();
+            // найти вариант по тесту и имени варианта
+            var variants = await _variants.Where(x => x.AbTestId == test.Id && x.Name == evt.Variant);
+            var variant = variants.FirstOrDefault();
 
             if (variant == null)
                 return;
 
-            // создать результат
+            // наличие InstanceId
+            if (string.IsNullOrEmpty(evt.InstanceId))
+            {
+                // Логируем ошибку, но не сохраняем результат
+                Console.WriteLine($"SaveEvent: InstanceId is empty for event {evt.TestName}/{evt.Variant}");
+                return;
+            }
+
+            // создаём результат с реальным InstanceId из события
             var result = new AbResults
             {
                 Id = ObjectId.GenerateNewId(),
-
                 VariantId = variant.Id,
-
-                InstanceId = ObjectId.GenerateNewId()
+                InstanceId = ObjectId.Parse(evt.InstanceId) 
             };
 
             await _results.Create(result);
         }
 
-         /// <summary> Получение разработчика по логину </summary>
+
+        /// <summary> Получение разработчика по логину </summary>
         public async Task<DeveloperDto?> GetDeveloperByLogin(string login)
         {
             var developer = await _developers.FirstOrDefault(x => x.Login == login);

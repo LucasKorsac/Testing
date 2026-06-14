@@ -7,7 +7,9 @@ namespace ABLibrary.Interfaces
     public interface IABManager
     {
         // Инициализация
-        Task InitAsync(string gameId);
+        //Task InitAsync(string gameId);
+
+        Task InitAsync(string gameId, string instanceId = "");
 
         // Получение варианта теста
         string GetVariant(string testName);

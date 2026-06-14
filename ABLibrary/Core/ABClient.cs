@@ -108,6 +108,8 @@ namespace ABLibrary.Core
         private readonly List<TestEvent> _buffer;
         private readonly object _lockObj = new object(); // ← добавить
 
+        private string _currentInstanceId = "";
+
         public ServerConfig Config { get; private set; } = new ServerConfig();
 
         public void SetConfig(ServerConfig config)
@@ -123,15 +125,25 @@ namespace ABLibrary.Core
             _buffer = _storage.Load<List<TestEvent>>(_options.StorageKey) ?? new List<TestEvent>();
         }
 
-        public async Task InitializeAsync(string appId)
+        public async Task InitializeAsync(string appId, string instanceId = "")
         {
+            _currentInstanceId = instanceId;
+
             try
             {
-                Config = await _transport.GetConfigAsync(appId);
+                Config = await _transport.GetConfigAsync(appId, instanceId);
+
+                // Сохраняем конфиг локально
+                _storage.Save(_options.StorageKey + "_config", Config);
             }
             catch
             {
-                // offline mode
+                // offline mode — загружаем сохранённый конфиг
+                var savedConfig = _storage.Load<ServerConfig>(_options.StorageKey + "_config");
+                if (savedConfig != null)
+                {
+                    Config = savedConfig;
+                }
             }
         }
 
@@ -150,6 +162,7 @@ namespace ABLibrary.Core
                 TestName = testName,
                 Variant = GetVariant(testName),
                 UserId = userId,
+                InstanceId = _currentInstanceId,
                 EventType = eventType,
                 Timestamp = DateTime.UtcNow
             };

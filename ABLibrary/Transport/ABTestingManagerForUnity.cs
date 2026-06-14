@@ -19,47 +19,71 @@ namespace ABLibrary.Transport
 
         public string CurrentGameId => _currentGameId;
 
-        public async Task InitAsync(string gameId)
+        //public async Task InitAsync(string gameId)
+        //{
+        //    try
+        //    {
+        //        // URL ASP.NET API
+        //        var transport =
+        //            new HttpABTransport(
+        //                "https://localhost:5001/");
+
+        //        // локальное хранилище
+        //        string storagePath =
+        //            GetPersistentDataPath();
+
+        //        var storage =
+        //            new FileStorageForUnity(storagePath);
+
+        //        // клиент SDK
+        //        var client =
+        //            new ABClient(
+        //                transport,
+        //                storage);
+
+        //        // менеджер
+        //        _manager =
+        //            new ABManager(client);
+
+        //        // инициализация
+        //        await _manager.InitAsync(gameId);
+
+        //        _currentGameId = gameId;
+
+        //        _isInitialized = true;
+
+        //        Console.WriteLine(
+        //            $"AB initialized for game: {gameId}");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(
+        //            $"Initialization failed: {ex.Message}");
+
+        //        _isInitialized = false;
+        //    }
+        //}
+
+        public async Task InitAsync(string gameId, string instanceId = "")
         {
             try
             {
-                // URL ASP.NET API
-                var transport =
-                    new HttpABTransport(
-                        "https://localhost:5001/");
+                var transport = new HttpABTransport("http://192.168.100.6:5001/");
+                string storagePath = GetPersistentDataPath();
+                var storage = new FileStorageForUnity(storagePath);
+                var client = new ABClient(transport, storage);
+                _manager = new ABManager(client);
 
-                // локальное хранилище
-                string storagePath =
-                    GetPersistentDataPath();
-
-                var storage =
-                    new FileStorageForUnity(storagePath);
-
-                // клиент SDK
-                var client =
-                    new ABClient(
-                        transport,
-                        storage);
-
-                // менеджер
-                _manager =
-                    new ABManager(client);
-
-                // инициализация
-                await _manager.InitAsync(gameId);
+                await _manager.InitAsync(gameId, instanceId);
 
                 _currentGameId = gameId;
-
                 _isInitialized = true;
 
-                Console.WriteLine(
-                    $"AB initialized for game: {gameId}");
+                Console.WriteLine($"AB initialized for game: {gameId}, instance: {instanceId}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"Initialization failed: {ex.Message}");
-
+                Console.WriteLine($"Initialization failed: {ex.Message}");
                 _isInitialized = false;
             }
         }
