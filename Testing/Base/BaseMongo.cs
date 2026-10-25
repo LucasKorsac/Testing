@@ -51,6 +51,7 @@ namespace Testing.Base
 
             public ObjectId MetricTypeId { get; set; } // FK → MetricType
             public ObjectId ApplicationId { get; set; }      // FK → Application
+            public ObjectId InstanceId { get; set; }        // FK → Instance
 
             public double Meaning { get; set; }     //значение
         }
@@ -136,5 +137,22 @@ namespace Testing.Base
             public ObjectId RoleId { get; set; } //FK → Role
             public ObjectId Application {  get; set; } //FK → Application
         }
+
+        //Для работы с uplift мб
+        //public class ABAssignment
+        //{
+        //    [BsonId]
+        //    public ObjectId Id { get; set; }
+
+        //    public ObjectId ApplicationId { get; set; }
+
+        //    public ObjectId AbTestId { get; set; }
+
+        //    public ObjectId UserId { get; set; }
+
+        //    public ObjectId VariantId { get; set; }
+
+        //    public ObjectId AssignedAtUtc { get; set; }
+        //}
     }
 }

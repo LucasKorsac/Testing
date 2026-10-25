@@ -207,27 +207,37 @@ namespace WebAppTest.Control
 
         /// <summary>
         /// Получение конфигурации A/B тестов для клиента (SDK)
-        /// </summary>
+        ///// </summary>
         [HttpGet("ab/config/{appId}")]
         public async Task<IActionResult> GetABConfig(string appId)
         {
             try
             {
-                var activeTests = await _ui.GetActiveTestsAsync(appId);
+                var activeTests = await _ui.GetActiveTestsAsync();
 
-                // Возвращаем в формате ServerConfig
                 var config = new ServerConfig
                 {
                     Tests = activeTests
+                        .Select(kv => new TestConfig
+                        {
+                            // Заполни свойства TestConfig
+                            // согласно его реальному определению.
+                        })
+                        .ToList()
                 };
 
                 return Ok(config);
             }
             catch (Exception ex)
             {
-                return Ok(new ServerConfig { Tests = new Dictionary<string, string>() });
+                // Записываем ошибку, а не скрываем её.
+                return StatusCode(500, new
+                {
+                    error = "Не удалось получить конфигурацию A/B-тестов."
+                });
             }
         }
+
 
         public class StrategyRequest
         {

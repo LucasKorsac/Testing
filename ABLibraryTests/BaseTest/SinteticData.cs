@@ -280,33 +280,34 @@ namespace ABProjectTests.BaseTest
         }
 
         private static async Task ClearAll(
-            IMongoRepo<Roles> roleRepo,
-            IMongoRepo<Developers> developerRepo,
-            IMongoRepo<DevelopRoleApplic> devRoleAppRepo,
-            IMongoRepo<Applications> appRepo,
-            IMongoRepo<MetricTypes> metricTypeRepo,
-            IMongoRepo<Metrics> metricRepo,
-            IMongoRepo<Instances> instanceRepo,
-            IMongoRepo<EquipParam> equipParamRepo,
-            IMongoRepo<Values> valueRepo,
-            IMongoRepo<ABTests> abTestRepo,
-            IMongoRepo<Variants> variantRepo,
-            IMongoRepo<AbResults> resultRepo)
+    IMongoRepo<Roles> roleRepo,
+    IMongoRepo<Developers> developerRepo,
+    IMongoRepo<DevelopRoleApplic> devRoleAppRepo,
+    IMongoRepo<Applications> appRepo,
+    IMongoRepo<MetricTypes> metricTypeRepo,
+    IMongoRepo<Metrics> metricRepo,
+    IMongoRepo<Instances> instanceRepo,
+    IMongoRepo<EquipParam> equipParamRepo,
+    IMongoRepo<Values> valueRepo,
+    IMongoRepo<ABTests> abTestRepo,
+    IMongoRepo<Variants> variantRepo,
+    IMongoRepo<AbResults> resultRepo)
         {
-            Console.WriteLine("Очистка коллекций...");
+            // Сначала удаляем записи, ссылающиеся на другие сущности.
             await resultRepo.DeleteAll();
             await valueRepo.DeleteAll();
             await variantRepo.DeleteAll();
             await abTestRepo.DeleteAll();
-            await equipParamRepo.DeleteAll();
-            await instanceRepo.DeleteAll();
             await metricRepo.DeleteAll();
-            await metricTypeRepo.DeleteAll();
+            await instanceRepo.DeleteAll();
             await devRoleAppRepo.DeleteAll();
+
+            // Затем справочники и основные сущности.
+            await equipParamRepo.DeleteAll();
+            await metricTypeRepo.DeleteAll();
             await appRepo.DeleteAll();
             await developerRepo.DeleteAll();
             await roleRepo.DeleteAll();
-            Console.WriteLine("Очистка завершена");
         }
     }
 }

@@ -1,0 +1,132 @@
+﻿@page
+@model UpliftModel
+
+<h1>Uplift анализ</h1>
+
+<form method="post">
+
+    <div>
+        <label>AB Test</label>
+
+        <select asp-for="TestId">
+
+            @foreach (var test in Model.Tests)
+            {
+                <option value="@test.Id">
+                    @test.Name
+                </option>
+            }
+
+        </select>
+    </div>
+
+    <br />
+
+    <div>
+        <label>Модель</label>
+
+        <select asp-for="ModelName">
+
+            <option value="T">
+                T-Learner
+            </option>
+
+            <option value="X">
+                X-Learner
+            </option>
+
+            <option value="R">
+                R-Learner
+            </option>
+
+            <option value="DR">
+                DR-Learner
+            </option>
+
+        </select>
+    </div>
+
+    <br />
+
+    <div>
+
+        <label>
+
+            <input asp-for="UseCuped"
+                   type="checkbox" />
+
+            Использовать CUPED
+
+        </label>
+
+    </div>
+
+    <br />
+
+    <button type="submit"
+            class="btn btn-primary">
+
+        Рассчитать uplift
+
+    </button>
+
+</form>
+
+
+@if (Model.Result != null)
+{
+    <hr />
+
+    <h2>Результаты</h2>
+
+    <div>
+
+        <p>
+            Пользователей:
+            <strong>
+                @Model.Result.Metrics.Users
+            </strong>
+        </p>
+
+        <p>
+            Control:
+            <strong>
+                @Model.Result.Metrics.ControlMean.ToString("P2")
+            </strong>
+        </p>
+
+        <p>
+            Treatment:
+            <strong>
+                @Model.Result.Metrics.TreatmentMean.ToString("P2")
+            </strong>
+        </p>
+
+        <p>
+            Observed uplift:
+            <strong>
+                @Model.Result.Metrics
+                .ObservedUplift
+                .ToString("P2")
+            </strong>
+        </p>
+
+        <p>
+            Predicted uplift:
+            <strong>
+                @Model.Result.Metrics
+                .PredictedUpliftMean
+                .ToString("F4")
+            </strong>
+        </p>
+
+        <p>
+            Положительный uplift:
+            <strong>
+                @Model.Result.Metrics
+                .PositiveUpliftUsers
+            </strong>
+        </p>
+
+    </div>
+}

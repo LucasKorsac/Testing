@@ -1,27 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace ABLibrary.Interfaces
 {
     public interface IABManager
     {
-        // Инициализация
-        //Task InitAsync(string gameId);
+        bool IsInitialized { get; }
 
-        Task InitAsync(string gameId, string instanceId = "");
+        string ApplicationId { get; }
 
-        // Получение варианта теста
+        string UserId { get; }
+
+        string InstanceId { get; }
+
+        Task InitializeAsync(
+            string applicationId,
+            string userId,
+            string instanceId = "",
+            CancellationToken cancellationToken = default);
+
         string GetVariant(string testName);
 
-        // Отслеживание события
-        Task TrackAsync(string testName, string userId, string eventType = "conversion");
+        Task TrackAsync(
+            string testName,
+            string eventType = "conversion",
+            double value = 1.0,
+            CancellationToken cancellationToken = default);
 
-        // Отправка накопленных событий
-        Task FlushAsync();
-
-        // Свойства
-        bool IsInitialized { get; }
-        string CurrentGameId { get; }
+        Task FlushAsync(
+            CancellationToken cancellationToken = default);
     }
 }

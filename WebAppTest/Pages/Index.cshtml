@@ -1,4 +1,6 @@
 ﻿@page
+@using Newtonsoft.Json
+@using System.Text.Json
 @model WebAppTest.Pages.IndexModel
 
 @{
@@ -99,5 +101,21 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="~/js/chart-helper.js"></script>
+<script>
+    // Передаём данные из C# в JavaScript
+    window.chartData = {
+        dates: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChartDates)),
+        values: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChartTestsValues)),
+        variantsValues: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChartVariantsValues)),
+        applicationsValues: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChartApplicationsValues)),
+        labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChartLabels)),
+        testsValues: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ChartTestsValues))
+    };
+
+    console.log("chartData загружен:", window.chartData);
+</script>
 <script src="~/js/index.js" asp-append-version="true"></script>
+
+@* <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/js/chart-helper.js"></script>
+<script src="~/js/index.js" asp-append-version="true"></script> *@
