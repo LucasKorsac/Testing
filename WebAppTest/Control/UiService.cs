@@ -258,6 +258,12 @@ namespace WebAppTest.Control
         //{
         //    await _facade.SaveEvent(evt);
         //}
+        public async Task<IEnumerable<object>> GetActiveTestsAsync()
+        {
+            var tests = await GetActiveTestsOnlyAsync();
+
+            return tests.Cast<object>().ToList();
+        }
 
         public async Task SaveEventAsync(TestEvent evt)
         {

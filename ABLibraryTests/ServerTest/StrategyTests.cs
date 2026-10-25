@@ -34,7 +34,7 @@ namespace ABProjectTests.ServerTest
         }
 
         [Fact]
-        public void RandomStrategy_WithEmptyList_ShouldReturnDefault()
+        public void RandomStrategyWithEmptyListShouldReturnDefault()
         {
             // Arrange
             var strategy = new RandomStrategy<VariantDto>();
@@ -78,6 +78,42 @@ namespace ABProjectTests.ServerTest
 
             // Assert
             Assert.Equal(defaultValue, result);
+        }
+
+        [Fact]
+        public void RandomStrategy_ShouldReturnVariantFromProvidedList()
+        {
+            var strategy = new RandomStrategy<VariantDto>();
+
+            var variants = new List<VariantDto>
+    {
+        new() { Id = "a", Name = "Variant A" },
+        new() { Id = "b", Name = "Variant B" }
+    };
+
+            var result = strategy.Choose(
+                variants,
+                new VariantDto { Id = "default" });
+
+            Assert.NotNull(result);
+            Assert.Contains(variants, variant => variant.Id == result.Id);
+        }
+
+        [Fact]
+        public void RandomStrategy_WithEmptyList_ShouldReturnDefault()
+        {
+            var strategy = new RandomStrategy<VariantDto>();
+            var defaultVariant = new VariantDto
+            {
+                Id = "default",
+                Name = "Default"
+            };
+
+            var result = strategy.Choose(
+                new List<VariantDto>(),
+                defaultVariant);
+
+            Assert.Same(defaultVariant, result);
         }
 
         #endregion
@@ -414,6 +450,32 @@ namespace ABProjectTests.ServerTest
 
             // Assert - UCB должен предпочесть менее исследованный вариант B
             Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void UCBStrategy_ShouldExploreUntriedVariant()
+        {
+            var strategy = new UCBStrategy(1.0);
+
+            var variants = new List<VariantDto>
+    {
+        new() { Id = "a", Name = "Variant A", AbTestId = "test" },
+        new() { Id = "b", Name = "Variant B", AbTestId = "test" }
+    };
+
+            // Инициализируем статистику обоих вариантов.
+            strategy.Choose(variants, variants[0]);
+
+            // Многократно обновляем только вариант A.
+            for (var i = 0; i < 5; i++)
+            {
+                strategy.UpdateStats("a", 1.0);
+            }
+
+            // Ожидаем исследование ещё не обновлявшегося варианта B.
+            var result = strategy.Choose(variants, variants[0]);
+
+            Assert.Equal("b", result.Id);
         }
 
         [Fact]

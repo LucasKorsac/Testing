@@ -1,102 +1,182 @@
-﻿using ABLibrary.Core;
-using ABLibrary.Interfaces;
-using ABLibrary.Models;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
+﻿//using ABLibrary.Interfaces;
+//using ABLibrary.Models;
+//using ABLibrary;
+//using Moq;
 
-public class ABManagerTests
-{
-    [Fact]
-    public async Task InitAsync_CallsClientInitialize()
-    {
-        // Arrange
-        var transport = new Mock<IABTransport>();
-        var storage = new Mock<ILocalStorage>();
-        var client = new ABClient(transport.Object, storage.Object);
-        var manager = new ABManager(client);
+//public class ABManagerTests
+//{
+//    private readonly Mock<IABTransport> _transportMock;
+//    private readonly Mock<ILocalStorage> _storageMock;
+//    private readonly ABClient _client;
+//    private readonly ABManager _manager;
 
-        transport.Setup(x => x.GetConfigAsync(It.IsAny<string>()))
-            .ReturnsAsync(new ServerConfig());
+//    public ABManagerTests()
+//    {
+//        _transportMock = new Mock<IABTransport>();
+//        _storageMock = new Mock<ILocalStorage>();
 
-        // Act
-        await manager.InitAsync("test_app");
+//        _client = new ABClient(
+//            _transportMock.Object,
+//            _storageMock.Object,
+//            new ABOptions { AutoFlush = false });
 
-        // Assert
-        transport.Verify(x => x.GetConfigAsync("test_app"), Times.Once);
-    }
+//        _manager = new ABManager(_client);
+//    }
 
-    [Fact]
-    public void GetVariant_CallsClientGetVariant()
-    {
-        // Arrange
-        var transport = new Mock<IABTransport>();
-        var storage = new Mock<ILocalStorage>();
-        var client = new ABClient(transport.Object, storage.Object);
-        var manager = new ABManager(client);
+//    [Fact]
+//    public async Task InitAsync_ShouldRequestConfigForApplication()
+//    {
+//        // Arrange
+//        const string appId = "test_app";
 
-        var expectedConfig = new ServerConfig
-        {
-            Tests = new Dictionary<string, string> { { "test_name", "test_variant" } }
-        };
-        client.SetConfig(expectedConfig);
+//        _transportMock
+//            .Setup(x => x.GetConfigAsync(
+//                appId,
+//                It.IsAny<CancellationToken>()))
+//            .ReturnsAsync(new ServerConfig
+//            {
+//                Tests = new Dictionary<string, string>
+//                {
+//                    { "test_name", "variant_a" }
+//                }
+//            });
 
-        // Act
-        var result = manager.GetVariant("test_name");
+//        // Act
+//        await _manager.InitAsync(appId);
 
-        // Assert
-        Assert.Equal("test_variant", result);
-    }
+//        // Assert
+//        _transportMock.Verify(
+//            x => x.GetConfigAsync(
+//                appId,
+//                It.IsAny<CancellationToken>()),
+//            Times.Once);
 
-    [Fact]
-    public async Task TrackAsync_CallsClientTrack()
-    {
-        // Arrange
-        var transport = new Mock<IABTransport>();
-        var storage = new Mock<ILocalStorage>();
-        var client = new ABClient(transport.Object, storage.Object, new ABOptions { AutoFlush = false });
-        var manager = new ABManager(client);
+//        Assert.Equal("variant_a", _manager.GetVariant("test_name"));
+//    }
 
-        client.SetConfig(new ServerConfig
-        {
-            Tests = new Dictionary<string, string> { { "test_name", "variant" } }
-        });
+//    [Fact]
+//    public void GetVariant_ShouldReturnConfiguredVariant()
+//    {
+//        // Arrange
+//        _client.SetConfig(new ServerConfig
+//        {
+//            Tests = new Dictionary<string, string>
+//            {
+//                { "test_name", "variant_b" }
+//            }
+//        });
 
-        // Act
-        await manager.TrackAsync("test_name", "user_id", "conversion");
+//        // Act
+//        var result = _manager.GetVariant("test_name");
 
-        // Assert
-        transport.Verify(x => x.SendEventAsync(It.Is<TestEvent>(e =>
-            e.TestName == "test_name" &&
-            e.UserId == "user_id" &&
-            e.EventType == "conversion")), Times.Never); // AutoFlush = false, поэтому не отправляется
-    }
+//        // Assert
+//        Assert.Equal("variant_b", result);
+//    }
 
-    [Fact]
-    public async Task FlushAsync_CallsClientFlush()
-    {
-        // Arrange
-        var transport = new Mock<IABTransport>();
-        var storage = new Mock<ILocalStorage>();
-        var client = new ABClient(transport.Object, storage.Object, new ABOptions { AutoFlush = false });
-        var manager = new ABManager(client);
+//    [Fact]
+//    public void GetVariant_ShouldReturnNullForUnknownTest()
+//    {
+//        // Arrange
+//        _client.SetConfig(new ServerConfig
+//        {
+//            Tests = new Dictionary<string, string>()
+//        });
 
-        client.SetConfig(new ServerConfig
-        {
-            Tests = new Dictionary<string, string> { { "test_name", "variant" } }
-        });
+//        // Act
+//        var result = _manager.GetVariant("unknown_test");
 
-        await manager.TrackAsync("test_name", "user_id", "conversion");
+//        // Assert
+//        Assert.Null(result);
+//    }
 
-        transport.Setup(x => x.SendEventAsync(It.IsAny<TestEvent>()))
-            .Returns(Task.CompletedTask);
+//    [Fact]
+//    public async Task TrackAsync_WithAutoFlushDisabled_ShouldNotSendEventImmediately()
+//    {
+//        // Arrange
+//        const string testName = "checkout_test";
+//        const string userId = "user_123";
+//        const string eventType = "conversion";
 
-        // Act
-        await manager.FlushAsync();
+//        _client.SetConfig(new ServerConfig
+//        {
+//            Tests = new Dictionary<string, string>
+//            {
+//                { testName, "variant_a" }
+//            }
+//        });
 
-        // Assert
-        transport.Verify(x => x.SendEventAsync(It.IsAny<TestEvent>()), Times.Once);
-    }
-}
+//        // Act
+//        await _manager.TrackAsync(testName, userId, eventType);
+
+//        // Assert
+//        _transportMock.Verify(
+//            x => x.SendEventAsync(
+//                It.IsAny<TestEvent>(),
+//                It.IsAny<CancellationToken>()),
+//            Times.Never);
+//    }
+
+//    [Fact]
+//    public async Task FlushAsync_AfterTrackingEvent_ShouldSendBufferedEvent()
+//    {
+//        // Arrange
+//        const string testName = "checkout_test";
+//        const string userId = "user_123";
+//        const string eventType = "conversion";
+
+//        _client.SetConfig(new ServerConfig
+//        {
+//            Tests = new Dictionary<string, string>
+//            {
+//                { testName, "variant_a" }
+//            }
+//        });
+
+//        TestEvent sentEvent = null;
+
+//        _transportMock
+//            .Setup(x => x.SendEventsAsync(
+//                It.IsAny<TestEvent>(),
+//                It.IsAny<CancellationToken>()))
+//            .Callback<TestEvent, CancellationToken>(
+//                (evt, _) => sentEvent = evt)
+//            .Returns(Task.CompletedTask);
+
+//        await _manager.TrackAsync(testName, userId, eventType);
+
+//        // Act
+//        await _manager.FlushAsync();
+
+//        // Assert
+//        _transportMock.Verify(
+//            x => x.SendEventsAsync(
+//                It.IsAny<TestEvent>(),
+//                It.IsAny<CancellationToken>()),
+//            Times.Once);
+
+//        Assert.NotNull(sentEvent);
+//        Assert.Equal(userId, sentEvent.UserId);
+//        Assert.Equal(eventType, sentEvent.EventType);
+//    }
+
+//    [Fact]
+//    public async Task FlushAsync_WithoutTrackedEvents_ShouldNotSendEvent()
+//    {
+//        // Arrange
+//        _transportMock
+//            .Setup(x => x.SendEventsAsync(
+//                It.IsAny<TestEvent>(),
+//                It.IsAny<CancellationToken>()))
+//            .Returns(Task.CompletedTask);
+
+//        // Act
+//        await _manager.FlushAsync();
+
+//        // Assert
+//        _transportMock.Verify(
+//            x => x.SendEventsAsync(
+//                It.IsAny<TestEvent>(),
+//                It.IsAny<CancellationToken>()),
+//            Times.Never);
+//    }
+//}

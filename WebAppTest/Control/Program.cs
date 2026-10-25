@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using MongoDB.Driver;
+using OfficeOpenXml;
 using Testing;
 using Testing.Base;
+using Testing.Control;
 using Testing.DTO;
 using Testing.Pattern;
 using WebAppTest.Control;
 using static Testing.Base.BaseMongo;
-using OfficeOpenXml;
+using WebAppTest.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,10 +57,6 @@ builder.Services.AddHttpClient<ApiClient>(client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "https://localhost:5001/");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
-
-// ========================================
-// регистрация mongodb (необходимо для testing)
-// ========================================
 
 // регистрация клиента mongodb
 builder.Services.AddSingleton<IMongoClient>(_ =>
@@ -135,6 +133,22 @@ builder.Services.AddScoped<ServiceControl>();
 builder.Services.AddScoped<IUiService, UiService>();
 builder.Services.AddScoped<ChartService>();
 
+//uplift
+builder.Services.AddHttpClient<IUpliftClient, UpliftClient>(
+    client =>
+    {
+        client.BaseAddress = new Uri("http://localhost:8000");
+
+        client.Timeout = TimeSpan.FromMinutes(10);
+    }
+);
+
+//uplift
+builder.Services.AddHttpClient<UpliftApiClient>(client => { 
+    client.BaseAddress = new Uri(builder.Configuration["UpliftApi:BaseUrl"]
+        ?? "http://localhost:8000/");
+    client.Timeout = TimeSpan.FromMinutes(5);
+});
 // построение приложения
 
 var app = builder.Build();

@@ -4,6 +4,12 @@ namespace ABLibrary.Models
 {
     public class ServerConfig
     {
-        public Dictionary<string, string> Tests { get; set; } = new Dictionary<string, string>();
+        public string ApplicationId { get; set; } = "";
+
+        public string UserId { get; set; } = "";
+
+        public string InstanceId { get; set; } = "";
+
+        public List<TestConfig> Tests { get; set; } = new List<TestConfig>();
     }
 }

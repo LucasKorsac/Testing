@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37328.6 d17.14
+VisualStudioVersion = 17.14.37328.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABLibrary", "ABLibrary.csproj", "{517B244D-2EC0-FE89-97AA-455ED32CFE80}"
 EndProject
@@ -10,6 +10,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "..\Testing\Testing.csproj", "{643146A9-8FDD-E97C-12B5-C425F651EE45}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAppTest", "..\WebAppTest\WebAppTest.csproj", "{4F577BD3-5D40-F35E-0B90-9CDBBC177152}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "ModUplift", "..\ModUplift\ModUplift.pyproj", "{21F3BB7C-7350-4087-AA55-0071B09BC93F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABLibraryUnity", "..\ABLibraryUnity\ABLibraryUnity.csproj", "{D4ACC8D3-7535-4F64-BE2D-1B0E55386CF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,12 @@ Global
 		{4F577BD3-5D40-F35E-0B90-9CDBBC177152}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F577BD3-5D40-F35E-0B90-9CDBBC177152}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F577BD3-5D40-F35E-0B90-9CDBBC177152}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21F3BB7C-7350-4087-AA55-0071B09BC93F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21F3BB7C-7350-4087-AA55-0071B09BC93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4ACC8D3-7535-4F64-BE2D-1B0E55386CF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4ACC8D3-7535-4F64-BE2D-1B0E55386CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4ACC8D3-7535-4F64-BE2D-1B0E55386CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4ACC8D3-7535-4F64-BE2D-1B0E55386CF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

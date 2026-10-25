@@ -96,7 +96,7 @@ nav a {
         .logout-btn:hover::after {
             transform: scaleX(0);
         }
-
+.create-app-card,
 .create-test-card {
     max-width: 600px;
     width: 100%;
@@ -696,5 +696,157 @@ canvas {
         font-weight: 600;
         background: #e0e7ff;
         color: #3730a3;
+    }
+
+    /* Общий стиль для карточек форм */
+    .create-app-card,
+    .create-test-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 24px;
+        margin-bottom: 24px;
+        transition: all 0.3s ease;
+    }
+
+        .create-app-card:hover,
+        .create-test-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .create-app-card h2,
+        .create-test-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 12px;
+        }
+
+    /* Стили для групп форм */
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+    }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .form-input:invalid {
+            border-color: #dc3545;
+        }
+
+    textarea.form-input {
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    /* Кнопки */
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-align: center;
+        text-decoration: none;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: #4a90e2;
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+    /* Стиль для select */
+    select.form-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+    }
+
+    /* Стиль для placeholder */
+    .form-input::placeholder {
+        color: #adb5bd;
+        font-size: 0.9rem;
+    }
+
+    /* Стиль для disabled состояний */
+    .form-input:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+    /* Грид для двух колонок (если нужно разместить формы рядом) */
+    .forms-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        .forms-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .create-app-card,
+        .create-test-card {
+            padding: 16px;
+        }
+
+            .create-app-card h2,
+            .create-test-card h2 {
+                font-size: 1.25rem;
+                margin-bottom: 16px;
+            }
+
+        .btn {
+            width: 100%;
+        }
     }
 }

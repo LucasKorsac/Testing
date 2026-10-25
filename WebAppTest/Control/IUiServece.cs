@@ -127,5 +127,6 @@ namespace WebAppTest.Control
 
        // Task<Dictionary<string, string>> GetActiveTestsAsync(string appId, string? instanceId = null);
         Task<Dictionary<string, string>> GetActiveTestsAsync(string appId, string? instanceId = null);
+        Task<IEnumerable<object>> GetActiveTestsAsync();
     }
 }

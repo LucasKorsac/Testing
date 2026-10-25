@@ -75,10 +75,7 @@ namespace WebAppTest.Control
 
             return Ok();
         }
-    }
-
-
-        
+    }       
 
     public record RunRequest(string AppId, string InstanceId = "");
     public record IdRequest(string Id);
